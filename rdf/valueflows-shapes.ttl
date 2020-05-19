@@ -1,0 +1,778 @@
+@prefix dfc:   <http://www.virtual-assembly.org/DataFoodConsortium/BusinessOntology#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix org:   <http://www.w3.org/ns/org#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix dtype: <http://www.linkedmodel.org/schema/dtype#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix vf:    <https://w3id.org/valueflows#> .
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix om2:   <http://www.ontology-of-units-of-measure.org/resource/om-2/> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix time:  <http://www.w3.org/2006/time#> .
+@prefix vs:    <http://www.w3.org/2003/06/sw-vocab-status/ns#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+@prefix om2: <http://www.ontology-of-units-of-measure.org/resource/om-2/> .
+@prefix : <https://w3id.org/valueflows-shapes#> .
+
+
+vf: 
+    sh:declare [
+        sh:prefix "om2" ;
+        sh:namespace "http://www.ontology-of-units-of-measure.org/resource/om-2/" ;
+    ] ;
+    sh:declare [
+        sh:prefix "vf" ;
+        sh:namespace "https://w3id.org/valueflows#" ;
+    ] ;
+    owl:imports <http://150.146.207.114/lode/extract?owlapi=true&url=https://raw.githubusercontent.com/valueflows/valueflows/master/release-doc-in-process/all_vf.TTL> ;
+    owl:imports <http://www.ontology-of-units-of-measure.org/data/om-2/> ;
+    .
+
+:EconomicEventShape
+        a               sh:NodeShape ;
+        sh:targetClass vf:EconomicEvent ;
+        sh:property :ProviderShape ;
+        sh:property :ReceiverShape ;
+        sh:property :ActionShape ;
+        sh:property :ResourceInventoriedAsShape ;
+        sh:property :ToResourceInventoriedAsShape ;
+        sh:property :ResourceQuantityShape ;
+        
+        .
+
+:EconomicResourceShape
+        a               sh:NodeShape ;
+        sh:targetClass  vf:EconomicResource ;
+        sh:property     :AccountingQuantityShape ;
+        sh:property     :OnhandQuantityShape ;
+        sh:property     :ResourceClassifiedAsShape ;
+        sh:property     :TrackingIdentifierShape ;
+        sh:property     :ConformsToShape ;
+        sh:property     :ContainedInShape ;
+        sh:property     :CurrentLocationShape ;
+        sh:property     :PrimaryAccountableShape ;
+# ignoring for now:         
+#       sh:property     :lotShape ; unclear: what is product batch?
+#       sh:property     :stageShape ;
+#       sh:property     :stateShape ;
+#       sh:property     :TrackingIdentifierShape ;
+    .
+:PrimaryAccountableShape
+        a               sh:PropertyShape ;
+        sh:path         vf:primaryAccountable ;
+        sh:class        foaf:Agent ;
+        sh:maxCount     1 ;
+        .
+
+
+:CurrentLocationShape
+        a               sh:PropertyShape ;
+        sh:path         vf:currentLocation ;
+        sh:maxCount     1 ;
+        .
+
+:ConformsToShape 
+        a               sh:PropertyShape ;
+        sh:path         vf:conformsTo ;
+        sh:class        vf:ResourceSpecification ;
+        .
+
+:ContainedInShape
+        a               sh:PropertyShape ;
+        sh:path         vf:containedIn ;
+        sh:class        vf:EconomicResource ;
+        .
+
+:TrackingIdentifierShape
+        a               sh:PropertyShape ;
+        sh:path         vf:trackingIdentifier ;
+        sh:nodeKind     sh:IRIOrLiteral ;
+        sh:maxCount     1 ;
+        .
+
+:ResourceClassifiedAsShape
+        a               sh:PropertyShape ;
+        sh:path         vf:resourceClassifiedAs ;
+        sh:nodeKind     sh:IRI ;        
+        .
+
+:AccountingQuantityShape 
+        a               sh:PropertyShape ;
+        sh:path         vf:accountingQuantity ; 
+        sh:node         :QuantityNodeShape ;
+        sh:maxCount     1 ;
+        sh:nodeKind     sh:BlankNodeOrIRI ;
+        .
+
+:QuantityNodeShape
+        a               sh:NodeShape ;
+        sh:property [
+            sh:path om2:hasUnit ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path om2:hasNumericalValue ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:or (
+                [ sh:datatype xsd:int ]
+                [ sh:datatype xsd:integer ]
+                [ sh:datatype xsd:double ]
+                [ sh:datatype xsd:float ]
+                [ sh:datatype xsd:decimal ]
+                [ sh:datatype xsd:long ]
+                [ sh:datatype xsd:short ]
+            )
+        ]
+        .
+
+:OnhandQuantityShape 
+        a               sh:PropertyShape ;
+        sh:node         :QuantityNodeShape ;
+        sh:path         vf:onhandQuantity ;
+        sh:maxCount     1 ;
+        sh:nodeKind     sh:BlankNodeOrIRI ;         
+        .
+
+:ResourceQuantityShape
+        a               sh:PropertyShape ;
+        sh:node         :QuantityNodeShape ;
+        sh:path         vf:resourceQuantity ;
+        .
+
+:ResourceInventoriedAsShape
+        a               sh:PropertyShape ;
+        sh:class        vf:EconomicResource ;
+        sh:path         vf:resourceInventoriedAs ;
+        sh:maxCount     1 ;
+        .
+
+:ToResourceInventoriedAsShape
+        a               sh:PropertyShape ;
+        sh:class        vf:EconomicResource ;
+        sh:path         vf:toResourceInventoriedAs ;
+        sh:maxCount     1 ;
+        .
+
+
+:ProviderShape
+        a               sh:PropertyShape ;
+        sh:path         vf:provider;
+        sh:class        foaf:Agent ;
+        sh:maxCount     1 ;
+        sh:nodeKind     sh:IRI ;
+        .
+
+:ReceiverShape
+        a               sh:PropertyShape ;
+        sh:path         vf:provider;
+        sh:class        foaf:Agent ;
+        sh:maxCount     1 ;
+        sh:nodeKind     sh:IRI ;
+        .
+
+:ActionShape
+        a               sh:PropertyShape ;
+        sh:path         vf:action ;
+        sh:class        vf:Action ;
+        sh:maxCount     1 ;
+        sh:minCount     1 ;
+        .      
+
+# If an EconomicEvent references two EconomicResources, their quantities
+# must be measured with the same units. (This constraint may turn out to
+# be too strict - eg when splitting one big resource (measured in tons) 
+# into much smaller resources (measured in kilograms). 
+:RequireCompatibleQuantitiesWithoutToResourceShape
+        a               sh:NodeShape ;
+        sh:class        vf:EconomicEvent ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:node :ToResourceInventoriedAsForbiddenShape ;
+        sh:sparql [
+            sh:prefixes vf: ;
+            sh:select """
+                SELECT ?this ("The measurement units of this EconomicEvent and its EconomicResource do not match"  as ?message ) 
+                WHERE {
+                    ?this 
+                        vf:resourceQuantity/om2:hasUnit                         ?evUnit  ;
+                        vf:resourceInventoriedAs/vf:onhandQuantity/om2:hasUnit  ?resUnit  .     
+                    FILTER (?resUnit != ?evUnit)
+                }
+            """ 
+        ] ;
+    .
+
+
+# If an EconomicEvent references two EconomicResources, their quantities
+# must be measured with the same units. (This constraint may turn out to
+# be too strict - eg when splitting one big resource (measured in tons) 
+# into much smaller resources (measured in kilograms). 
+:RequireCompatibleQuantitiesWithToResourceShape
+        a               sh:NodeShape ;
+        sh:class        vf:EconomicEvent ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:node :ToResourceInventoriedAsRequiredShape ;
+        sh:sparql [
+            sh:prefixes vf: ;
+            sh:select """
+                SELECT ?this (CONCAT("The EconomicResources connected by this event (using ", 
+                                STR(?evUnit)," for units) must use the same units of measurement for ",
+                                "their vf:onhandQuantity values, but units are ", STR(?resUnit), 
+                                " and ", STR(?toResUnit) ) as ?message ) 
+                WHERE {
+                    ?this 
+                        vf:resourceQuantity/om2:hasUnit                          ?evUnit ;
+                        vf:resourceInventoriedAs/vf:onhandQuantity/om2:hasUnit   ?resUnit ;     
+                        vf:toResourceInventoriedAs/vf:onhandQuantity/om2:hasUnit ?toResUnit .
+                    FILTER (?resUnit != ?toResUnit || ?evUnit != ?resUnit)
+                }
+            """ ; 
+        ] ;
+    .
+
+:RequireLocationChangeWithToResourceShape
+        a               sh:NodeShape ;
+        sh:class        vf:EconomicEvent ;
+        sh:property [
+            sh:path vf:action ; 
+            sh:hasValue vf:move ; #TODO check: only with 'move' action?
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:atLocation ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path ( vf:resourceInventoriedAs vf:currentLocation );
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path ( vf:toResourceInventoriedAs vf:currentLocation );
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:sparql [
+            sh:prefixes vf: ;
+            sh:message "Resources/Event locations inappropriate for location change" ;
+            sh:select """
+                SELECT ?this 
+                WHERE {
+                    ?this 
+                        vf:atLocation                          ?evLoc ;
+                        vf:resourceInventoriedAs/vf:currentLocation ?fromLoc;     
+                        vf:toResourceInventoriedAs/vf:currentLocation ?toLoc .
+                    FILTER (?evLoc = ?fromLoc || ?evLoc != ?toLoc )
+                }
+            """ ; 
+        ] ;
+    .
+
+
+:ResourceInventoriedAsRequiredShape
+        a           sh:NodeShape ;
+        sh:property [
+            sh:path vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:message "This event must reference an inventoried resource as its source using 'vf:resourceInventoriedAs'" ;
+        ] ;
+        .
+
+:ToResourceInventoriedAsRequiredShape
+        a           sh:NodeShape ;
+        sh:property [
+            sh:path vf:toResourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:message "This event must reference an inventoried resource as its target using 'vf:toResourceInventoriedAs'" ;
+        ] ;
+        .
+
+:ToResourceInventoriedAsForbiddenShape
+        a           sh:NodeShape ;
+        sh:property [
+            sh:path vf:toResourceInventoriedAs ;
+            sh:maxCount 0 ;
+            sh:message "This event must not reference an inventoried resource as its target using 'vf:toResourceInventoriedAs'" ;
+        ] ;
+        .
+
+:RequireSamePrimaryAccountableShape
+        a           sh:NodeShape ;
+        sh:class    vf:EconomicEvent ;
+        sh:node     :ToResourceInventoriedAsRequiredShape ;
+        sh:sparql [
+            sh:prefixes vf: ;
+            sh:message "`vf:primaryAccountable` values of the resources referenced by the event must not be different." ;
+            sh:select """ 
+            SELECT ?this 
+            WHERE {
+                ?this   vf:resourceInventoriedAs ?res ;
+                        vf:toResourceInventoriedAs ?toRes .
+                ?res    vf:primaryAccountable   ?agent .
+                ?toRes  vf:primaryAccountable   ?toAgent .
+                FILTER (?agent != ?toAgent)
+            }
+            """;
+        ] .
+
+###############################################################################
+#                   Some Utilities
+###############################################################################
+
+# SPARQLFunction for identifying EconomicEvents by properties of their vf:action
+# i.e. checks if `$parEvent/vf:action/$parActionProperty = $parValue`
+:EventHasActionPropertyValueFunction
+        a sh:SPARQLFunction ;
+        rdfs:comment "True if the specified event has an action with the specified property value" ;
+        sh:labelTemplate "True for events with `vf:action/{$parActionProperty} = $parValue`. " ;
+        sh:parameter [
+            sh:path :parEvent ;
+            sh:nodeKind sh:IRI ;
+            sh:description "The event to check" ;
+        ] ;
+        sh:parameter [
+            sh:path :parActionProperty ;
+            sh:nodeKind sh:IRI ;
+            sh:description "The action property to check" ;
+        ] ;
+        sh:parameter [
+            sh:path :parValue ;
+            sh:nodeKind sh:IRI ;
+            sh:description "The value to compare to" ;
+        ] ;
+        sh:prefixes vf: ;
+        sh:returnType xsd:boolean ;
+        sh:ask """
+            ASK  
+            WHERE {
+                $parEvent 
+                    a                       vf:EconomicEvent ;
+                    vf:action               ?action ;
+                .
+                ?action     
+                    $parActionProperty      $parValue ;
+                .
+                BIND (?parEvent as ?this)
+            }
+        """ ;
+        .
+
+
+# SPARQLTargetType for selecting EconomicEvents by properties of their vf:action
+# i.e. checking for [value] of [property] in event/vf:action/[property] = [value]
+:EventHasActionPropertyValueTarget
+        a sh:SPARQLTargetType ;
+        rdfs:subClassOf sh:Target ;
+        rdfs:comment "Selects events that have the specified action property value" ;
+        sh:labelTemplate "All events with `vf:action/{$parActionProperty} = $parValue`. " ;
+        sh:parameter [
+            sh:path :parActionProperty ;
+            sh:nodeKind sh:IRI ;
+            sh:description "The action property to check" ;
+        ] ;
+        sh:parameter [
+            sh:path :parValue ;
+            sh:nodeKind sh:IRI ;
+            sh:description "The Value to check for" ;
+        ] ;
+        sh:prefixes vf: ;
+        sh:select """
+            SELECT ?this 
+            WHERE {
+                ?this 
+                    a                       vf:EconomicEvent ;
+                    vf:action               ?action ;
+                .
+                ?action     
+                    $parActionProperty      $parValue ;
+                .
+            }
+        """ ;
+        .
+
+# SPARQLTarget shape for selecting current events
+:CurrentEventsTargetByActionProp
+		a sh:SPARQLTargetType ;
+        rdfs:subClassOf sh:Target ;
+		sh:prefixes vf: ;
+        sh:parameter [
+            sh:path :parEventActionProperty ;
+            sh:nodeKind sh:IRI ;
+        ] ;
+        sh:parameter [
+            sh:path :parEventActionPropertyValue ;
+            sh:nodeKind sh:IRI ;
+        ] ;         
+		sh:select """
+			SELECT DISTINCT ?this
+			WHERE {
+				?this   
+                    a                           vf:EconomicEvent ;
+                    vf:resourceInventoriedAs    ?res ;
+                    vf:action                   ?action ;
+                    .
+                ?action 
+                    ?parEventActionProperty ?parEventActionPropertyValue .
+                FILTER NOT EXISTS {
+                    ?this vf:toResourceInventoriedAs ?toRes 
+                }
+                FILTER NOT EXISTS {
+                    ?any1 vf:previousState ?res 
+                } 
+			}
+			""" ;
+        .
+
+# SPARQLTarget shape for selecting 
+#   - current events 
+#   - by action
+#   - that have a toResourceIA
+:CurrentEventsWithToResourceTarget
+		a sh:SPARQLTargetType ;
+        rdfs:subClassOf sh:Target ;
+		sh:prefixes vf: ;
+        sh:parameter [
+            sh:path :parAction ;
+            sh:nodeKind sh:IRI ;
+        ] ;
+		sh:select """
+			SELECT DISTINCT ?this
+			WHERE {
+				?this   
+                    a                           vf:EconomicEvent ;
+                    vf:resourceInventoriedAs    ?res ;
+                    vf:toResourceInventoriedAs  ?toRes ;
+                    vf:action                   ?action ;
+                    .
+                FILTER NOT EXISTS {
+                    ?any2 vf:previousState ?toRes 
+                }
+                FILTER NOT EXISTS {
+                    ?any1 vf:previousState ?res 
+                } 
+			}
+			""" ;
+        .
+
+:EconomicEventHasTwoEconomicResourcesShape
+    a           sh:NodeShape ;
+    sh:class    vf:EconomicEvent ;
+    sh:property [
+        sh:path     vf:resourceInventoriedAs ;
+        sh:class    vf:EconomicResource ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path     vf:toResourceInventoriedAs ;
+        sh:class    vf:EconomicResource ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    .
+
+###############################################################################
+#                   Calculation of EcononomicEvents' effects
+###############################################################################
+#
+# We use shape execution order 10 to start. The spec says: triples generated by 
+# shapes of the same order aren't visible to each other during calculation. We 
+# use this to calculate the different kinds of effects (quantity, location, 
+# primaryAccountable)
+
+# An EconomicResource can only be connected with a new EconomicEvent
+# if the resource is the head of the chain formed by vf:previousState
+# relationships.
+:EconomicResourceChainHeadShape
+        a           sh:NodeShape ;
+        sh:property [
+            sh:path (sh:inversePath vf:previousState ) ;
+            sh:maxCount 0 ;
+        ] ;
+        sh:rule [
+            a sh:TripleRule ;
+            sh:subject sh:this ;
+            sh:predicate rdf:type ;
+            sh:object vf:ChainHeadDebug ;
+        ]
+        .
+
+# An EconomicEvent is current if it references EconomicResources that 
+# are the heads of their respective state chains. We only calculate effects
+# for current events 
+:CurrentEventShape
+        a               sh:NodeShape ;
+        sh:order 0 ;
+        sh:targetClass vf:EconomicEvent ;
+        sh:property [
+            sh:path vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:node :EconomicResourceChainHeadShape ;
+        ] ;
+        sh:property [
+            sh:path vf:toResourceInventoriedAs ;
+            sh:maxCount 1 ;
+            sh:node :EconomicResourceChainHeadShape ;
+        ] 
+        .
+
+
+:MoveEventWithToResourceEffectsShape
+        a           sh:NodeShape ;
+        sh:target [
+            a :CurrentEventsWithToResourceTarget ;
+            :parAction vf:move
+        ] ;
+        sh:node :CurrentEventShape ;
+        sh:node :RequireLocationChangeWithToResourceShape ;
+        sh:node :RequireCompatibleQuantitiesWithToResourceShape ; # TODO general constraint
+        sh:node :RequireSamePrimaryAccountableShape ;        # TODO general constraint 
+        # sh:node :RequireSufficientResourceQuantity TODO (general constraint)
+        sh:rule [
+            a sh:SPARQLRule ;
+            sh:prefixes vf: ;
+            sh:construct """
+                CONSTRUCT {
+                    ?next vf:previousState ?res .
+                    ?next ?p ?o .
+                    ?next vf:onhandQuantity ?onhandQuantity .
+                    ?onhandQuantity om2:hasUnit ?onhandUnit .
+                    ?onhandQuantity om2:hasNumericalValue ?newOnhandValue .
+
+                    ?toNext vf:previousState ?toRes .
+                    ?toNext ?toP ?toO .
+                    ?toNext vf:onhandQuantity ?toOnhandQuantity .
+                    ?toOnhandQuantity om2:hasUnit ?toOnhandUnit .
+                    ?toOnhandQuantity om2:hasNumericalValue ?toNewOnhandValue .
+                } WHERE {
+                    ?this vf:resourceInventoriedAs ?res .
+                    ?this vf:toResourceInventoriedAs ?toRes .
+                    {
+                        {
+                                # generate an IRI and a bnode that's the same in ALL solutions
+                                SELECT 
+                                    (UUID() as ?next) (BNODE() as ?onhandQuantity) 
+                                    (UUID() as ?toNext) (BNODE() as ?toOnhandQuantity) 
+                                WHERE { }
+                        }
+                        {
+                            ?res ?p ?o .
+                            FILTER (
+                                ?p != vf:onhandQuantity 
+                                && ?p != vf:accountingQuantity 
+                            )
+                        } UNION {
+                            ?toRes ?toP ?toO .
+                            FILTER (
+                                ?toP != vf:onhandQuantity 
+                                && ?toP != vf:accountingQuantity 
+                            )
+                        } UNION {
+                            ?this vf:resourceQuantity/om2:hasNumericalValue ?eventValue .
+                            ?res vf:onhandQuantity [
+                                om2:hasUnit ?onhandUnit ;
+                                om2:hasNumericalValue ?onhandValue ;
+                            ] .
+                            ?toRes vf:onhandQuantity [
+                                om2:hasUnit ?toOnhandUnit ;
+                                om2:hasNumericalValue ?toOnhandValue ;
+                            ] .
+                            BIND (?onhandValue - ?eventValue as ?newOnhandValue)
+                            BIND (?toOnhandValue + ?eventValue as ?toNewOnhandValue)
+                        }
+                    }
+                }""" ;
+            ] ;
+        .
+
+# decrementIncrement actions only have their decrement/increment
+# function if there is a `toResourceInventoriedAs` attached to the
+# event. So: only match this shape in that case.
+:DecrementIncrementQuantityToResourceEffectShape 
+        sh:deactivated true ;
+        a sh:NodeShape ;
+        sh:order 10;
+        sh:target [ 
+            a :CurrentEventsTargetWithToResource ;
+            :parEventActionProperty vf:resourceEffect ;
+            :parEventActionPropertyValue vf:decrementIncrement ;
+        ] ;
+        sh:rule :DecrementEconomicResourceRule ;
+        sh:rule :IncrementToEconomicResourceRule ;
+        .
+
+:GenerateNewResourceWithoutToResourceEffect 
+        sh:deactivated true ;
+        a sh:NodeShape ;
+        sh:order 10 ;
+        sh:target [ 
+            a :CurrentEventsTargetByActionProp ;
+            :parEventActionProperty vf:resourceEffect ;
+            :parEventActionPropertyValue vf:decrementIncrement ;
+        ] ;
+        sh:rule :DecrementEconomicResourceRule ;
+        sh:rule :IncrementToEconomicResourceRule ;
+        .        
+
+# decrementIncrement actions only have their decrement/increment
+# function if there is a `toResourceInventoriedAs` attached to the
+# event. So: only match this shape in that case.
+:DecrementEffectShape 
+        sh:deactivated true ;
+        a sh:NodeShape ;
+        sh:target [ 
+            a :CurrentEventsTargetWithToResource ;
+            :parEventActionProperty vf:resourceEffect ;
+            :parEventActionPropertyValue vf:decrement ;
+        ] ;
+        sh:rule :DecrementEconomicResourceRule ;
+        .
+
+
+:DecrementEconomicResourceRule 
+        a sh:SPARQLRule ;
+        sh:prefixes vf: ;
+        #sh:condition :RequireCompatibleResourceQuantitiesShape ;
+        sh:condition [
+            sh:path vf:resourceInventoriedAs ;
+            sh:node :EconomicResourceChainHeadShape ;
+        ] ;
+        sh:construct """
+            CONSTRUCT {
+                ?next vf:previousState ?res .
+                ?next ?p ?o .
+                ?next vf:onhandQuantity ?onhandQuantity .
+                ?onhandQuantity om2:hasUnit ?onhandUnit .
+                ?onhandQuantity om2:hasNumericalValue ?newOnhandValue .
+            } WHERE {
+                ?this vf:resourceInventoriedAs ?res .
+                {
+                    {
+                            # generate an IRI and a bnode that's the same in ALL solutions
+                            SELECT (UUID() as ?next) (BNODE() as ?onhandQuantity) WHERE {}
+                    }
+                    {
+                        ?res ?p ?o .
+                        FILTER (
+                            ?p != vf:onhandQuantity 
+                            && ?p != vf:accountingQuantity 
+                        )
+                    } UNION {
+                        ?this vf:resourceQuantity/om2:hasNumericalValue ?eventValue .
+                        ?res vf:onhandQuantity [
+                            om2:hasUnit ?onhandUnit ;
+                            om2:hasNumericalValue ?onhandValue ;
+                        ] ;
+                        BIND (?onhandValue - ?eventValue as ?newOnhandValue)
+                    }
+                }
+            }""" ;
+        .
+
+:IncrementEconomicResourceRule 
+        a sh:SPARQLRule ;
+        sh:prefixes vf: ;
+        #sh:condition :RequireCompatibleResourceQuantitiesShape ;
+        sh:condition [
+            sh:path vf:resourceInventoriedAs ;
+            sh:node :EconomicResourceChainHeadShape ;
+        ] ;
+        sh:construct """
+            CONSTRUCT {
+                ?next vf:previousState ?res .
+                ?next ?p ?o .
+                ?next vf:onhandQuantity ?onhandQuantity .
+                ?onhandQuantity om2:hasUnit ?onhandUnit .
+                ?onhandQuantity om2:hasNumericalValue ?newOnhandValue .
+            } WHERE {
+                ?this vf:resourceInventoriedAs ?res .
+                {
+                    {
+                            # generate an IRI and a bnode that's the same in ALL solutions
+                            SELECT (UUID() as ?next) (BNODE() as ?onhandQuantity) WHERE {}
+                    }
+                    {
+                        ?res ?p ?o .
+                        FILTER (
+                            ?p != vf:onhandQuantity 
+                            && ?p != vf:accountingQuantity 
+                        )
+                    } UNION {
+                        ?this vf:resourceQuantity/om2:hasNumericalValue ?eventValue .
+                        ?res vf:onhandQuantity [
+                            om2:hasUnit ?onhandUnit ;
+                            om2:hasNumericalValue ?onhandValue ;
+                        ] ;
+                        BIND (?onhandValue + ?eventValue as ?newOnhandValue)
+                    }
+                }
+            }""" ;
+        .
+
+:IncrementToEconomicResourceRule 
+        a sh:SPARQLRule ;
+        sh:prefixes vf: ;
+        #sh:condition :RequireCompatibleResourceQuantitiesShape ;
+        sh:condition [
+            sh:path vf:toResourceInventoriedAs ;
+            sh:node :EconomicResourceChainHeadShape ;
+        ] ;
+        sh:construct """
+            CONSTRUCT {
+                ?next vf:previousState ?res .
+                ?next ?p ?o .
+                ?next vf:onhandQuantity ?onhandQuantity .
+                ?onhandQuantity om2:hasUnit ?onhandUnit .
+                ?onhandQuantity om2:hasNumericalValue ?newOnhandValue .
+            } WHERE {
+                ?this vf:toResourceInventoriedAs ?res .
+                {
+                    {
+                            # generate an IRI and a bnode that's the same in ALL solutions
+                            SELECT (UUID() as ?next) (BNODE() as ?onhandQuantity) WHERE {}
+                    }
+                    {
+                        ?res ?p ?o .
+                        FILTER (
+                            ?p != vf:onhandQuantity 
+                            && ?p != vf:accountingQuantity 
+                        )
+                    } UNION {
+                        ?this vf:resourceQuantity/om2:hasNumericalValue ?eventValue .
+                        ?res vf:onhandQuantity [
+                            om2:hasUnit ?onhandUnit ;
+                            om2:hasNumericalValue ?onhandValue ;
+                        ] ;
+                        BIND (?onhandValue + ?eventValue as ?newOnhandValue)
+                    }
+                }
+            }""" ;
+        .        
