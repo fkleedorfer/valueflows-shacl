@@ -51,7 +51,7 @@ then
     compareInfTo=${expectedOutputDir}/`basename ${dataFile}`${infSuffix}
 fi
 
-tmpFile=$(mktemp ${script_path}/tmp/tmp-data.XXX.ttl)
+tmpFile=$(mktemp ${script_path}/../tmp/tmp-data.XXX.ttl)
 cat ${dataFile} > ${tmpFile}
 cat `dirname ${shapesFile}`/"valueflows-and-required-ontologies.ttl" >> ${tmpFile}
 
@@ -77,41 +77,40 @@ fi
 ${SHACL_VALIDATE} -shapesfile ${shapesFile} -datafile ${tmpFile} > ${redirValOut} 2>&1 && validateSuccess=true || validateSuccess=false
 ${SHACL_INFER} -shapesfile ${shapesFile} -datafile ${tmpFile} > ${redirInfOut} 2>&1 && inferenceSuccess=true || inferenceSuccess=false
 
-
 rm ${tmpFile}
 showFile=`realpath --relative-to . ${dataFile}`
-validateMessage=`statusColor $validateSuccess 'validate'`
-inferenceMessage=`statusColor $inferenceSuccess 'inference'`
+validateMessage=validation:
+inferenceMessage=inference:
 compareVal=false
 compareInf=false
 if (${compareToExpected})
 then
-    if (${validateSuccess})
+    if (${validateSuccess} || ! ${validateSuccess}) # validate reports status 1 if data graph does not conform or there is an exception!
     then
         test -f $compareValTo && compareVal=true || compareVal=false
         test ${compareVal} && cmp -s $redirValOut $compareValTo && compareValExpected=true || compareValExpected=false
         if ( ${compareVal} )
         then
-            compareValMessage=`statusColorText $compareValExpected 'vresult expected' 'vresult not expected' `
+            compareValMessage=`statusColorText $compareValExpected 'ok' 'failed' `
         else 
-            compareValMessage='not compared'
+            compareValMessage="${YELLOW}no spec${NC}"
         fi
     else 
-        compareValMessage=""
+        compareValMessage="${RED}failed${NC}"
     fi
 
     if (${inferenceSuccess})
     then
         test -f $compareInfTo && compareInf=true || compareInf=false
         test ${compareInf} && cmp -s $redirInfOut $compareInfTo && infResultExpected=true || infResultExpected=false
-        if ( ${compareVal} )
+        if ( ${compareInf} )
         then
-            compareInfMessage=`statusColorText $infResultExpected 'inferences expected' 'inferences not expected' `
+            compareInfMessage=`statusColorText $infResultExpected 'ok' 'failed' `
         else 
-            compareInfMessage='nothing to compare to'
+            compareInfMessage="${YELLOW}no spec${NC}"
         fi
     else 
-        compareInfMessage=""
+        compareInfMessage="${RED}failed${NC}"
     fi
 else 
     compareValMessage=""
