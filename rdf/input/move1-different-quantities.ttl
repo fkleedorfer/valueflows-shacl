@@ -34,8 +34,7 @@ ex:event2
     vf:resourceInventoriedAs ex:bobsApples2 ;
     vf:atLocation wd:Q1741 ;
     vf:resourceQuantity [
-        # TODO ASK: why would I need a quantity here? Did @fosterlynn say, all events have quantities? check!
         om2:hasUnit om2:kilogram ;
-        om2:hasNumericalValue "100"^^xsd:int ;
+        om2:hasNumericalValue "50"^^xsd:int ;
     ] ; 
     .

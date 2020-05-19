@@ -6,6 +6,7 @@ script_name=$0
 RED='\033[0;31m' #red
 NC='\033[0m' # No Color
 GREEN='\033[0;32m' #green
+YELLOW='\033[33m' #yellow
 verbose=false
 
 function error_handler() {

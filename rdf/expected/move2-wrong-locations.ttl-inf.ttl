@@ -3,10 +3,8 @@
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 
-<urn:uuid:e892ab31-6a4c-4a09-a3c8-3b996ccc9972>
+<urn:uuid:5b399efe-ef5c-4eb6-a20f-2d807ce8be4a>
         a       <https://w3id.org/valueflows#EconomicResource> ;
-        <https://w3id.org/valueflows#currentLocation>
-                <urn:www.wikidata.org/entity/Q1741> ;
         <https://w3id.org/valueflows#onhandQuantity>
                 [ <http://www.ontology-of-units-of-measure.org/resource/om-2/hasNumericalValue>
                           30 ;
@@ -20,7 +18,7 @@
         <https://w3id.org/valueflows#trackingIdentifier>
                 "lot-alice-apples-2018-10-11" .
 
-<urn:uuid:d0a26a49-be7a-4746-b497-6d807f6d3d96>
+<urn:uuid:2a014bd0-8fa4-4ff9-a9b3-2e92bb4a9295>
         a       <https://w3id.org/valueflows#EconomicResource> ;
         <https://w3id.org/valueflows#currentLocation>
                 <urn:www.wikidata.org/entity/Q676832> ;

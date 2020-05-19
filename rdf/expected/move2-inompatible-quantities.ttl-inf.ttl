@@ -3,24 +3,7 @@
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 
-<urn:uuid:e892ab31-6a4c-4a09-a3c8-3b996ccc9972>
-        a       <https://w3id.org/valueflows#EconomicResource> ;
-        <https://w3id.org/valueflows#currentLocation>
-                <urn:www.wikidata.org/entity/Q1741> ;
-        <https://w3id.org/valueflows#onhandQuantity>
-                [ <http://www.ontology-of-units-of-measure.org/resource/om-2/hasNumericalValue>
-                          30 ;
-                  <http://www.ontology-of-units-of-measure.org/resource/om-2/hasUnit>
-                          <http://www.ontology-of-units-of-measure.org/resource/om-2/kilogram>
-                ] ;
-        <https://w3id.org/valueflows#previousState>
-                <http://example.org/ns#alicesApples2> ;
-        <https://w3id.org/valueflows#primaryAccountable>
-                <http://example.org/ns#Alice> ;
-        <https://w3id.org/valueflows#trackingIdentifier>
-                "lot-alice-apples-2018-10-11" .
-
-<urn:uuid:d0a26a49-be7a-4746-b497-6d807f6d3d96>
+<urn:uuid:506e0697-d17f-4de0-921b-a9ecd32747a4>
         a       <https://w3id.org/valueflows#EconomicResource> ;
         <https://w3id.org/valueflows#currentLocation>
                 <urn:www.wikidata.org/entity/Q676832> ;
@@ -36,3 +19,18 @@
                 <http://example.org/ns#Alice> ;
         <https://w3id.org/valueflows#resourceClassifiedAs>
                 <urn:www.wikidata.org/entity/Q4917> .
+
+<urn:uuid:94d2424e-a425-4f6b-92a1-d796d112d1ad>
+        a       <https://w3id.org/valueflows#EconomicResource> ;
+        <https://w3id.org/valueflows#onhandQuantity>
+                [ <http://www.ontology-of-units-of-measure.org/resource/om-2/hasNumericalValue>
+                          30 ;
+                  <http://www.ontology-of-units-of-measure.org/resource/om-2/hasUnit>
+                          <http://www.ontology-of-units-of-measure.org/resource/om-2/kilogram>
+                ] ;
+        <https://w3id.org/valueflows#previousState>
+                <http://example.org/ns#alicesApples2> ;
+        <https://w3id.org/valueflows#primaryAccountable>
+                <http://example.org/ns#Alice> ;
+        <https://w3id.org/valueflows#trackingIdentifier>
+                "lot-alice-apples-2018-10-11" .

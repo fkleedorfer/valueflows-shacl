@@ -10,7 +10,6 @@
 @prefix vf:    <https://w3id.org/valueflows#> .
 @prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
 @prefix ex:    <http://example.org/ns#> .
-@prefix sh:    <http://www.w3.org/ns/shacl#> .
 @prefix om2:   <http://www.ontology-of-units-of-measure.org/resource/om-2/> .
 @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
@@ -18,6 +17,22 @@
 @prefix vs:    <http://www.w3.org/2003/06/sw-vocab-status/ns#> .
 @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
 
-[ a            sh:ValidationReport ;
-  sh:conforms  true
+[ a       <http://www.w3.org/ns/shacl#ValidationReport> ;
+  <http://www.w3.org/ns/shacl#conforms>
+          false ;
+  <http://www.w3.org/ns/shacl#result>
+          [ a       <http://www.w3.org/ns/shacl#ValidationResult> ;
+            <http://www.w3.org/ns/shacl#focusNode>
+                    ex:event1 ;
+            <http://www.w3.org/ns/shacl#resultMessage>
+                    "Value does not have shape :RequireSufficientQuantityForResourceDecrementShape" ;
+            <http://www.w3.org/ns/shacl#resultSeverity>
+                    <http://www.w3.org/ns/shacl#Violation> ;
+            <http://www.w3.org/ns/shacl#sourceConstraintComponent>
+                    <http://www.w3.org/ns/shacl#NodeConstraintComponent> ;
+            <http://www.w3.org/ns/shacl#sourceShape>
+                    <https://w3id.org/valueflows-shapes#MoveActionWithToResourceShape> ;
+            <http://www.w3.org/ns/shacl#value>
+                    ex:event1
+          ]
 ] .
