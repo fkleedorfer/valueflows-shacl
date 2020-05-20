@@ -729,9 +729,10 @@ vf:
 
 ## `vf:move` connected to only one resource
 
-# Rules specific for move actions with `vf:resourceInventoriedAs` and NO `vf:toResourceInventoriedAs`:
+# Invariants for move actions with `vf:resourceInventoriedAs` and NO `vf:toResourceInventoriedAs`:
 # - The event must have different `vf:atLocation` value than the resource's `vf:currentLocation` 
 # - The event must have a quantity that must be equal to the resource's quantity
+# - If the event is not current, the resource states must differ by vf:currentLocation
 :MoveActionWithoutToResourceShape
         a           sh:NodeShape ;
         sh:target [
@@ -739,8 +740,23 @@ vf:
             :parAction vf:move
         ] ;
         sh:node :RequireLocationChangeWithoutToResourceShape ;
-        sh:node :RequireSameQuantitiesOnEventAndResource;
+        sh:node :RequireSameQuantitiesOnEventAndResource ;
+        sh:sparql [
+            # The event is either current or it caused a location change
+            sh:prefixes vf: ;
+            sh:select """
+                SELECT ?this
+                WHERE {
+                    ?this vf:resourceInventoriedAs  ?res .
+                    ?res  vf:currentLocation        ?resLoc .
+                    ?succ vf:previousState          ?res ;
+                            vf:currentLocation        ?succLoc .
+                    FILTER (?resLoc = ?succLoc)
+                }
+            """;
+        ]
        .
+
 
 
 # Effect of a current `move` action that has a 
@@ -752,7 +768,7 @@ vf:
 #
 # Note: there are problems with finding a boundary for the query so it can recurse in the star-shaped 
 #       environment of the resource, but it does not go to far. 
-:MoveEventWithoutToResourceEffectsShape
+:CurrentMoveEventWithoutToResourceEffectsShape
         a           sh:NodeShape ;
         sh:target [
             a :CurrentEventsWithoutToResourceTarget ;
@@ -788,12 +804,10 @@ vf:
                             )
                             OPTIONAL {
                                 ?o ?p2 ?o2
-                                FILTER (!ISIRI(?o) ||!STRSTARTS(STR(?o), "https://w3id.org/valueflows"))
-                                FILTER (!ISIRI(?o) ||!STRSTARTS(STR(?o), "http://www.ontology-of-units-of-measure.org/resource/om-2/"))
+                                FILTER(ISBLANK(?o))
                                 OPTIONAL {
                                     ?o2 ?p3 ?o3 .
-                                    FILTER (!ISIRI(?o2) || !STRSTARTS(STR(?o2), "https://w3id.org/valueflows"))
-                                    FILTER (!ISIRI(?o2) || !STRSTARTS(STR(?o2), "http://www.ontology-of-units-of-measure.org/resource/om-2/"))
+                                    FILTER(ISBLANK(?o2))
                                 }
                             }
                         } UNION {
@@ -802,11 +816,7 @@ vf:
                                 ?evLocation ?lp2 ?lo2
                                 OPTIONAL {
                                     ?lo2 ?lp3 ?lo3 .
-                                    FILTER NOT EXISTS {
-                                        ?lo2 ?lp3 ?lo3 .
-                                        FILTER (!ISIRI(?lo2) || !STRSTARTS(STR(?lo2), "https://w3id.org/valueflows"))
-                                        FILTER (!ISIRI(?lo2) || !STRSTARTS(STR(?lo2), "http://www.ontology-of-units-of-measure.org/resource/om-2/"))
-                                    }
+                                    FILTER(ISBLANK(?lo2))
                                 }
                             }
 
@@ -821,14 +831,16 @@ vf:
 ## `vf:move` connected to two resources
 
 
-# Rules specific for move actions with `vf:resourceInventoriedAs` and `vf:toResourceInventoriedAs`:
+# Invariants specific for move actions with `vf:resourceInventoriedAs` and `vf:toResourceInventoriedAs`:
 # - The two resources must have different `vf:currentLocation` values
 # - The toResource must have the same `vf:currentLocation` as the event's `vf:atLocation`
 # - The two resources must have identical `vf:onhandQuantity/om2:hasUnit` values
 # - The two resources must have the same `vf:primaryAccountable`
 # - The action's `vf:resourceQuantity/vf:om2:hasNumericalValue` must be larger than 
 #   the resource's `vf:onhandQuantity`
-:MoveActionWithToResourceShape
+# - The successor resources must not differ from their predecessors except in quantity as
+#   results from the event quantity
+:MoveEventWithToResourceShape
         a           sh:NodeShape ;
         sh:target [
             a :EventsWithToResourceTarget ;
@@ -838,6 +850,59 @@ vf:
         sh:node :RequireCompatibleQuantitiesWithToResourceShape ; 
         sh:node :RequireSamePrimaryAccountableShape ;        
         sh:node :RequireSufficientQuantityForResourceDecrementShape ;
+        sh:sparql [
+            sh:prefixes vf: ;
+            sh:select """
+            SELECT ?this 
+            WHERE {
+                ?this vf:resourceInventoriedAs ?res ;
+                      vf:toResourceInventoriedAs ?toRes .
+                ?succ vf:previousState ?res .
+                ?toSucc ?vf:previousState ?toRes .
+                OPTIONAL {
+                    # if this result is empty, the quantities are off or missing
+                    ?res vf:onhandQuantity [
+                        om2:hasUnit ?unit ;
+                        om2:hasNumericalValue ?resVal ;
+                    ] .
+                    ?toRes vf:onhandQuantity [
+                        om2:hasUnit ?unit ;
+                        om2:hasNumericalValue ?toResVal ;
+                    ] .
+                    ?succ vf:onhandQuantity [
+                        om2:hasUnit ?unit ;
+                        om2:hasNumericalValue ?succVal ;
+                    ] .
+                    ?toSucc vf:onhandQuantity [
+                        om2:hasUnit ?unit ;
+                        om2:hasNumericalValue ?toSuccVal 
+                    ] .
+                    ?this vf:resourceQuantity[
+                        om2:hasUnit ?unit .
+                        om2:hasNumericalValue ?evVal 
+                    ]
+                    FILTER (?succVal = ?resVal - ?evVal 
+                        && ?toSuccVal = ?toResVal + ?evVal)
+                }     
+                {
+                    OPTIONAL {
+                        ?res ?p ?o 
+                        FILTER(?p != vf:onhandQuantity)
+                        FILTER(!ISBLANK(?o))
+                        OPTIONAL {
+                            ?o ?p2 ?o2 
+                            FILTER(!ISBLANK(?o2))
+                        }
+                    }
+                    FILTER EXISTS {
+                        ?toRes ?p ?o .
+                        ?o ?p2 ?o2 .
+                    }
+                }        
+                FILTER (!BOUND(?succVal)) # produce result if quantities are off
+            }
+            """
+            ]
         .
 
 # Effect of a current `move` action that has a 
@@ -848,7 +913,7 @@ vf:
 #   - sets both `vf:onhandQuantity` based on the event `vf:resourceQuantity`
 # 
 
-:MoveEventWithToResourceEffectsShape
+:CurrentMoveEventWithToResourceEffectsShape
         a           sh:NodeShape ;
         sh:target [
             a :CurrentEventsWithToResourceTarget ;
@@ -862,12 +927,16 @@ vf:
                 CONSTRUCT {
                     ?next vf:previousState ?res .
                     ?next ?p ?o .
+                    ?o ?p2 ?o2 .
+                    ?o2 ?p3 ?o3 .
                     ?next vf:onhandQuantity ?onhandQuantity .
                     ?onhandQuantity om2:hasUnit ?onhandUnit .
                     ?onhandQuantity om2:hasNumericalValue ?newOnhandValue .
 
                     ?toNext vf:previousState ?toRes .
                     ?toNext ?toP ?toO .
+                    ?toO ?toP2 ?toO2 .
+                    ?toO2 ?toP3 ?toO3 .
                     ?toNext vf:onhandQuantity ?toOnhandQuantity .
                     ?toOnhandQuantity om2:hasUnit ?toOnhandUnit .
                     ?toOnhandQuantity om2:hasNumericalValue ?toNewOnhandValue .
@@ -888,12 +957,28 @@ vf:
                                 ?p != vf:onhandQuantity 
                                 && ?p != vf:accountingQuantity 
                             )
+                            OPTIONAL {
+                                ?o ?p2 ?o2
+                                FILTER(ISBLANK(?o))
+                                OPTIONAL {
+                                    ?o2 ?p3 ?o3 .
+                                    FILTER(ISBLANK(?o2))
+                                }
+                            }
                         } UNION {
                             ?toRes ?toP ?toO .
                             FILTER (
                                 ?toP != vf:onhandQuantity 
                                 && ?toP != vf:accountingQuantity 
                             )
+                            OPTIONAL {
+                                ?toO ?toP2 ?toO2
+                                FILTER(ISBLANK(?toO))
+                                OPTIONAL {
+                                    ?toO2 ?toP3 ?toO3 .
+                                    FILTER(ISBLANK(?toO2))
+                                }
+                            }
                         } UNION {
                             ?this vf:resourceQuantity/om2:hasNumericalValue ?eventValue .
                             ?res vf:onhandQuantity [
