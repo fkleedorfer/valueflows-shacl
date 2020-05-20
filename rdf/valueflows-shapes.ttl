@@ -596,7 +596,7 @@ vf:
                     vf:action                   ?parAction ;
                     .
                 FILTER NOT EXISTS {
-                    ?this vf:toResourceInventoriesAs []
+                    ?this vf:toResourceInventoriedAs []
                 }
                 FILTER NOT EXISTS {
                     [] vf:previousState ?res 
@@ -733,7 +733,7 @@ vf:
 # - The event must have different `vf:atLocation` value than the resource's `vf:currentLocation` 
 # - The event must have a quantity that must be equal to the resource's quantity
 # - If the event is not current, the resource states must differ by vf:currentLocation
-:MoveActionWithoutToResourceShape
+:MoveEventWithoutToResourceShape
         a           sh:NodeShape ;
         sh:target [
             a :EventsWithoutToResourceTarget ;
@@ -793,8 +793,8 @@ vf:
                         {
                                 # generate an IRI and a bnode that's the same in ALL solutions
                                 SELECT 
-                                    (UUID() as ?next) (BNODE() as ?onhandQuantity) 
-                                    (UUID() as ?toNext) (BNODE() as ?toOnhandQuantity) 
+                                    (IRI(CONCAT("urn:wonvf:", SHA256(CONCAT(STR(?res), " ", STR(?this))))) as ?next) 
+                                    (BNODE() as ?onhandQuantity) 
                                 WHERE { }
                         }
                         {
@@ -858,7 +858,7 @@ vf:
                 ?this vf:resourceInventoriedAs ?res ;
                       vf:toResourceInventoriedAs ?toRes .
                 ?succ vf:previousState ?res .
-                ?toSucc ?vf:previousState ?toRes .
+                ?toSucc vf:previousState ?toRes .
                 OPTIONAL {
                     # if this result is empty, the quantities are off or missing
                     ?res vf:onhandQuantity [
@@ -878,25 +878,35 @@ vf:
                         om2:hasNumericalValue ?toSuccVal 
                     ] .
                     ?this vf:resourceQuantity[
-                        om2:hasUnit ?unit .
+                        om2:hasUnit ?unit ;
                         om2:hasNumericalValue ?evVal 
                     ]
                     FILTER (?succVal = ?resVal - ?evVal 
                         && ?toSuccVal = ?toResVal + ?evVal)
                 }     
                 {
+                    # match star-shaped environment around ?res and require ?toRes to have
+                    # the same environment
                     OPTIONAL {
                         ?res ?p ?o 
                         FILTER(?p != vf:onhandQuantity)
-                        FILTER(!ISBLANK(?o))
                         OPTIONAL {
                             ?o ?p2 ?o2 
-                            FILTER(!ISBLANK(?o2))
                         }
                     }
-                    FILTER EXISTS {
+                    FILTER NOT EXISTS {
                         ?toRes ?p ?o .
                         ?o ?p2 ?o2 .
+                        FILTER(!ISBLANK(?o) 
+                            && !ISBLANK(?o2))
+
+                    }
+                    FILTER NOT EXISTS {
+                        ?toRes ?p [ 
+                             ?p2 ?o2 
+                        ]
+                        FILTER(ISBLANK(?o)
+                            && !ISBLANK(?o2))
                     }
                 }        
                 FILTER (!BOUND(?succVal)) # produce result if quantities are off
@@ -945,11 +955,16 @@ vf:
                     ?this vf:toResourceInventoriedAs ?toRes .
                     {
                         {
-                                # generate an IRI and a bnode that's the same in ALL solutions
-                                SELECT 
-                                    (UUID() as ?next) (BNODE() as ?onhandQuantity) 
-                                    (UUID() as ?toNext) (BNODE() as ?toOnhandQuantity) 
-                                WHERE { }
+                            # generate an IRI and a bnode that's the same in ALL solutions
+                            SELECT 
+                                (IRI(CONCAT("urn:wonvf:",SHA256(CONCAT(STR(?res), " ", STR(?this))))) as ?next) 
+                                (IRI(CONCAT("urn:wonvf:",SHA256(CONCAT(STR(?toRes), " ", STR(?this))))) as ?toNext) 
+                                (BNODE() as ?onhandQuantity) 
+                                (BNODE() as ?toOnhandQuantity) 
+                            WHERE { 
+                                ?this vf:resourceInventoriedAs ?res .
+                                ?this vf:toResourceInventoriedAs ?toRes .
+                            }
                         }
                         {
                             ?res ?p ?o .

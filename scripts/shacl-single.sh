@@ -73,51 +73,96 @@ else
 fi
 }
 
+function statusColorTextPink() {
+if (${1})
+then
+    echo "${TURQUOISE}${2}${NC}"
+else
+    echo "${PINK}${3}${NC}"
+fi
+}
+
+function statusText() {
+if (${1})
+then
+    echo "${2}"
+else
+    echo "${3}"
+fi
+}
+
+showFile=`realpath --relative-to . ${dataFile}`
+echo -e -n "${showFile}: " 
+
+# VALIDATION
 
 ${SHACL_VALIDATE} -shapesfile ${shapesFile} -datafile ${tmpFile} > ${redirValOut} 2>&1 && validateSuccess=true || validateSuccess=false
-${SHACL_INFER} -shapesfile ${shapesFile} -datafile ${tmpFile} > ${redirInfOut} 2>&1 && inferenceSuccess=true || inferenceSuccess=false
 
-rm ${tmpFile}
-showFile=`realpath --relative-to . ${dataFile}`
-validateMessage=validation:
-inferenceMessage=inference:
+if (${validateSuccess})
+then
+    validateConforms=true
+else
+    grep -q -e 'conforms[ \t]*false' ${redirValOut} && validateConforms=false || validateConforms="unknown"
+    if [[ ${validateConforms} = "unknown" ]]
+    then
+        grep -q -e 'conforms[ \t]*true' ${redirValOut} && validateConforms=true || validateConforms="unknown"
+    fi
+    if [[ ${validateConforms} = "unknown" ]]
+    then
+        # validate reports status 1 if data graph does not conform or there is an exception! 
+        # so we have to check the output to see what was the case. 
+        # In this branch, we did not find a validation result, so we assume the command failed
+        validateSuccess=false
+    else 
+        validateSuccess=true
+    fi
+fi
+
+validateMessage="valid:"  
+inferenceMessage="inferences:"
 compareVal=false
 compareInf=false
-if (${compareToExpected})
+if (${validateSuccess}) 
 then
-    if (${validateSuccess} || ! ${validateSuccess}) # validate reports status 1 if data graph does not conform or there is an exception!
+    compareValMessage="`statusColorTextPink ${validateConforms} 'true' 'false'`"
+    if (${compareToExpected})
     then
         test -f $compareValTo && compareVal=true || compareVal=false
         test ${compareVal} && cmp -s $redirValOut $compareValTo && compareValExpected=true || compareValExpected=false
         if ( ${compareVal} )
         then
-            compareValMessage=`statusColorText $compareValExpected 'ok' 'failed' `
+            compareValMessage="${compareValMessage} (`statusColorText $compareValExpected 'expected' 'unexpected' `)"
         else 
-            compareValMessage="${YELLOW}no spec${NC}"
+            compareValMessage="${compareValMessage} (${YELLOW}no spec${NC})"
         fi
-    else 
-        compareValMessage="${RED}failed${NC}"
     fi
+else 
+    compareValMessage="${RED}error${NC}"
+fi
 
-    if (${inferenceSuccess})
+echo -ne "${validateMessage} ${compareValMessage}"
+
+# INFERENCES
+
+${SHACL_INFER} -shapesfile ${shapesFile} -datafile ${tmpFile} > ${redirInfOut} 2>&1 && inferenceSuccess=true || inferenceSuccess=false
+if (${inferenceSuccess})
+then
+    compareInfMessage="`cat ${redirInfOut} | wc -l` lines"
+    if (${compareToExpected})
     then
         test -f $compareInfTo && compareInf=true || compareInf=false
         test ${compareInf} && cmp -s $redirInfOut $compareInfTo && infResultExpected=true || infResultExpected=false
         if ( ${compareInf} )
         then
-            compareInfMessage=`statusColorText $infResultExpected 'ok' 'failed' `
+            compareInfMessage="${compareInfMessage} (`statusColorText $infResultExpected 'expected' 'unexpected' `)"
         else 
-            compareInfMessage="${YELLOW}no spec${NC}"
+            compareInfMessage="${compareInfMessage} (${YELLOW}no spec${NC})"
         fi
-    else 
-        compareInfMessage="${RED}failed${NC}"
     fi
 else 
-    compareValMessage=""
-    compareInfMessage=""
+    compareInfMessage="${RED}failed${NC}"
 fi
 
-echo -e "${showFile}:  ${validateMessage} ${compareValMessage}  ${inferenceMessage} ${compareInfMessage}"
-
-
+echo -e ", ${inferenceMessage} ${compareInfMessage}"
+rm ${tmpFile}
 

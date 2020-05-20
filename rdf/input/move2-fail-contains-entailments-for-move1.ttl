@@ -1,16 +1,64 @@
-@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix owl:   <http://www.w3.org/2002/07/owl#> .
-@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
-@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ex: <http://example.org/ns#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix vf:    <https://w3id.org/valueflows#> .
+@prefix om2: <http://www.ontology-of-units-of-measure.org/resource/om-2/> .
+@prefix wd: <www.wikidata.org/entity/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
 
-<http://example.org/ns#Alice>
-        a       <http://xmlns.com/foaf/0.1/Agent> .
+ex:Alice
+    a foaf:Agent .
 
-<urn:uuid:d79abe34-63f7-462d-87b8-1a32b9f31cbb>
+ex:Bob
+    a foaf:Agent .
+
+ex:alicesApples1 a vf:EconomicResource ;
+    vf:accountingQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "230"^^xsd:int ;
+    ] ;
+    vf:onhandQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "230"^^xsd:int ;
+    ] ;
+    vf:resourceClassifiedAs wd:Q4917 ;
+    vf:currentLocation wd:Q676832 ;
+    vf:primaryAccountable ex:Alice ;
+    . 
+
+
+ex:alicesApples2 
+    a vf:EconomicResource ;
+    vf:trackingIdentifier "lot-alice-apples-2018-10-11" ;
+    vf:primaryAccountable ex:Alice ;
+    vf:currentLocation wd:Q1741 ;
+    vf:onhandQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "0"^^xsd:int ;
+    ]
+    .
+
+ex:event1 
+    a vf:EconomicEvent ;
+    vf:action vf:move ;
+    vf:atLocation wd:Q1741 ;
+    vf:provider ex:Alice ;
+    vf:receiver ex:Alice ;
+    vf:resourceInventoriedAs ex:alicesApples1 ;
+    vf:toResourceInventoriedAs ex:alicesApples2 ;
+    vf:resourceQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "30"^^xsd:int ;
+    ] .
+
+<urn:uuid:55856050-afdb-40e2-b8bd-2b9607cf68b1>
         a       <https://w3id.org/valueflows#EconomicResource> ;
         <https://w3id.org/valueflows#accountingQuantity>
                 [ <http://www.ontology-of-units-of-measure.org/resource/om-2/hasNumericalValue>
-                          "29"^^xsd:int ;
+                          "230"^^xsd:int ;
                   <http://www.ontology-of-units-of-measure.org/resource/om-2/hasUnit>
                           <http://www.ontology-of-units-of-measure.org/resource/om-2/kilogram>
                 ] ;
@@ -18,7 +66,7 @@
                 <urn:www.wikidata.org/entity/Q1741> ;
         <https://w3id.org/valueflows#onhandQuantity>
                 [ <http://www.ontology-of-units-of-measure.org/resource/om-2/hasNumericalValue>
-                          "29"^^xsd:int ;
+                          "230"^^xsd:int ;
                   <http://www.ontology-of-units-of-measure.org/resource/om-2/hasUnit>
                           <http://www.ontology-of-units-of-measure.org/resource/om-2/kilogram>
                 ] ;
@@ -29,24 +77,7 @@
         <https://w3id.org/valueflows#resourceClassifiedAs>
                 <urn:www.wikidata.org/entity/Q4917> .
 
-<urn:uuid:740a5fb0-b73a-470c-accc-6cb6721a14b1>
-        a       <https://w3id.org/valueflows#EconomicResource> ;
-        <https://w3id.org/valueflows#currentLocation>
-                <urn:www.wikidata.org/entity/Q676832> ;
-        <https://w3id.org/valueflows#onhandQuantity>
-                [ <http://www.ontology-of-units-of-measure.org/resource/om-2/hasNumericalValue>
-                          -1 ;
-                  <http://www.ontology-of-units-of-measure.org/resource/om-2/hasUnit>
-                          <http://www.ontology-of-units-of-measure.org/resource/om-2/kilogram>
-                ] ;
-        <https://w3id.org/valueflows#previousState>
-                <http://example.org/ns#alicesApples1> ;
-        <https://w3id.org/valueflows#primaryAccountable>
-                <http://example.org/ns#Alice> ;
-        <https://w3id.org/valueflows#resourceClassifiedAs>
-                <urn:www.wikidata.org/entity/Q4917> .
-
-<urn:uuid:174fc75c-12e1-4e5c-9e15-c267923a61e9>
+<urn:uuid:3585e2fc-3acc-4c3e-a366-6ce4f17c59a1>
         a       <https://w3id.org/valueflows#EconomicResource> ;
         <https://w3id.org/valueflows#currentLocation>
                 <urn:www.wikidata.org/entity/Q1741> ;
@@ -62,3 +93,20 @@
                 <http://example.org/ns#Alice> ;
         <https://w3id.org/valueflows#trackingIdentifier>
                 "lot-alice-apples-2018-10-11" .
+
+<urn:uuid:88764d33-791b-4fa2-9a00-a772e5292252>
+        a       <https://w3id.org/valueflows#EconomicResource> ;
+        <https://w3id.org/valueflows#currentLocation>
+                <urn:www.wikidata.org/entity/Q676832> ;
+        <https://w3id.org/valueflows#onhandQuantity>
+                [ <http://www.ontology-of-units-of-measure.org/resource/om-2/hasNumericalValue>
+                          200 ;
+                  <http://www.ontology-of-units-of-measure.org/resource/om-2/hasUnit>
+                          <http://www.ontology-of-units-of-measure.org/resource/om-2/kilogram>
+                ] ;
+        <https://w3id.org/valueflows#previousState>
+                <http://example.org/ns#alicesApples1> ;
+        <https://w3id.org/valueflows#primaryAccountable>
+                <http://example.org/ns#Alice> ;
+        <https://w3id.org/valueflows#resourceClassifiedAs>
+                <urn:www.wikidata.org/entity/Q4917> .

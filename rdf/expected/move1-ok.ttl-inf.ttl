@@ -1,0 +1,10 @@
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+
+[ <http://www.ontology-of-units-of-measure.org/resource/om-2/hasNumericalValue>
+          "100"^^xsd:int ;
+  <http://www.ontology-of-units-of-measure.org/resource/om-2/hasUnit>
+          <http://www.ontology-of-units-of-measure.org/resource/om-2/kilogram>
+] .

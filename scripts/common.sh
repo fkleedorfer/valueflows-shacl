@@ -3,10 +3,12 @@
 
 script_name=$0
 
-RED='\033[0;31m' #red
+RED='\e[91m' #red
 NC='\033[0m' # No Color
 GREEN='\033[0;32m' #green
 YELLOW='\033[33m' #yellow
+PINK='\033[38;5;177m' 
+TURQUOISE='\033[38;5;123m'
 verbose=false
 
 function error_handler() {

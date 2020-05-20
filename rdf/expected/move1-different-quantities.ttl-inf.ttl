@@ -3,8 +3,13 @@
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 
-<urn:uuid:aeed5ffc-563f-409c-8f3b-4e790cef6715>
+<http://example.org/ns#Bob>
+        a       <http://xmlns.com/foaf/0.1/Agent> .
+
+<urn:uuid:556d62f5-f2b3-4949-897e-c4ca363d1ba0>
         a       <https://w3id.org/valueflows#EconomicResource> ;
+        <https://w3id.org/valueflows#currentLocation>
+                <urn:www.wikidata.org/entity/Q1741> ;
         <https://w3id.org/valueflows#onhandQuantity>
                 [ <http://www.ontology-of-units-of-measure.org/resource/om-2/hasNumericalValue>
                           "100"^^xsd:int ;
@@ -15,6 +20,3 @@
                 <http://example.org/ns#bobsApples2> ;
         <https://w3id.org/valueflows#primaryAccountable>
                 <http://example.org/ns#Bob> .
-
-<http://example.org/ns#Bob>
-        a       <http://xmlns.com/foaf/0.1/Agent> .
