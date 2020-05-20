@@ -877,39 +877,42 @@ vf:
                         om2:hasUnit ?unit ;
                         om2:hasNumericalValue ?toSuccVal 
                     ] .
-                    ?this vf:resourceQuantity[
+                    ?this vf:resourceQuantity [
                         om2:hasUnit ?unit ;
                         om2:hasNumericalValue ?evVal 
                     ]
-                    FILTER (?succVal = ?resVal - ?evVal 
-                        && ?toSuccVal = ?toResVal + ?evVal)
                 }     
-                {
-                    # match star-shaped environment around ?res and require ?toRes to have
-                    # the same environment
-                    OPTIONAL {
-                        ?res ?p ?o 
-                        FILTER(?p != vf:onhandQuantity)
-                        OPTIONAL {
-                            ?o ?p2 ?o2 
-                        }
-                    }
-                    FILTER NOT EXISTS {
-                        ?toRes ?p ?o .
-                        ?o ?p2 ?o2 .
-                        FILTER(!ISBLANK(?o) 
-                            && !ISBLANK(?o2))
+                #BIND(?succVal != ?resVal - ?evVal || ?toSuccVal != ?toResVal + ?evVal as ?wrongCount)
+                #BIND(BOUND(?succVal) as ?valsFound)
+                #FILTER( ( ! ?valsFound ) || ?wrongCount)
 
-                    }
-                    FILTER NOT EXISTS {
-                        ?toRes ?p [ 
-                             ?p2 ?o2 
-                        ]
-                        FILTER(ISBLANK(?o)
-                            && !ISBLANK(?o2))
-                    }
-                }        
+#                {
+#                    # match star-shaped environment around ?res and require ?toRes to have
+#                    # the same environment
+#                    OPTIONAL {
+#                        ?res ?p ?o 
+#                        FILTER(?p != vf:onhandQuantity)
+#                        OPTIONAL {
+#                            ?o ?p2 ?o2 
+#                        }
+#                    }
+#                    FILTER NOT EXISTS {
+#                        ?toRes ?p ?o .
+#                        ?o ?p2 ?o2 .
+#                        FILTER(!ISBLANK(?o) 
+#                            && !ISBLANK(?o2))
+#
+#                    }
+#                    FILTER NOT EXISTS {
+#                        ?toRes ?p [ 
+#                             ?p2 ?o2 
+#                        ]
+#                        FILTER(ISBLANK(?o)
+#                            && !ISBLANK(?o2))
+#                    }
+#                }        
                 FILTER (!BOUND(?succVal)) # produce result if quantities are off
+                
             }
             """
             ]
