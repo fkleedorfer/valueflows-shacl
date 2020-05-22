@@ -68,7 +68,7 @@ ex:bobsApples3
     a vf:EconomicResource ;
     vf:previousState ex:bobsApples2 ;
     vf:primaryAccountable ex:Bob ;
-    vf:currentLocation wd:Q1741 ;
+    vf:currentLocation wd:Q1741 ;   # wrong!
     vf:onhandQuantity [
         om2:hasUnit om2:kilogram ;
         om2:hasNumericalValue "100"^^xsd:int ;

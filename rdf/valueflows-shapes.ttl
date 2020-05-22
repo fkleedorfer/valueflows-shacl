@@ -508,6 +508,281 @@ vf:
 #                   Some Utilities
 ###############################################################################
 
+
+:notBound
+    a sh:SPARQLFunction ;
+    sh:parameter [
+        sh:path :node ;
+        sh:optional false ;
+    ] ;
+    sh:select """
+    SELECT (!BOUND(?node) as ?result) 
+    WHERE {}
+    """ ;
+    .
+
+:bound 
+    a sh:SPARQLFunction ;
+    sh:parameter [
+        sh:path :node ;
+        sh:optional false ;
+    ] ;
+    sh:select """
+    SELECT (BOUND(?node) as ?result) 
+    WHERE {}
+    """ ;
+    .
+
+:onlyOneBound
+    a sh:SPARQLFunction ;
+    sh:parameter [
+        sh:path :op1 ;
+        sh:optional false ;
+    ] ;
+    sh:parameter [
+        sh:path :op2 ;
+        sh:optional true ;
+    ] ;
+    sh:select """
+        SELECT ( 
+            (BOUND(?op1) && !BOUND(?op2)) 
+            || (!BOUND(?op1) && BOUND(?op2)) as ?result) 
+        WHERE {}
+    """;
+    .
+
+:or 
+    a sh:SPARQLFunction ;
+    sh:parameter [
+        sh:path :op1 ;
+        sh:optional false ;
+    ] ;
+    sh:parameter [
+        sh:path :op2 ;
+        sh:optional true ;
+    ] ;
+    sh:parameter [
+        sh:path :op3 ;
+        sh:optional true ;
+    ] ;
+    sh:parameter [
+        sh:path :op4 ;
+        sh:optional true ;
+    ] ;
+    sh:select """
+    SELECT ( ?op1 || ?op2 || ?op3 || ?op4 as ?result) 
+    WHERE {}
+    """;
+    .
+
+:and 
+    a sh:SPARQLFunction ;
+    sh:parameter [
+        sh:path :op1 ;
+        sh:optional false ;
+    ] ;
+    sh:parameter [
+        sh:path :op2 ;
+        sh:optional true ;
+    ] ;
+    sh:parameter [
+        sh:path :op3 ;
+        sh:optional true ;
+    ] ;
+    sh:parameter [
+        sh:path :op4 ;
+        sh:optional true ;
+    ] ;
+    sh:select """
+    SELECT ( (!BOUND(?op1) || ?op1) 
+          && (!BOUND(?op2) || ?op2)
+          && (!BOUND(?op3) || ?op3) 
+          && (!BOUND(?op4) || ?op4) as ?result) 
+    WHERE {}
+    """;
+    .
+
+:not 
+    a sh:SPARQLFunction ;
+    sh:parameter [
+        sh:path :op1 ;
+        sh:optional false ;
+    ] ;
+    sh:select """
+    SELECT ( ! ?op1 as ?result) 
+    WHERE {}
+    """;
+    .
+
+:pathEquals
+    a sh:SPARQLFunction ;
+    sh:parameter [
+        sh:order 1 ;
+        sh:path :node1 ;
+        sh:optional false ;
+    ] ;
+    sh:parameter [
+        sh:order 2 ;
+        sh:path :path1 ;
+        sh:optional false ;
+    ] ;
+    sh:parameter [
+        sh:order 3 ;
+        sh:path :node2 ;
+        sh:optional false ;
+    ] ;
+    sh:parameter [
+        sh:order 4 ;
+        sh:path :path2 ;
+        sh:optional false ;
+    ] ;
+    sh:prefixes vf:;
+    sh:select """
+        SELECT ?result
+        WHERE {
+            ?node1 ?path1 ?expected .
+            ?node2 ?path2 ?actual .
+            BIND(
+                IF(ISBLANK(?expected),
+                vfs:deepPathEquals4(?node1, ?path1, ?node2, ?path2),
+                vfs:IRIOrLiteralEquals(?expected,?actual)
+            )
+            as ?result
+            )
+        }
+    """ ;
+    .
+
+:IRIOrLiteralEquals
+    a sh:SPARQLFunction ;
+    sh:parameter [
+        sh:order 1 ;
+        sh:path :expected ;
+        sh:optional false ;
+    ] ;
+    sh:parameter [
+        sh:order 2 ;
+        sh:path :actual ;
+        sh:optional false ;
+    ] ;
+    sh:select """
+        SELECT (
+                !ISBLANK(?actual) 
+                && !ISBLANK(?expected) 
+                && ?actual = ?expected as ?result
+            ) 
+        WHERE {}
+    """ ;
+    .
+
+:deepPathEquals4
+    a sh:SPARQLFunction ;
+    sh:parameter [
+        sh:order 1 ;
+        sh:path :node1 ;
+        sh:optional false ;
+    ] ;
+    sh:parameter [
+        sh:order 2 ;
+        sh:path :path1 ;
+        sh:optional false ;
+    ] ;
+    sh:parameter [
+        sh:order 3 ;
+        sh:path :node2 ;
+        sh:optional false ;
+    ] ;
+    sh:parameter [
+        sh:order 4 ;
+        sh:path :path2 ;
+        sh:optional false ;
+    ] ;
+    sh:select """
+         # TODO: only detects that triples are missing, not when triples were added
+         SELECT (COUNT(*) = 0 as ?result)
+         WHERE {
+            ?node1 ?path1 ?expected .
+            ?node2 ?path2 ?actual .
+            ?expected ?p ?o .
+            OPTIONAL {
+                ?o ?p2 ?o2 
+                FILTER (ISBLANK(?o))
+                OPTIONAL {
+                    ?o2 ?p3 ?o3 
+                    FILTER (ISBLANK(?o2))
+                    OPTIONAL {
+                        ?o3 ?p4 ?o4
+                        FILTER (ISBLANK(?o3))
+                    }
+                }
+            }
+            FILTER NOT EXISTS {
+                ?actual ?p ?o
+                OPTIONAL{
+                    ?actual ?p [
+                        ?p2 ?o2
+                    ]
+                    OPTIONAL{
+                        ?actual ?p [
+                            ?p2 [
+                                ?p3 ?o3
+                            ]
+                        ]
+                        OPTIONAL{
+                            ?actual ?p [
+                                ?p2 [
+                                    ?p3 [
+                                        ?p4 ?o4
+                                    ]
+                                ]
+                            ]
+                        }
+                    }
+                }
+            }    
+        }
+    """ ;
+    .
+ 
+
+# Effect of a current `move` action that has a 
+#    `vf:resourceInventoriedAs` and NO
+#    `vf:toResourceInventoriedAs` :
+# 
+# - It generates one new resource states for `resource`
+# - It copies all old values but changes the location to the event's location
+#
+# Note: there are problems with finding a boundary for the query so it can recurse in the star-shaped 
+#       environment of the resource, but it does not go to far. 
+
+
+:FnNewNodeUri 
+        a           sh:SPARQLFunction ;
+        sh:parameter [
+            sh:path :parResourceUri ;
+            sh:optional false ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+        ] ;
+        sh:parameter [
+            sh:path :parEventUri ;
+            sh:optional false ;
+            sh:nodeKind sh:IRI ;
+            sh:order 2 ;
+        ] ;
+        sh:prefixes vf: ;
+        sh:select """
+            SELECT
+            (IRI(CONCAT("urn:wonvf:",
+                SHA256(CONCAT(STR(?parResourceUri), 
+                " ", 
+                STR(?parEventUri))))) 
+                as ?result) 
+            WHERE {}
+        """;
+        .
+
+
 # SPARQLFunction for identifying EconomicEvents by properties of their vf:action
 # i.e. checks if `$parEvent/vf:action/$parActionProperty = $parValue`
 :EventHasActionPropertyValueFunction
@@ -761,257 +1036,59 @@ vf:
             a :EventsTarget_noToResource;
             :parAction vf:move
         ] ;
-        :constantResourceProperty vf:primaryAccountable ;
-        :constantResourceProperty vf:resourceClassifiedAs ;
-        :constantResourceProperty vf:trackingIdentifier ;
-        #:constantResourceProperty vf:onhandQuantity ;
-        #:constantResourceProperty vf:accountingQuantity ;
-        #sh:property [
-        #    sh:path vf:atLocation ;
-        #    :sameAsNextResourceProperty vf:currentLocation ;
-        #    sh:minCount 1 ;
-        #    sh:maxCount 1 ;
-        #] ;
-        sh:expression [
-            sh:message "Event quantity is not identical to next state onhand quantity" ;
-            :or (
-                [ :notBound ( [ sh:path ( vf:resourceInventoriedAs [ sh:inversePath vf:previousState ] ) ] ) ]
-                [ :and (
-                    [ :IRIOrLiteralEquals ( 
-                        [ sh:path ( vf:resourceQuantity om2:hasUnit ) ] 
-                        [ sh:path ( vf:resourceInventoriedAs [ sh:inversePath vf:previousState ] vf:onhandQuantity om2:hasUnit ) ]
-                    )]    
-                    [ :IRIOrLiteralEquals ( 
-                        [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ] 
-                        [ sh:path ( vf:resourceInventoriedAs [ sh:inversePath vf:previousState ] vf:onhandQuantity om2:hasNumericalValue ) ]
-                    )]
-                )]
-            )] ;
-
-        sh:expression [
-            :or (
-                [ :notBound ( [ sh:path ( vf:resourceInventoriedAs [ sh:inversePath vf:previousState ] ) ] ) ]
-                [ :IRIOrLiteralEquals ( 
-                    [ sh:path vf:atLocation ] 
-                    [ sh:path ( vf:resourceInventoriedAs [ sh:inversePath vf:previousState ] vf:currentLocation ) ]
-                )]
-                [ :deepEquals4 ( 
-                    [ sh:path vf:atLocation ] 
-                    [ sh:path ( vf:resourceInventoriedAs [ sh:inversePath vf:previousState ] vf:currentLocation ) ]
-                )]    
-            )
+        :unaffectedResourceProperty vf:primaryAccountable ;
+        :unaffectedResourceProperty vf:resourceClassifiedAs ;
+        :unaffectedResourceProperty vf:trackingIdentifier ;
+        :unaffectedResourceProperty vf:onhandQuantity ;
+        :unaffectedResourceProperty vf:accountingQuantity ;
+        sh:not [
+            sh:message "Event with action 'move': vf:atLocation must be different from resource's vf:currentLocation, but it is not." ; 
+            sh:property [
+                sh:path vf:atLocation ;
+                    :sameAsResourceProperty vf:currentLocation ;
+                sh:minCount 1 ;
+                sh:maxCount 1 ;
+            ] ;
         ] ;
-
-        sh:node :RequireSameQuantitiesOnEventAndResource ;
+        sh:property [
+            sh:path vf:atLocation ;
+            :sameAsNextResourceProperty vf:currentLocation ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :sameAsNextResourceProperty vf:onhandQuantity ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :sameAsResourceProperty vf:onhandQuantity ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
         .
-
-:notBound
-    a sh:SPARQLFunction ;
-    sh:parameter [
-        sh:path :node ;
-        sh:optional false ;
-    ] ;
-    sh:select """
-    SELECT (!BOUND(?node) as ?result) 
-    WHERE {}
-    """ ;
-    .
-
-:bound 
-    a sh:SPARQLFunction ;
-    sh:parameter [
-        sh:path :node ;
-        sh:optional false ;
-    ] ;
-    sh:select """
-    SELECT (BOUND(?node) as ?result) 
-    WHERE {}
-    """ ;
-    .
-
-:or 
-    a sh:SPARQLFunction ;
-    sh:parameter [
-        sh:path :op1 ;
-        sh:optional false ;
-    ] ;
-    sh:parameter [
-        sh:path :op2 ;
-        sh:optional true ;
-    ] ;
-    sh:parameter [
-        sh:path :op3 ;
-        sh:optional true ;
-    ] ;
-    sh:parameter [
-        sh:path :op4 ;
-        sh:optional true ;
-    ] ;
-    sh:select """
-    SELECT ( ?op1 || ?op2 || ?op3 || ?op4 as ?result) 
-    WHERE {}
-    """;
-    .
-
-:and 
-    a sh:SPARQLFunction ;
-    sh:parameter [
-        sh:path :op1 ;
-        sh:optional false ;
-    ] ;
-    sh:parameter [
-        sh:path :op2 ;
-        sh:optional true ;
-    ] ;
-    sh:parameter [
-        sh:path :op3 ;
-        sh:optional true ;
-    ] ;
-    sh:parameter [
-        sh:path :op4 ;
-        sh:optional true ;
-    ] ;
-    sh:select """
-    SELECT ( (!BOUND(?op1) || ?op1) 
-          && (!BOUND(?op2) || ?op2)
-          && (!BOUND(?op3) || ?op3) 
-          && (!BOUND(?op4) || ?op4) as ?result) 
-    WHERE {}
-    """;
-    .
-
-:not 
-    a sh:SPARQLFunction ;
-    sh:parameter [
-        sh:path :op1 ;
-        sh:optional false ;
-    ] ;
-    sh:select """
-    SELECT ( ! ?op1 as ?result) 
-    WHERE {}
-    """;
-    .
-
-
-:IRIOrLiteralEquals
-    a sh:SPARQLFunction ;
-    sh:parameter [
-        sh:order 1 ;
-        sh:path :expected ;
-        sh:optional false ;
-    ] ;
-    sh:parameter [
-        sh:order 2 ;
-        sh:path :actual ;
-        sh:optional false ;
-    ] ;
-    sh:select """
-        SELECT (
-                !ISBLANK(?actual) 
-                && !ISBLANK(?expected) 
-                && ?actual = ?expected as ?result
-            ) 
-        WHERE {}
-    """ ;
-    .
-
-:deepEquals4
-    a sh:SPARQLFunction ;
-    sh:parameter [
-        sh:order 1 ;
-        sh:path :expected ;
-        sh:optional false ;
-    ] ;
-    sh:parameter [
-        sh:order 2 ;
-        sh:path :actual ;
-        sh:optional false ;
-    ] ;
-    sh:select """
-        SELECT (true as ?result)
-        WHERE {
-            # if ?expected is a bnode structure, do deep compare
-            ?expected ?p ?o .
-            FILTER(ISBLANK(?expected))
-            OPTIONAL {
-                ?o ?p2 ?o2 .
-                FILTER(ISBLANK(?o))
-                OPTIONAL {
-                    ?o2 ?p3 ?o3 .
-                    FILTER(ISBLANK(?o2))
-                    OPTIONAL {
-                        ?o3 ?p4 ?o4 .
-                        FILTER(!ISBLANK(?o4))
-                    }
-                }
-            }
-            FILTER EXISTS {
-                {
-                    ?actual ?p ?o 
-                    FILTER(!ISBLANK(?o))
-                } UNION {
-                    ?actual ?p [ 
-                        ?p2 ?o2
-                    ]
-                    FILTER(!ISBLANK(?o2))
-                } UNION {
-                    ?actual ?p [ 
-                        ?p2 [
-                            ?p3 ?o3 
-                        ]
-                    ]
-                    FILTER(!ISBLANK(?o3))
-                } UNION {
-                    ?actual ?p [ 
-                        ?p2 [
-                            ?p3 [
-                                ?p4 ?o4
-                            ]
-                        ]
-                    ]
-                    FILTER(!ISBLANK(?o4))
-                }
-            }
-        }
-    """ ;
-    .
-
-# Effect of a current `move` action that has a 
-#    `vf:resourceInventoriedAs` and NO
-#    `vf:toResourceInventoriedAs` :
 # 
-# - It generates one new resource states for `resource`
-# - It copies all old values but changes the location to the event's location
+# Example of an expression we can build with our functions. Not too nice to use.
+# Better to use them inside SPARQL
 #
-# Note: there are problems with finding a boundary for the query so it can recurse in the star-shaped 
-#       environment of the resource, but it does not go to far. 
+#sh:expression [
+        #    sh:message "Event quantity is not identical to next state onhand quantity" ;
+        #    :or (
+        #        [ :notBound ( [ sh:path ( vf:resourceInventoriedAs [ sh:inversePath vf:previousState ] ) ] ) ]
+        #        [ :and (
+        #            [ :IRIOrLiteralEquals ( 
+        #                [ sh:path ( vf:resourceQuantity om2:hasUnit ) ] 
+        #                [ sh:path ( vf:resourceInventoriedAs [ sh:inversePath vf:previousState ] vf:onhandQuantity om2:hasUnit ) ]
+        #            )]    
+        #            [ :IRIOrLiteralEquals ( 
+        #                [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ] 
+        #                [ sh:path ( vf:resourceInventoriedAs [ sh:inversePath vf:previousState ] vf:onhandQuantity om2:hasNumericalValue ) ]
+        #            )]
+        #        )]
+        #    )] ;
 
-
-:FnNewNodeUri 
-        a           sh:SPARQLFunction ;
-        sh:parameter [
-            sh:path :parResourceUri ;
-            sh:optional false ;
-            sh:nodeKind sh:IRI ;
-            sh:order 1 ;
-        ] ;
-        sh:parameter [
-            sh:path :parEventUri ;
-            sh:optional false ;
-            sh:nodeKind sh:IRI ;
-            sh:order 2 ;
-        ] ;
-        sh:prefixes vf: ;
-        sh:select """
-            SELECT
-            (IRI(CONCAT("urn:wonvf:",
-                SHA256(CONCAT(STR(?parResourceUri), 
-                " ", 
-                STR(?parEventUri))))) 
-                as ?result) 
-            WHERE {}
-        """;
-        .
 
 # Effect of a current `move` action that has a 
 #    `vf:resourceInventoriedAs` and NO
@@ -1034,6 +1111,73 @@ vf:
         sh:rule :RuleCopyAccountingQuantityToNextState ;
         sh:rule :RuleCopyOtherPropertiesToNextState ;
         sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
+        .
+
+## `vf:move` connected to two resources
+
+# Invariants for move actions with `vf:resourceInventoriedAs` AND `vf:toResourceInventoriedAs`:
+# - The event's vf:atLocation` value must be different from the resource's `vf:currentLocation` 
+# - The event's vf:atLocation` value must be the same as the toResource's `vf:currentLocation` 
+# - The event's `vf:resourcequantity` must not be smaller than the resource's `vf:onhandQuantity`
+# - The the resource's `vf:onhandQuantity` must decrement by the event's `vf:resourceQuantity`
+# - The the toResource's `vf:onhandQuantity` must increment by the event's `vf:resourceQuantity`
+
+:EventShape_move_toResource
+        a           sh:NodeShape ;
+        sh:target [
+            a :EventsTarget_toResource;
+            :parAction vf:move
+        ] ;
+#        :sameValueInBothResources vf:primaryAccountable ;
+#        :sameValueInBothResources vf:resourceClassifiedAs ;
+        :unaffectedResourceProperty vf:trackingIdentifier ;
+        :unaffectedResourceProperty_toResource vf:trackingIdentifier ;
+        :unaffectedResourceProperty vf:primaryAccountable ;
+        :unaffectedResourceProperty_toResource vf:primaryAccountable ;
+        :unaffectedResourceProperty vf:resourceClassifiedAs ;
+        :unaffectedResourceProperty_toResource vf:resourceClassifiedAs ;
+        :unaffectedResourceProperty vf:accountingQuantity ;
+        :unaffectedResourceProperty_toResource vf:accountingQuantity ;
+        sh:not [
+            sh:property [
+                sh:path vf:atLocation ;
+                    :sameAsResourceProperty vf:currentLocation ;
+                sh:minCount 1 ;
+                sh:maxCount 1 ;
+            ] ;
+        ] ;
+        sh:not [
+            sh:property [
+                sh:path vf:atLocation ;
+                    :sameAsNextResourceProperty vf:currentLocation ;
+                sh:minCount 1 ;
+                sh:maxCount 1 ;
+            ] ;
+        ] ;
+        sh:property [
+            sh:path vf:atLocation ;
+            :sameAsResourceProperty_toResource vf:currentLocation ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:atLocation ;
+            :sameAsNextResourceProperty_toResource vf:currentLocation ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+#        sh:property [
+#            sh:path vf:resourceQuantity ;
+#            :decrementsPrevToNextResourceProperty vf:onhandQuantity ;
+#            sh:minCount 1 ;
+#            sh:maxCount 1 ;
+#        ] ;
+#        sh:property [
+#            sh:path vf:resourceQuantity ;
+#            :incrementsPrevToNextResourceProperty_toResource vf:onhandQuantity ;
+#            sh:minCount 1 ;
+#            sh:maxCount 1 ;
+#        ] ;
         .
 
 # Effect of a current `move` action that has a 
@@ -1066,11 +1210,81 @@ vf:
         .
 
 
-
-:ConstantResourcePropertyConstraint
+:UnaffectedResourcePropertyConstraint
     a sh:ConstraintComponent ;
     sh:parameter [
-        sh:path :constantResourceProperty ;
+        sh:path :unaffectedResourceProperty ;
+        sh:nodeKind sh:IRI ;
+        sh:optional false ;
+    ] ;
+    sh:nodeValidator [
+        a sh:SPARQLSelectValidator ;
+        sh:prefixes vf: ;
+        sh:select """
+            SELECT ?this ?message ?path ?value
+            WHERE {
+                ?this vf:resourceInventoriedAs ?res .
+                OPTIONAL {
+                    ?next vf:previousState ?res .
+                    OPTIONAL {
+                        ?next ?unaffectedResourceProperty ?nextVal .
+                    }
+                }
+                FILTER (BOUND(?next)) # no error if there is no next state!
+                OPTIONAL {
+                    ?res ?unaffectedResourceProperty ?val .
+                } 
+                FILTER(
+                       # error if values aren't equal
+                       ! vfs:pathEquals(
+                           ?res, ?unaffectedResourceProperty, 
+                           ?next, ?unaffectedResourceProperty)
+                    || # error if only one property of the two is present
+                        vfs:onlyOneBound(?val, ?nextVal) 
+                )
+                BIND(IF(
+                        BOUND(?val) && BOUND(?nextVal),
+                        IF(
+                            ISBLANK(?val),
+                            CONCAT(
+                                "Event ",
+                                STR(?this),
+                                " is not allowed to change ",
+                                STR(?unaffectedResourceProperty),
+                                ", but the structure of its bnode value has changed."
+                            ) ,
+                            CONCAT(
+                                "Event ",
+                                STR(?this),
+                                " is not allowed to change ",
+                                STR(?unaffectedResourceProperty),
+                                ", but it changed from ",
+                                IF(BOUND(?val),STR(?val),"[unbound]"),
+                                " to ",
+                                IF(BOUND(?nextVal),STR(?nextVal),"[unbound]"),
+                                "."
+                            ) 
+                        ),
+                        CONCAT(
+                                "Event ",
+                                STR(?this),
+                                " is not allowed to affect ",
+                                STR(?unaffectedResourceProperty),
+                                " of the resource, but it is only present in one of its states."
+                        )
+                    ) 
+                    as ?message
+                )
+            }
+        """;
+    ];
+    .
+
+
+:UnaffectedResourcePropertyConstraint_toResource
+    a sh:ConstraintComponent ;
+    sh:parameter [
+        sh:path :unaffectedResourceProperty_toResource ;
         sh:nodeKind sh:IRI ;
         sh:optional false ;
     ] ;
@@ -1080,95 +1294,133 @@ vf:
         sh:select """
             SELECT ?this ?message
             WHERE {
-                ?this vf:resourceInventoriedAs ?res .
-                ?next vf:previousState ?res .
-                ?res ?constantResourceProperty ?val .
-                ?next ?constantResourceProperty ?nextVal .
-                {
-                    ?res ?constantResourceProperty ?val .
-                    ?next ?constantResourceProperty ?nextVal .
-                    FILTER(!ISBLANK(?val) && !ISBLANK(?nextVal) && ?val != ?nextVal)
-                    BIND(
-                        CONCAT(
-                            "Event ",
-                            STR(?this),
-                            " is not allowed to change ",
-                            STR(?constantResourceProperty),
-                            ", but it changed from ",
-                            IF(BOUND(?val),STR(?val),"[unbound]"),
-                            " to ",
-                            IF(BOUND(?nextVal),STR(?nextVal),"[unbound]"),
-                            "."
-                        ) 
-                    as ?message)
-                } UNION {
-                    # if ?val is a bnode structure, do deep compare
-                    ?res ?constantResourceProperty ?val .
-                    ?next ?constantResourceProperty ?nextVal .
-                    ?val ?p ?o .
-                    FILTER(ISBLANK(?val))
+                ?this vf:toResourceInventoriedAs ?res .
+                OPTIONAL {
+                    ?next vf:previousState ?res .
                     OPTIONAL {
-                        ?o ?p2 ?o2 .
-                        FILTER(ISBLANK(?o))
-                        OPTIONAL {
-                           ?o2 ?p3 ?o3 .
-                            FILTER(ISBLANK(?o2))
-                            OPTIONAL {
-                                ?o3 ?p4 ?o4 .
-                                FILTER(ISBLANK(?o4))
-                        }
-                        }
+                        ?next ?unaffectedResourceProperty_toResource ?nextVal .
                     }
-                    FILTER NOT EXISTS {
-                        {
-                            ?next ?constantResourceProperty [ 
-                                ?p ?o 
-                            ]
-                            FILTER(!ISBLANK(?o))
-                        } UNION {
-                            ?next ?constantResourceProperty [ 
-                                ?p [
-                                    ?p2 ?o2
-                                ]
-                            ]
-                            FILTER(!ISBLANK(?o2))
-                        } UNION {
-                            ?next ?constantResourceProperty [ 
-                                ?p [
-                                    ?p2 [
-                                        ?p3 ?o3
-                                    ]
-                                ]
-                            ]
-                            FILTER(!ISBLANK(?o3))
-                        } UNION {
-                            ?next ?constantResourceProperty [ 
-                                ?p [
-                                    ?p2 [
-                                        ?p3 [
-                                            ?p4 ?o4
-                                        ]
-                                    ]
-                                ]
-                            ]
-                            FILTER(!ISBLANK(?o4))
-                        }
-
-                    }
-                    BIND(
+                }
+                OPTIONAL {
+                    ?res ?unaffectedResourceProperty_toResource ?val .
+                }
+                FILTER(BOUND(?next))
+                FILTER(
+                    vfs:onlyOneBound(?val, ?nextVal)
+                    ||
+                    ! vfs:deepPathEquals4(?res, ?unaffectedResourceProperty_toResource, ?next, ?unaffectedResourceProperty_toResource)
+                )
+                BIND(IF(BOUND(?val) && BOUND(?nextVal),
+                        IF(
+                            ISBLANK(?val),
+                            CONCAT(
+                                "Event ",
+                                STR(?this),
+                                " is not allowed to change ",
+                                STR(?unaffectedResourceProperty_toResource),
+                                " of its vf:toResourceInventoriedAs ",
+                                ", but the structure of its bnode value has changed."
+                            ) ,
+                            CONCAT(
+                                "Event ",
+                                STR(?this),
+                                " is not allowed to change ",
+                                STR(?unaffectedResourceProperty_toResource),
+                                " of its vf:toResourceInventoriedAs ",
+                                ", but it changed from ",
+                                IF(BOUND(?val),STR(?val),"[unbound]"),
+                                " to ",
+                                IF(BOUND(?nextVal),STR(?nextVal),"[unbound]"),
+                                "."
+                            ) 
+                        ), 
                         CONCAT(
                             "Event ",
                             STR(?this),
                             " is not allowed to change ",
-                            STR(?constantResourceProperty),
-                            ", but the structure of its bnode value has changed."
+                            STR(?unaffectedResourceProperty_toResource),
+                            " of its vf:toResourceInventoriedAs ",
+                            ", but it is only present in one of its states."
                         ) 
-                    as ?message)
-                }
+                    )
+                    as ?message
+                )
             }
         """;
     ];
     .
+
+:SameAsResourcePropertyConstraint
+    a sh:ConstraintComponent ;
+    sh:parameter [
+        sh:path :sameAsResourceProperty ;
+        sh:nodeKind sh:IRI ;
+        sh:optional false ;
+    ] ;
+    sh:propertyValidator [
+        a sh:SPARQLSelectValidator ;
+        sh:prefixes vf: ;
+        sh:select """
+            SELECT ?this ?message
+            WHERE {
+                ?this ?PATH ?eventVal .
+                OPTIONAL {
+                    ?this vf:resourceInventoriedAs ?res .
+                    ?res ?sameAsResourceProperty ?val .
+                }
+                FILTER(
+                    vfs:onlyOneBound(?val, ?eventVal)
+                    || ! vfs:pathEquals(?this, ?PATH, ?res, ?sameAsResourceProperty)
+                )
+                BIND(
+                    IF(BOUND(?val) && BOUND(?eventVal),
+                        IF(ISBLANK(?val),
+                            CONCAT(
+                            "Event ",
+                                STR(?this),
+                                ", path ",
+                                IF(BOUND(?PATH), STR(?PATH),"[unbound]"),
+                                " (which is a bnode structure) ",
+                                " must be equal to resource ",
+                                STR(?res),
+                                ", path ",
+                                STR(?sameAsResourceProperty),
+                                " but the structures differ."
+                            ),
+                            CONCAT(
+                                "Event ",
+                                STR(?this),
+                                ", path ",
+                                IF(BOUND(?PATH), STR(?PATH),"[unbound]"),
+                                " must be equal to resource ",
+                                STR(?res),
+                                ", path ",
+                                STR(?sameAsResourceProperty),
+                                " but the values are ",
+                                IF(BOUND(?eventVal),STR(?eventVal),"[unbound]"),
+                                " and ",
+                                IF(BOUND(?val),STR(?val),"[unbound]")
+                            )
+                        ),
+                        CONCAT(
+                            "Event ",
+                            STR(?this),
+                            ", path ",
+                            IF(BOUND(?PATH), STR(?PATH),"[unbound]"),
+                            " must be equal to resource ",
+                            STR(?res),
+                            ", path ",
+                            STR(?sameAsResourceProperty),
+                            ", but only one of them is present."
+                        )
+                    )
+                    as ?message
+                )
+            }
+        """;
+    ];
+    .
+
 
 :SameAsNextResourcePropertyConstraint
     a sh:ConstraintComponent ;
@@ -1183,19 +1435,48 @@ vf:
         sh:select """
             SELECT ?this ?message
             WHERE {
-                {
-                    ?this ?PATH ?eventVal .
-                    ?this vf:resourceInventoriedAs ?res .
-                    ?res ?sameAsNextResourceProperty ?val .
-                    ?next vf:previousState ?res .
-                    ?next ?sameAsNextResourceProperty ?nextVal .
-                    FILTER(
-                        (!ISBLANK(?val) && !ISBLANK(?nextVal) && !ISBLANK(?eventVal)) 
-                        && 
-                            (  ?val = ?nextVal 
-                            || ?eventVal != ?nextVal)
-                    )
-                    BIND(
+                ?this ?PATH ?eventVal .
+                ?this vf:resourceInventoriedAs ?res .
+                OPTIONAL {
+                ?next vf:previousState ?res .
+                    OPTIONAL {
+                        ?next ?sameAsNextResourceProperty ?nextVal .
+                    }
+                }
+                FILTER(
+                    vfs:onlyOneBound(?eventVal, ?nextVal)
+                    ||
+                    ! vfs:pathEquals(?this, ?PATH, ?next, ?sameAsNextResourceProperty)
+                )
+                BIND(
+                    IF(BOUND(?eventVal) && BOUND(?nextVal),
+                        IF(ISBLANK(?val),
+                            CONCAT(
+                            "Event ",
+                                STR(?this),
+                                " must change the resource property ",
+                                STR(?sameAsNextResourceProperty),
+                                " to its value of property ",
+                                IF(BOUND(?PATH), STR(?PATH),"[unbound]"),
+                                " (which is a bnode structure) ",
+                                " but the new value ",
+                                IF(BOUND(?nextVal), STR(?nextVal),"[unbound]"),
+                                " differs from that."
+                            ),
+                            CONCAT(
+                                "Event ",
+                                STR(?this),
+                                " must change the resource property ",
+                                STR(?sameAsNextResourceProperty),
+                                " to its value of property ",
+                                IF(BOUND(?PATH), STR(?PATH),"[unbound]"),
+                                ", which would be ",
+                                IF(BOUND(?eventVal), STR(?eventVal),"[unbound]"),
+                                " but the new value is ",
+                                IF(BOUND(?nextVal), STR(?nextVal),"[unbound]"),
+                                " ."
+                            )
+                        ),
                         CONCAT(
                             "Event ",
                             STR(?this),
@@ -1203,84 +1484,84 @@ vf:
                             STR(?sameAsNextResourceProperty),
                             " to its value of property ",
                             IF(BOUND(?PATH), STR(?PATH),"[unbound]"),
-                            ", which would be ",
-                            IF(BOUND(?eventVal), STR(?eventVal),"[unbound]"),
-                            " but the new value is ",
-                            IF(BOUND(?nextVal), STR(?nextVal),"[unbound]"),
-                            " ."
-                        ) 
-                    as ?message)
-                } UNION {
-                    # if ?val is a bnode structure, do deep compare
-                    ?this ?PATH ?eventVal .
-                    ?this vf:resourceInventoriedAs ?res .
-                    ?res ?sameAsNextResourceProperty ?val .
-                    ?next vf:previousState ?res .
-                    ?next ?sameAsNextResourceProperty ?nextVal .
-                    ?val ?p ?o .
-                    FILTER(ISBLANK(?val))
-                    OPTIONAL {
-                        ?o ?p2 ?o2 .
-                        FILTER(ISBLANK(?o))
-                        OPTIONAL {
-                           ?o2 ?p3 ?o3 .
-                            FILTER(ISBLANK(?o2))
-                            OPTIONAL {
-                                ?o3 ?p4 ?o4 .
-                                FILTER(ISBLANK(?o4))
-                        }
-                        }
-                    }
-                    FILTER NOT EXISTS {
-                        {
-                            ?next ?sameAsNextResourceProperty [ 
-                                ?p ?o 
-                            ]
-                            FILTER(!ISBLANK(?o))
-                        } UNION {
-                            ?next ?sameAsNextResourceProperty [ 
-                                ?p [
-                                    ?p2 ?o2
-                                ]
-                            ]
-                            FILTER(!ISBLANK(?o2))
-                        } UNION {
-                            ?next ?sameAsNextResourceProperty [ 
-                                ?p [
-                                    ?p2 [
-                                        ?p3 ?o3
-                                    ]
-                                ]
-                            ]
-                            FILTER(!ISBLANK(?o3))
-                        } UNION {
-                            ?next ?sameAsNextResourceProperty [ 
-                                ?p [
-                                    ?p2 [
-                                        ?p3 [
-                                            ?p4 ?o4
-                                        ]
-                                    ]
-                                ]
-                            ]
-                            FILTER(!ISBLANK(?o4))
-                        }
+                            ", but one of these two values is missing." 
+                        )
+                    )
+                    as ?message
+                )
+            }
+        """;
+    ];
+    .
 
+:SameAsNextResourcePropertyConstraint_toResource
+    a sh:ConstraintComponent ;
+    sh:parameter [
+        sh:path :sameAsNextResourceProperty_toResource ;
+        sh:nodeKind sh:IRI ;
+        sh:optional false ;
+    ] ;
+    sh:propertyValidator [
+        a sh:SPARQLSelectValidator ;
+        sh:prefixes vf: ;
+        sh:select """
+            SELECT ?this ?message
+            WHERE {
+                ?this ?PATH ?eventVal .
+                ?this vf:toResourceInventoriedAs ?res .
+                OPTIONAL {
+                    ?next vf:previousState ?res .
+                    OPTIONAL {
+                        ?next ?sameAsNextResourceProperty_toResource ?nextVal .
                     }
-                    BIND(
-                        CONCAT(
-                           "Event ",
-                            STR(?this),
-                            " must change the resource property ",
-                            STR(?sameAsNextResourceProperty),
-                            " to its value of property ",
-                            IF(BOUND(?PATH), STR(?PATH),"[unbound]"),
-                            " (which is a bnode structure) ",
-                            IF(BOUND(?eventVal), STR(?eventVal),"[unbound]"),
-                            " but the new value differs from that."
-                        ) 
-                    as ?message)
                 }
+                FILTER(BOUND(?next))
+                FILTER(
+                    vfs:onlyOneBound(?eventVal, ?nextVal)
+                    ||
+                    ! vfs:pathEquals(?this, ?PATH, ?next, ?sameAsNextResourceProperty_toResource)
+                )
+                BIND(
+                    IF(BOUND(?eventVal) && BOUND(?nextVal),
+                        IF(ISBLANK(?val),
+                            CONCAT(
+                            "Event ",
+                                STR(?this),
+                                " must change property ",
+                                STR(?sameAsNextResourceProperty_toResource),
+                                " of its vf:toResourceInventoriedAs to its value of property ",
+                                IF(BOUND(?PATH), STR(?PATH),"[unbound]"),
+                                " (which is a bnode structure) ",
+                                " but the new value ",
+                                IF(BOUND(?nextVal), STR(?nextVal),"[unbound]"),
+                                " differs from that."
+                            ),
+                            CONCAT(
+                                "Event ",
+                                STR(?this),
+                                " must change property ",
+                                STR(?sameAsNextResourceProperty_toResource),
+                                " of its vf:toResourceInventoriedAs to its value of property ",
+                                IF(BOUND(?PATH), STR(?PATH),"[unbound]"),
+                                ", which would be ",
+                                IF(BOUND(?eventVal), STR(?eventVal),"[unbound]"),
+                                " but the new value is ",
+                                IF(BOUND(?nextVal), STR(?nextVal),"[unbound]"),
+                                " ."
+                            )
+                        ),
+                        CONCAT(
+                            "Event ",
+                            STR(?this),
+                            " must change the property ",
+                            STR(?sameAsNextResourceProperty_toResource),
+                            " of its vf:toResourceInventoriedAs to its value of property ",
+                            IF(BOUND(?PATH), STR(?PATH),"[unbound]"),
+                            ", but one of these two values is missing." 
+                        )
+                    )
+                    as ?message
+                )
             }
         """;
     ];
@@ -1695,58 +1976,58 @@ vf:
 #   the resource's `vf:onhandQuantity`
 # - The successor resources must not differ from their predecessors except in quantity as
 #   results from the event quantity
-:MoveEventShape_toResource
-        a           sh:NodeShape ;
-        sh:target [
-            a :EventsTarget_toResource ;
-            :parAction vf:move
-        ] ;
-        sh:node :RequireLocationChangeShape_toResource ;
-        sh:node :RequireCompatibleQuantitiesShape_toResource ; 
-        sh:node :RequireSamePrimaryAccountableShape_toResource ;        
-        sh:node :RequireSufficientQuantityForResourceDecrementShape ;
-        sh:sparql [
-            sh:prefixes vf: ;
-            sh:select """
-            SELECT ?this (?quantityMessage as ?message)
-            WHERE {
-                ?this vf:resourceInventoriedAs ?res ;
-                      vf:toResourceInventoriedAs ?toRes .
-                ?succ   vf:previousState ?res .
-                ?toSucc vf:previousState ?toRes .
-                OPTIONAL {
-                    # if this result is empty, the quantities are off or missing
-                    ?res vf:onhandQuantity [
-                        om2:hasUnit ?unit ;
-                        om2:hasNumericalValue ?resVal ;
-                    ] .
-                    ?toRes vf:onhandQuantity [
-                        om2:hasUnit ?unit ;
-                        om2:hasNumericalValue ?toResVal ;
-                    ] .
-                    ?succ vf:onhandQuantity [
-                        om2:hasUnit ?unit ;
-                        om2:hasNumericalValue ?succVal ;
-                    ] .
-                    ?toSucc vf:onhandQuantity [
-                        om2:hasUnit ?unit ;
-                        om2:hasNumericalValue ?toSuccVal ; 
-                    ] .
-                    ?this vf:resourceQuantity [
-                        om2:hasUnit ?unit ;
-                        om2:hasNumericalValue ?evVal ;
-                    ]
-                }     
-                BIND(BOUND(?succVal) as ?qFound)
-                BIND( (?succVal = ?resVal - ?evVal ) 
-                    && ( ?toSuccVal = ?toResVal + ?evVal ) as ?qOk)
-                FILTER( ! ?qFound || ! ?qOk)
-                BIND(IF(?qFound,
-                            IF( ?qOk, "quantities ok", "quantities do not add up"),
-                            "quantities missing or wrong units") 
-                    as ?quantityMessage )
-            }
-            """
-            ]
-        .
+#:MoveEventShape_toResource
+#        a           sh:NodeShape ;
+#        sh:target [
+#            a :EventsTarget_toResource ;
+#            :parAction vf:move
+#        ] ;
+#        sh:node :RequireLocationChangeShape_toResource ;
+#        sh:node :RequireCompatibleQuantitiesShape_toResource ; 
+#        sh:node :RequireSamePrimaryAccountableShape_toResource ;        
+#        sh:node :RequireSufficientQuantityForResourceDecrementShape ;
+#        sh:sparql [
+#            sh:prefixes vf: ;
+#            sh:select """
+#            SELECT ?this (?quantityMessage as ?message)
+#            WHERE {
+#                ?this vf:resourceInventoriedAs ?res ;
+#                      vf:toResourceInventoriedAs ?toRes .
+#                ?succ   vf:previousState ?res .
+#                ?toSucc vf:previousState ?toRes .
+#                OPTIONAL {
+#                    # if this result is empty, the quantities are off or missing
+#                    ?res vf:onhandQuantity [
+#                        om2:hasUnit ?unit ;
+#                        om2:hasNumericalValue ?resVal ;
+#                    ] .
+#                    ?toRes vf:onhandQuantity [
+#                        om2:hasUnit ?unit ;
+#                        om2:hasNumericalValue ?toResVal ;
+#                    ] .
+#                    ?succ vf:onhandQuantity [
+#                        om2:hasUnit ?unit ;
+#                        om2:hasNumericalValue ?succVal ;
+#                    ] .
+#                    ?toSucc vf:onhandQuantity [
+#                        om2:hasUnit ?unit ;
+#                        om2:hasNumericalValue ?toSuccVal ; 
+#                    ] .
+#                    ?this vf:resourceQuantity [
+#                        om2:hasUnit ?unit ;
+#                        om2:hasNumericalValue ?evVal ;
+#                    ]
+#                }     
+#                BIND(BOUND(?succVal) as ?qFound)
+#                BIND( (?succVal = ?resVal - ?evVal ) 
+#                    && ( ?toSuccVal = ?toResVal + ?evVal ) as ?qOk)
+#                FILTER( ! ?qFound || ! ?qOk)
+#                BIND(IF(?qFound,
+#                            IF( ?qOk, "quantities ok", "quantities do not add up"),
+#                            "quantities missing or wrong units") 
+#                    as ?quantityMessage )
+#            }
+#            """
+#            ]
+#        .
 
