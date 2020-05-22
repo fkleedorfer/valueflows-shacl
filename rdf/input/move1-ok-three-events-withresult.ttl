@@ -6,7 +6,7 @@
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix vf:    <https://w3id.org/valueflows#> .
 @prefix om2: <http://www.ontology-of-units-of-measure.org/resource/om-2/> .
-@prefix wd: <www.wikidata.org/entity/> .
+@prefix wd: <http://www.wikidata.org/entity/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 
 # move with only one resource
@@ -67,6 +67,30 @@ ex:event2
 ex:bobsApples3
     a vf:EconomicResource ;
     vf:previousState ex:bobsApples2 ;
+    vf:primaryAccountable ex:Bob ;
+    vf:currentLocation wd:Q676832 ;
+    vf:onhandQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "100"^^xsd:int ;
+    ]
+    .
+
+ex:event3
+    a vf:EconomicEvent ;
+    vf:action vf:move ;
+    vf:provider ex:Bob ;
+    vf:receiver ex:Bob ;
+    vf:resourceInventoriedAs ex:bobsApples3 ;
+    vf:atLocation wd:Q1741 ;
+    vf:resourceQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "100"^^xsd:int ;
+    ] ; 
+    .
+
+ex:bobsApples4
+    a vf:EconomicResource ;
+    vf:previousState ex:bobsApples3 ;
     vf:primaryAccountable ex:Bob ;
     vf:currentLocation wd:Q1741 ;
     vf:onhandQuantity [

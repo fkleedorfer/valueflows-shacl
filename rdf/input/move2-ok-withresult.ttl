@@ -30,12 +30,12 @@ ex:alicesApples1 a vf:EconomicResource ;
     vf:primaryAccountable ex:Alice ;
     . 
 
-#ex:aa2 vf:previousState ex:alicesApples1 .
 
 ex:alicesApples2 
     a vf:EconomicResource ;
     vf:trackingIdentifier "lot-alice-apples-2018-10-11" ;
     vf:primaryAccountable ex:Alice ;
+    vf:currentLocation wd:Q1741 ;
     vf:onhandQuantity [
         om2:hasUnit om2:kilogram ;
         om2:hasNumericalValue "0"^^xsd:int ;
@@ -45,11 +45,42 @@ ex:alicesApples2
 ex:event1 
     a vf:EconomicEvent ;
     vf:action vf:move ;
+    vf:atLocation wd:Q1741 ;
     vf:provider ex:Alice ;
-    vf:receiver ex:Bob ;
+    vf:receiver ex:Alice ;
     vf:resourceInventoriedAs ex:alicesApples1 ;
     vf:toResourceInventoriedAs ex:alicesApples2 ;
     vf:resourceQuantity [
-        om2:hasUnit om2:gram ;
+        om2:hasUnit om2:kilogram ;
         om2:hasNumericalValue "30"^^xsd:int ;
     ] .
+
+# Effects of ex:event1
+
+ex:alicesApples1-2
+    a vf:EconomicResource ;
+    vf:trackingIdentifier "lot-alice-apples-2018-10-11" ;
+    vf:primaryAccountable ex:Alice ;
+    vf:currentLocation wd:Q1741 ;
+    vf:onhandQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "30"^^xsd:int ;
+    ] ;
+    vf:previousState ex:alicesApples1 ;
+    .
+
+
+ex:alicesApples2-2 a vf:EconomicResource ;
+    vf:accountingQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "230"^^xsd:int ;
+    ] ;
+    vf:onhandQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "200"^^xsd:int ;
+    ] ;
+    vf:resourceClassifiedAs wd:Q4917 ;
+    vf:currentLocation wd:Q676832 ;
+    vf:primaryAccountable ex:Alice ;
+    vf:previousState ex:alicesApples2
+    . 

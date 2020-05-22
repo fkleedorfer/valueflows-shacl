@@ -16,10 +16,9 @@ ex:Alice
 ex:Bob
     a foaf:Agent .
 
-ex:bobsApples2
+ex:bobsApples1
     a vf:EconomicResource ;
     vf:primaryAccountable ex:Bob ;
-    vf:resourceClassifiedAs wd:Q4917 ;    
     vf:currentLocation wd:Q676832 ;
     vf:onhandQuantity [
         om2:hasUnit om2:kilogram ;
@@ -32,11 +31,21 @@ ex:event2
     vf:action vf:move ;
     vf:provider ex:Bob ;
     vf:receiver ex:Bob ;
-    vf:resourceInventoriedAs ex:bobsApples2 ;
+    vf:resourceInventoriedAs ex:bobsApples1 ;
     vf:atLocation wd:Q1741 ;
     vf:resourceQuantity [
-        # TODO ASK: why would I need a quantity here? Did @fosterlynn say, all events have quantities? check!
         om2:hasUnit om2:kilogram ;
         om2:hasNumericalValue "100"^^xsd:int ;
     ] ; 
+    .
+
+ex:bobsApples2
+    a vf:EconomicResource ;
+    vf:primaryAccountable ex:Bob ;
+    vf:currentLocation wd:Q676832 ;
+    vf:onhandQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "100"^^xsd:int ;
+    ] ;
+    vf:previousState ex:bobsApples1 ;
     .

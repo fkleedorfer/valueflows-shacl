@@ -22,6 +22,7 @@
   sh:conforms  false ;
   sh:result    [ a                             sh:ValidationResult ;
                  sh:focusNode                  ex:event2 ;
+                 sh:resultMessage              "event did not change vf:currentLocation" ;
                  sh:resultSeverity             sh:Violation ;
                  sh:sourceConstraint           []  ;
                  sh:sourceConstraintComponent  sh:SPARQLConstraintComponent ;

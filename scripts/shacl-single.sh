@@ -21,6 +21,7 @@ source ${script_path}/settings.sh
 
 valSuffix="-val.ttl"
 infSuffix="-inf.ttl"
+infValSuffix="-inf-val.ttl"
 if (${verbose})
 then
     echo "shapes: ${shapesFile}"
@@ -37,10 +38,12 @@ fi
 
 redirValOut=/dev/null
 redirInfOut=/dev/null
+redirInfValOut=/dev/null
 if (${outputToDir})
 then
     redirValOut=${outputDir}/`basename ${dataFile}`${valSuffix}
     redirInfOut=${outputDir}/`basename ${dataFile}`${infSuffix}
+    redirInfValOut=${outputDir}/`basename ${dataFile}`${infValSuffix}
 fi
 
 
@@ -163,6 +166,54 @@ else
     compareInfMessage="${RED}failed${NC}"
 fi
 
-echo -e ", ${inferenceMessage} ${compareInfMessage}"
+echo -en ", ${inferenceMessage} ${compareInfMessage}"
+
+# VALIDATION of DATA + INFERENCES
+cat ${redirInfOut} >> ${tmpFile}
+
+# almost identical code as above
+${SHACL_VALIDATE} -shapesfile ${shapesFile} -datafile ${tmpFile} > ${redirInfValOut} 2>&1 && validateSuccess=true || validateSuccess=false
+
+if (${validateSuccess})
+then
+    validateConforms=true
+else
+    grep -q -e 'conforms[ \t]*false' ${redirInfValOut} && validateConforms=false || validateConforms="unknown"
+    if [[ ${validateConforms} = "unknown" ]]
+    then
+        grep -q -e 'conforms[ \t]*true' ${redirInfValOut} && validateConforms=true || validateConforms="unknown"
+    fi
+    if [[ ${validateConforms} = "unknown" ]]
+    then
+        # validate reports status 1 if data graph does not conform or there is an exception! 
+        # so we have to check the output to see what was the case. 
+        # In this branch, we did not find a validation result, so we assume the command failed
+        validateSuccess=false
+    else 
+        validateSuccess=true
+    fi
+fi
+
+validateMessage="inferences valid:"  
+compareVal=false
+if (${validateSuccess}) 
+then
+    compareValMessage="`statusColorTextPink ${validateConforms} 'true' 'false'`"
+    if (${compareToExpected})
+    then
+        test -f $compareValTo && compareVal=true || compareVal=false
+        test ${compareVal} && cmp -s $redirInfValOut $compareValTo && compareValExpected=true || compareValExpected=false
+        if ( ${compareVal} )
+        then
+            compareValMessage="${compareValMessage} (`statusColorText $compareValExpected 'expected' 'unexpected' `)"
+        else 
+            compareValMessage="${compareValMessage} (${YELLOW}no spec${NC})"
+        fi
+    fi
+else 
+    compareValMessage="${RED}error${NC}"
+fi
+echo -e ", ${validateMessage} ${compareValMessage}"
+
 rm ${tmpFile}
 

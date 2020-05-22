@@ -7,7 +7,7 @@
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix vf:    <https://w3id.org/valueflows#> .
 @prefix om2: <http://www.ontology-of-units-of-measure.org/resource/om-2/> .
-@prefix wd: <www.wikidata.org/entity/> .
+@prefix wd: <http://www.wikidata.org/entity/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 
 ex:Alice
@@ -28,6 +28,15 @@ ex:alicesApples1 a vf:EconomicResource ;
     vf:resourceClassifiedAs wd:Q4917 ;
     vf:currentLocation wd:Q676832 ;
     vf:primaryAccountable ex:Alice ;
+    ex:someProperty [
+        ex:some [
+            ex:deeper [
+                ex:funny [
+                    ex:structure "here" ;
+                ]
+            ]
+        ]
+    ]
     . 
 
 
@@ -39,6 +48,17 @@ ex:alicesApples2
     vf:onhandQuantity [
         om2:hasUnit om2:kilogram ;
         om2:hasNumericalValue "0"^^xsd:int ;
+    ] ;
+    vf:accountingQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "0"^^xsd:int ;
+    ] ;
+    ex:someProperty [
+        ex:some [
+            ex:funny [
+                ex:structure "here" ;
+            ]
+        ]
     ]
     .
 
@@ -53,4 +73,5 @@ ex:event1
     vf:resourceQuantity [
         om2:hasUnit om2:kilogram ;
         om2:hasNumericalValue "30"^^xsd:int ;
-    ] .
+    ] ;
+    .

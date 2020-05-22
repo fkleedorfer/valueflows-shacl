@@ -1,12 +1,9 @@
-@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 
-<http://example.org/ns#Bob>
-        a       <http://xmlns.com/foaf/0.1/Agent> .
-
-<urn:uuid:955fd77a-751d-4b4f-94e6-8a464fd51eca>
+<urn:uuid:8d0b5f08-f18f-42c0-824f-7b20b40be09a>
         a       <https://w3id.org/valueflows#EconomicResource> ;
         <https://w3id.org/valueflows#currentLocation>
                 <urn:www.wikidata.org/entity/Q1741> ;
