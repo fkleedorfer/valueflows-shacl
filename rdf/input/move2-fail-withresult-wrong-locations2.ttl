@@ -46,7 +46,7 @@ ex:alicesApples2
 ex:event1 
     a vf:EconomicEvent ;
     vf:action vf:move ;
-    vf:atLocation wd:Q1741 ;
+    vf:atLocation wd:Q676832 ;
     vf:provider ex:Alice ;
     vf:receiver ex:Alice ;
     vf:resourceInventoriedAs ex:alicesApples1 ;
@@ -69,7 +69,7 @@ ex:alicesApples1-2
     ] ;
     vf:onhandQuantity [
         om2:hasUnit om2:kilogram ;
-        om2:hasNumericalValue "0"^^xsd:int ;#wrong!
+        om2:hasNumericalValue "200"^^xsd:int ;
     ] ;   
     vf:previousState ex:alicesApples1 ;
     .

@@ -136,7 +136,7 @@ ex:bobsApples5
 
 ex:bobsAppleStash2
     a vf:EconomicResource ;
-    vf:primaryAccountable ex:Alice ;
+    vf:primaryAccountable ex:Alice ;            #wrong!
     vf:currentLocation wd:Q667328 ;
     vf:onhandQuantity [
         om2:hasUnit om2:kilogram ;

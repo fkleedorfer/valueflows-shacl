@@ -45,6 +45,7 @@ ex:alicesApples2
     vf:trackingIdentifier "lot-alice-apples-2018-10-11" ;
     vf:primaryAccountable ex:Alice ;
     vf:currentLocation wd:Q1741 ;
+    vf:resourceClassifiedAs wd:Q4917 ;    
     vf:onhandQuantity [
         om2:hasUnit om2:kilogram ;
         om2:hasNumericalValue "0"^^xsd:int ;

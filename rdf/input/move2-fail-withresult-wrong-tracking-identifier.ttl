@@ -64,7 +64,7 @@ ex:alicesApples1-2
     vf:trackingIdentifier "hey, this changed!" ;    #wrong!
     vf:primaryAccountable ex:Alice ;
     vf:resourceClassifiedAs wd:Q4917 ;    
-    vf:currentLocation wd:Q1741 ;
+    vf:currentLocation wd:Q676832 ;
     vf:onhandQuantity [
         om2:hasUnit om2:kilogram ;
         om2:hasNumericalValue "30"^^xsd:int ;
@@ -84,7 +84,7 @@ ex:alicesApples2-2 a vf:EconomicResource ;
     ] ;
     vf:resourceClassifiedAs wd:Q4917 ;
     vf:trackingIdentifier "hey, this changed, too!" ;    #wrong!
-    vf:currentLocation wd:Q676832 ;
+    vf:currentLocation wd:Q1741 ;
     vf:primaryAccountable ex:Alice ;
     vf:previousState ex:alicesApples2
     . 

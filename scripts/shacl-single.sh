@@ -8,9 +8,10 @@ usage: $0 <shapes-file> <data-file> [output-directory] [expected-output-director
     1. validate it (and output a message if validation fails)
     2. makes SHACL-AF inferences (and outputs a message if there were inferences)
     3. writes the output for each file to a file suffixed with 
-       '-val.ttl' and '-inf.ttl' to [output-directory] if one is set
+       '-val.ttl' and '-inf.ttl' to [output-directory](default: ${script_path}/tmp/out) 
     4. compares the output to the expected output 
         in [expected-output-directory] if one is set
+    
 
 EOF
 }
@@ -18,6 +19,13 @@ script_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 source ${script_path}/common.sh 
 source ${script_path}/settings.sh 
+
+if $( ! ${outputToDir})
+then
+    outputToDir=true
+    outputDir=${script_path}/../tmp/out
+fi
+mkdir -p ${outputDir}
 
 valSuffix="-val.ttl"
 infSuffix="-inf.ttl"
@@ -34,6 +42,24 @@ then
     then 
         echo "comparing to data in : ${expectedOutputDir}"
     fi 
+fi
+dataFileBase=`basename $dataFile`
+okRegex='.+-ok(-.+)?\.ttl'
+failRegex='.+-fail(-.+)?\.ttl'
+expectedOk=false
+expectedFail=false
+filenameBaseExpectation=false
+if [[ `basename ${dataFile}` =~ ${okRegex} ]]
+then
+    expectedOk=true
+fi
+if [[ `basename ${dataFile}` =~ ${failRegex} ]]
+then
+    expectedFail=true
+fi
+if ($expectedOk || $expectedFail )
+then
+    filenameBaseExpectation=true
 fi
 
 redirValOut=/dev/null
@@ -56,7 +82,11 @@ fi
 
 tmpFile=$(mktemp ${script_path}/../tmp/tmp-data.XXX.ttl)
 cat ${dataFile} > ${tmpFile}
-cat `dirname ${shapesFile}`/"valueflows-and-required-ontologies.ttl" >> ${tmpFile}
+additionalValueflowsData=`dirname ${shapesFile}`/"valueflows-and-required-ontologies.ttl"
+if [[ -f ${additionalValueflowsData} ]]
+then
+    cat ${additionalValueflowsData} >> ${tmpFile}
+fi
 
 function statusColor() {
 if (${1})
@@ -128,15 +158,26 @@ compareInf=false
 if (${validateSuccess}) 
 then
     compareValMessage="`statusColorTextPink ${validateConforms} 'true' 'false'`"
+    # evaluate result based on filename (-ok- or -fail-)
+    if (${filenameBaseExpectation})
+    then
+        compareValExpected=false
+        if ($validateConforms && $expectedOk || ( ! $validateConforms && $expectedFail))
+        then
+            compareValExpected=true
+        fi
+        compareValMessage="${compareValMessage}(`statusColorText $compareValExpected 'expected' 'unexpected' `)"
+    fi
     if (${compareToExpected})
     then
+        # evaluate result based on expected file and filename
         test -f $compareValTo && compareVal=true || compareVal=false
         test ${compareVal} && cmp -s $redirValOut $compareValTo && compareValExpected=true || compareValExpected=false
         if ( ${compareVal} )
         then
-            compareValMessage="${compareValMessage} (`statusColorText $compareValExpected 'expected' 'unexpected' `)"
+            compareValMessage="${compareValMessage} output: `statusColorText $compareValExpected 'expected' 'unexpected' `"
         else 
-            compareValMessage="${compareValMessage} (${YELLOW}no spec${NC})"
+            compareValMessage="${compareValMessage} (${YELLOW}no output spec${NC})"
         fi
     fi
 else 
@@ -199,13 +240,23 @@ compareVal=false
 if (${validateSuccess}) 
 then
     compareValMessage="`statusColorTextPink ${validateConforms} 'true' 'false'`"
+    # evaluate result based on filename (-ok- or -fail-)
+    if (${filenameBaseExpectation})
+    then
+        compareValExpected=false
+        if ($validateConforms && $expectedOk || ( ! $validateConforms && $expectedFail))
+        then
+            compareValExpected=true
+        fi
+        compareValMessage="${compareValMessage}(`statusColorText $compareValExpected 'expected' 'unexpected' `)"
+    fi
     if (${compareToExpected})
     then
         test -f $compareValTo && compareVal=true || compareVal=false
         test ${compareVal} && cmp -s $redirInfValOut $compareValTo && compareValExpected=true || compareValExpected=false
         if ( ${compareVal} )
         then
-            compareValMessage="${compareValMessage} (`statusColorText $compareValExpected 'expected' 'unexpected' `)"
+            compareValMessage="${compareValMessage} output: `statusColorText $compareValExpected 'expected' 'unexpected' `"
         else 
             compareValMessage="${compareValMessage} (${YELLOW}no spec${NC})"
         fi

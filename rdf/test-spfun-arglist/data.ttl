@@ -1,0 +1,7 @@
+@prefix ex: <http://example.org/ns#> .
+
+ex:node a ex:Example .
+
+ex:node2 a ex:Example2;
+    ex:prop ex:obj .
+ex:obj ex:prop2 ex:obj2 .

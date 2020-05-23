@@ -9,7 +9,6 @@
 @prefix om2: <http://www.ontology-of-units-of-measure.org/resource/om-2/> .
 @prefix wd: <http://www.wikidata.org/entity/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
-
 ex:Alice
     a foaf:Agent .
 
@@ -30,12 +29,13 @@ ex:alicesApples1 a vf:EconomicResource ;
     vf:primaryAccountable ex:Alice ;
     . 
 
-#ex:aa2 vf:previousState ex:alicesApples1 .
 
-ex:bobsApples1 
+ex:alicesApples2 
     a vf:EconomicResource ;
     vf:trackingIdentifier "lot-alice-apples-2018-10-11" ;
     vf:primaryAccountable ex:Bob ;
+    vf:currentLocation wd:Q1741 ;
+    vf:resourceClassifiedAs wd:Q4917 ;    
     vf:onhandQuantity [
         om2:hasUnit om2:kilogram ;
         om2:hasNumericalValue "0"^^xsd:int ;
@@ -45,11 +45,14 @@ ex:bobsApples1
 ex:event1 
     a vf:EconomicEvent ;
     vf:action vf:move ;
+    vf:atLocation wd:Q1741 ;
     vf:provider ex:Alice ;
-    vf:receiver ex:Bob ;
+    vf:receiver ex:Alice ;
     vf:resourceInventoriedAs ex:alicesApples1 ;
-    vf:toResourceInventoriedAs ex:bobsApples1 ;
+    vf:toResourceInventoriedAs ex:alicesApples2 ;
     vf:resourceQuantity [
         om2:hasUnit om2:kilogram ;
         om2:hasNumericalValue "30"^^xsd:int ;
     ] .
+
+# Effects of ex:event1

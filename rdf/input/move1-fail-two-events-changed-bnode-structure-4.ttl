@@ -78,7 +78,10 @@ ex:bobsApples2
     ex:someProperty [
         ex:some [
             ex:funny [
-                ex:structure "there" ;   # invalid change
+                ex:structure "here" ;  
+                ex:added[                    # invalid change
+                    ex:something "at a deeper level"
+                ]
             ]
         ]
     ]

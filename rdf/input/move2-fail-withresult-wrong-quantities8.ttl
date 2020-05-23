@@ -53,7 +53,7 @@ ex:event1
     vf:toResourceInventoriedAs ex:alicesApples2 ;
     vf:resourceQuantity [
         om2:hasUnit om2:kilogram ;
-        om2:hasNumericalValue "30"^^xsd:int ;
+        om2:hasNumericalValue "330"^^xsd:int ;
     ] .
 
 # Effects of ex:event1
@@ -65,12 +65,12 @@ ex:alicesApples1-2
     vf:currentLocation wd:Q676832 ;
     vf:accountingQuantity [
         om2:hasUnit om2:kilogram ;
-        om2:hasNumericalValue "230"^^xsd:int ;
+        om2:hasNumericalValue "230"^^xsd:int ; 
     ] ;
     vf:onhandQuantity [
         om2:hasUnit om2:kilogram ;
-        om2:hasNumericalValue "0"^^xsd:int ;#wrong!
-    ] ;   
+        om2:hasNumericalValue "-100"^^xsd:int ;
+    ] ;    
     vf:previousState ex:alicesApples1 ;
     .
 
@@ -83,6 +83,6 @@ ex:alicesApples2-2 a vf:EconomicResource ;
     vf:previousState ex:alicesApples2 ;
     vf:onhandQuantity [
         om2:hasUnit om2:kilogram ;
-        om2:hasNumericalValue "30"^^xsd:int ;
+        om2:hasNumericalValue "330"^^xsd:int ;
     ]
     . 

@@ -69,7 +69,7 @@ ex:alicesApples1-2
     ] ;
     vf:onhandQuantity [
         om2:hasUnit om2:kilogram ;
-        om2:hasNumericalValue "0"^^xsd:int ;#wrong!
+        om2:hasNumericalValue "200"^^xsd:int ;
     ] ;   
     vf:previousState ex:alicesApples1 ;
     .
@@ -83,6 +83,6 @@ ex:alicesApples2-2 a vf:EconomicResource ;
     vf:previousState ex:alicesApples2 ;
     vf:onhandQuantity [
         om2:hasUnit om2:kilogram ;
-        om2:hasNumericalValue "30"^^xsd:int ;
+        om2:hasNumericalValue "0"^^xsd:int ;#wrong!
     ]
     . 

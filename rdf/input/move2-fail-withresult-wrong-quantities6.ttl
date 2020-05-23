@@ -65,11 +65,11 @@ ex:alicesApples1-2
     vf:currentLocation wd:Q676832 ;
     vf:accountingQuantity [
         om2:hasUnit om2:kilogram ;
-        om2:hasNumericalValue "230"^^xsd:int ;
+        om2:hasNumericalValue "200"^^xsd:int ;  #wrong!
     ] ;
     vf:onhandQuantity [
         om2:hasUnit om2:kilogram ;
-        om2:hasNumericalValue "0"^^xsd:int ;#wrong!
+        om2:hasNumericalValue "230"^^xsd:int ;
     ] ;   
     vf:previousState ex:alicesApples1 ;
     .
