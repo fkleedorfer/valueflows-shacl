@@ -24,17 +24,17 @@
 @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
 
 <urn:wonvf:ef10bc26f50280ec594d912ad89ca3b566c8c6f5f1ee97bb67f2400b1783a189>
-        a                        vf:EconomicResource ;
-        ex:someProperty          [ ex:some  [ ex:funny  [ ex:added      [ ex:something  "at a deeper level" ] ;
-                                                          ex:structure  "here"
-                                                        ] ] ] ;
-        vf:accountingQuantity    [ om2:hasNumericalValue  "100"^^xsd:int ;
-                                   om2:hasUnit            om2:kilogram
-                                 ] ;
-        vf:currentLocation       wd:Q676832 ;
-        vf:onhandQuantity        [ om2:hasNumericalValue  "100"^^xsd:int ;
-                                   om2:hasUnit            om2:kilogram
-                                 ] ;
-        vf:previousState         ex:bobsApples2 ;
-        vf:primaryAccountable    ex:Bob ;
-        vf:resourceClassifiedAs  wd:Q4917 .
+        a                      vf:EconomicResource ;
+        ex:someProperty        [ ex:some  [ ex:funny  [ ex:added      [ ex:something  "at a deeper level" ] ;
+                                                        ex:structure  "here"
+                                                      ] ] ] ;
+        vf:accountingQuantity  [ om2:hasNumericalValue  "100"^^xsd:int ;
+                                 om2:hasUnit            om2:kilogram
+                               ] ;
+        vf:classifiedAs        wd:Q4917 ;
+        vf:currentLocation     wd:Q676832 ;
+        vf:onhandQuantity      [ om2:hasNumericalValue  "100"^^xsd:int ;
+                                 om2:hasUnit            om2:kilogram
+                               ] ;
+        vf:previousState       ex:bobsApples2 ;
+        vf:primaryAccountable  ex:Bob .

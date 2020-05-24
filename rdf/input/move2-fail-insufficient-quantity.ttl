@@ -25,7 +25,7 @@ ex:alicesApples1 a vf:EconomicResource ;
         om2:hasUnit om2:kilogram ;
         om2:hasNumericalValue "29"^^xsd:int ;
     ] ;
-    vf:resourceClassifiedAs wd:Q4917 ;
+    vf:classifiedAs wd:Q4917 ;
     vf:currentLocation wd:Q676832 ;
     vf:primaryAccountable ex:Alice ;
     . 

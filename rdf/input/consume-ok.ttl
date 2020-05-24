@@ -24,30 +24,24 @@ ex:bobsApples1
     vf:onhandQuantity [
         om2:hasUnit om2:kilogram ;
         om2:hasNumericalValue "100"^^xsd:int ;
+    ] ;
+    vf:accountingQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "100"^^xsd:int ;
     ]
+
     .
 
 ex:event1
     a vf:EconomicEvent ;
-    vf:action vf:move ;
+    vf:action vf:consume ;
     vf:provider ex:Bob ;
     vf:receiver ex:Bob ;
     vf:resourceInventoriedAs ex:bobsApples1 ;
-    vf:atLocation wd:Q1741 ;
+    vf:resourceClassifiedAs wd:Q4917 ;
+    vf:atLocation wd:Q676832 ;
     vf:resourceQuantity [
         om2:hasUnit om2:kilogram ;
-        om2:hasNumericalValue "100"^^xsd:int ;
+        om2:hasNumericalValue "50"^^xsd:int ;
     ] ; 
-    .
-
-ex:bobsApples2
-    a vf:EconomicResource ;
-    vf:previousState ex:bobsApples1 ;
-    vf:primaryAccountable ex:Bob ;
-    vf:classifiedAs wd:Q4917 ;    
-    vf:currentLocation wd:Q1741 ;
-    vf:onhandQuantity [
-        om2:hasUnit om2:kilogram ;
-        om2:hasNumericalValue "100"^^xsd:int ;
-    ]
     .

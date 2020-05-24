@@ -27,19 +27,19 @@
   sh:conforms  false ;
   sh:result    [ a                             sh:ValidationResult ;
                  sh:focusNode                  ex:event1 ;
+                 sh:resultMessage              "Value has shape _:f13fbe41ef2c46eb21fa35c366b1a031" ;
+                 sh:resultSeverity             sh:Violation ;
+                 sh:sourceConstraintComponent  sh:NotConstraintComponent ;
+                 sh:sourceShape                vfs:EventShape_move_toResource ;
+                 sh:value                      ex:event1
+               ] ;
+  sh:result    [ a                             sh:ValidationResult ;
+                 sh:focusNode                  ex:event1 ;
                  sh:resultMessage              "Event http://example.org/ns#event1, / https://w3id.org/valueflows#atLocation must be equal to its https://w3id.org/valueflows#toResourceInventoriedAs resource http://example.org/ns#alicesApples2, / https://w3id.org/valueflows#currentLocation but the values are http://www.wikidata.org/entity/Q676832 and http://www.wikidata.org/entity/Q1741" ;
                  sh:resultPath                 vf:atLocation ;
                  sh:resultSeverity             sh:Violation ;
                  sh:sourceConstraintComponent  vfs:SameAsResourcePropertyConstraint ;
                  sh:sourceShape                [] 
-               ] ;
-  sh:result    [ a                             sh:ValidationResult ;
-                 sh:focusNode                  ex:event1 ;
-                 sh:resultMessage              "Value has shape _:ad695cafe845705a59d6ac1480d880f3" ;
-                 sh:resultSeverity             sh:Violation ;
-                 sh:sourceConstraintComponent  sh:NotConstraintComponent ;
-                 sh:sourceShape                vfs:EventShape_move_toResource ;
-                 sh:value                      ex:event1
                ] ;
   sh:result    [ a                             sh:ValidationResult ;
                  sh:focusNode                  ex:event1 ;

@@ -18,23 +18,11 @@
 @prefix sh:    <http://www.w3.org/ns/shacl#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix time:  <http://www.w3.org/2006/time#> .
-@prefix swa:   <http://topbraid.org/swa#> .
 @prefix dash:  <http://datashapes.org/dash#> .
+@prefix swa:   <http://topbraid.org/swa#> .
 @prefix vs:    <http://www.w3.org/2003/06/sw-vocab-status/ns#> .
 @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
 
-<urn:wonvf:8b43c7ecfad5fe2a4f4dd89b22f24e4e2767640b82a50ffb8c73e5c3fab94f15>
-        a                      vf:EconomicResource ;
-        vf:accountingQuantity  [ om2:hasNumericalValue  "230"^^xsd:int ;
-                                 om2:hasUnit            om2:kilogram
-                               ] ;
-        vf:classifiedAs        wd:Q4917 ;
-        vf:currentLocation     wd:Q676832 ;
-        vf:previousState       ex:alicesApples1 ;
-        vf:primaryAccountable  ex:Alice .
-
-<urn:wonvf:66d391bbde3a62099f90334b82cb5e99e23199ed645bfcc4bc3563be388e96e0>
-        a                      vf:EconomicResource ;
-        vf:previousState       ex:alicesApples2 ;
-        vf:primaryAccountable  ex:Alice ;
-        vf:trackingIdentifier  "lot-alice-apples-2018-10-11" .
+[ a            sh:ValidationReport ;
+  sh:conforms  true
+] .

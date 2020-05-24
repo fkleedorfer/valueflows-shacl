@@ -19,7 +19,7 @@ ex:Bob
 ex:bobsApples2
     a vf:EconomicResource ;
     vf:primaryAccountable ex:Bob ;
-    vf:resourceClassifiedAs wd:Q4917 ;    
+    vf:classifiedAs wd:Q4917 ;    
     vf:currentLocation wd:Q676832 ;
     vf:onhandQuantity [
         om2:hasUnit om2:kilogram ;

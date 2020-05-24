@@ -27,7 +27,7 @@
   sh:conforms  false ;
   sh:result    [ a                             sh:ValidationResult ;
                  sh:focusNode                  ex:event1 ;
-                 sh:resultMessage              "Value has shape _:6b7004211d9d8d869e3e74bd23eacce9" ;
+                 sh:resultMessage              "Value has shape _:b644c6fcc60ffb73c545c7d87d94b305" ;
                  sh:resultSeverity             sh:Violation ;
                  sh:sourceConstraintComponent  sh:NotConstraintComponent ;
                  sh:sourceShape                vfs:EventShape_move_toResource ;
