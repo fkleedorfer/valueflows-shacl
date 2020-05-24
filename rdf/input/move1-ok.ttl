@@ -6,7 +6,7 @@
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix vf:    <https://w3id.org/valueflows#> .
 @prefix om2: <http://www.ontology-of-units-of-measure.org/resource/om-2/> .
-@prefix wd: <www.wikidata.org/entity/> .
+@prefix wd: <http://www.wikidata.org/entity/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 
 # move with only one resource
@@ -19,6 +19,7 @@ ex:Bob
 ex:bobsApples2
     a vf:EconomicResource ;
     vf:primaryAccountable ex:Bob ;
+    vf:resourceClassifiedAs wd:Q4917 ;    
     vf:currentLocation wd:Q676832 ;
     vf:onhandQuantity [
         om2:hasUnit om2:kilogram ;
@@ -34,7 +35,6 @@ ex:event2
     vf:resourceInventoriedAs ex:bobsApples2 ;
     vf:atLocation wd:Q1741 ;
     vf:resourceQuantity [
-        # TODO ASK: why would I need a quantity here? Did @fosterlynn say, all events have quantities? check!
         om2:hasUnit om2:kilogram ;
         om2:hasNumericalValue "100"^^xsd:int ;
     ] ; 

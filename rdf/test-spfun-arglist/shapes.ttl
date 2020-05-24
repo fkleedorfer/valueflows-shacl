@@ -1,0 +1,189 @@
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix ex: <http://example.org/ns#> .
+@prefix : <https://w3id.org/valueflows-shacl/test#> .
+
+:fun
+    a sh:SPARQLFunction ;
+    sh:parameter [
+        sh:order 1 ;
+        sh:path :one ;
+    ];
+    sh:parameter [
+        sh:order 2 ;
+        sh:path :two ;
+    ];
+    sh:parameter [
+        sh:order 3 ;
+        sh:path :three ;
+    ];
+    sh:parameter [
+        sh:order 4 ;
+        sh:path :four ;
+    ] ;
+    sh:select """
+        SELECT (1 IN (?one, ?two, ?three, ?four) as ?result) 
+        WHERE {}
+    """ ;
+    .
+
+:fun2
+    a sh:SPARQLFunction ;
+    sh:parameter [
+        sh:order 1 ;
+        sh:path :one ;
+    ];
+    sh:select """
+        SELECT (CONCAT("you said: ", ?one) as ?result) 
+        WHERE {}
+    """ ;
+    .
+# Concatenates the parameters into a list separated by ', '.
+# Compatible with SPARQL `IN()` or `NOT IN()` 
+# Max number of params: 10
+:buildSparqlList
+    a sh:SPARQLFunction ;
+    sh:returnType xsd:string ;
+    sh:parameter [
+        sh:order 1 ;
+        sh:path :arg1 ;
+        sh:optional true ;
+    ];
+    sh:parameter [
+        sh:order 2 ;
+        sh:path :arg2 ;
+        sh:optional true ;
+    ];
+    sh:parameter [
+        sh:order 3 ;
+        sh:path :arg3 ;
+        sh:optional true ;
+    ];
+    sh:parameter [
+        sh:order 4 ;
+        sh:path :arg4 ;
+        sh:optional true ;
+    ];
+    sh:parameter [
+        sh:order 5 ;
+        sh:path :arg5 ;
+        sh:optional true ;
+    ];
+    sh:parameter [
+        sh:order 6 ;
+        sh:path :arg6 ;
+        sh:optional true ;
+    ];
+    sh:parameter [
+        sh:order 7 ;
+        sh:path :arg7 ;
+        sh:optional true ;
+    ];
+    sh:parameter [
+        sh:order 8 ;
+        sh:path :arg8 ;
+        sh:optional true ;
+    ];
+    sh:parameter [
+        sh:order 9 ;
+        sh:path :arg9 ;
+        sh:optional true ;
+    ];
+    sh:parameter [
+        sh:order 10 ;
+        sh:path :arg10 ;
+        sh:optional true ;
+    ];
+    sh:select """
+        SELECT (GROUP_CONCAT(?elements; SEPARATOR=", ") as ?result) 
+        WHERE {
+            {
+                BIND("all" as ?group)
+                BIND(?arg1 as ?elements)
+                FILTER(BOUND(?elements))
+            } UNION {
+                BIND("all" as ?group)
+                BIND(?arg2 as ?elements)
+                FILTER(BOUND(?elements))
+            } UNION {
+                BIND("all" as ?group)
+                BIND(?arg3 as ?elements)
+                FILTER(BOUND(?elements))
+            } UNION {
+                BIND("all" as ?group)
+                BIND(?arg4 as ?elements)
+                FILTER(BOUND(?elements))
+            } UNION {
+                BIND("all" as ?group)
+                BIND(?arg5 as ?elements)
+                FILTER(BOUND(?elements))
+            } UNION {
+                BIND("all" as ?group)
+                BIND(?arg6 as ?elements)
+                FILTER(BOUND(?elements))
+            } UNION {
+                BIND("all" as ?group)
+                BIND(?arg7 as ?elements)
+                FILTER(BOUND(?elements))
+            } UNION {
+                BIND("all" as ?group)
+                BIND(?arg8 as ?elements)
+                FILTER(BOUND(?elements))
+            } UNION {
+                BIND("all" as ?group)
+                BIND(?arg9 as ?elements)
+                FILTER(BOUND(?elements))
+            } UNION {
+                BIND("all" as ?group)
+                BIND(?arg10 as ?elements)
+                FILTER(BOUND(?elements))
+            }
+        } GROUP BY (?group)
+    """ ;
+    .
+
+
+:inf
+    a sh:NodeShape ;
+    sh:targetClass ex:Example ;
+    sh:rule [
+        a sh:TripleRule ;
+        sh:subject sh:this ;
+        sh:predicate ex:is ;
+        sh:object [ :fun ( "ha" <h:b> 1 3) ] ;
+    ] ;
+    sh:rule [
+        a sh:TripleRule ;
+        sh:subject sh:this ;
+        sh:predicate ex:is ;
+          sh:object [ :fun2 ( [ sh:union ( "hahah" "fun" ) ]  ) ] ;
+    ] ;
+     sh:rule [
+        a sh:TripleRule ;
+        sh:subject sh:this ;
+        sh:predicate ex:is ;
+          sh:object [ :buildSparqlList ( "a" "b" "c" 4 5 6 7 8 9 ) ] ;
+    ] ;
+     sh:rule [
+        a sh:TripleRule ;
+        sh:subject sh:this ;
+        sh:predicate ex:is ;
+          sh:object [ :buildSparqlList (1) ] ;
+    ] ;
+    .   
+
+:anyProp
+    a sh:NodeShape ;
+    sh:targetClass ex:Example2 ;
+    sh:property [
+        sh:path ex:prop ;
+        sh:property [
+            sh:path ex:prop2 ;
+            sh:minCount 1 ;
+        ] ;
+        sh:minCount 1 ;
+    ] .
+    

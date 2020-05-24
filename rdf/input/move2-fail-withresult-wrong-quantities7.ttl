@@ -1,0 +1,84 @@
+
+@prefix ex: <http://example.org/ns#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix vf:    <https://w3id.org/valueflows#> .
+@prefix om2: <http://www.ontology-of-units-of-measure.org/resource/om-2/> .
+@prefix wd: <http://www.wikidata.org/entity/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+ex:Alice
+    a foaf:Agent .
+
+ex:Bob
+    a foaf:Agent .
+
+ex:alicesApples1 a vf:EconomicResource ;
+    vf:accountingQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "230"^^xsd:int ;
+    ] ;
+    vf:onhandQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "230"^^xsd:int ;
+    ] ;
+    vf:resourceClassifiedAs wd:Q4917 ;
+    vf:currentLocation wd:Q676832 ;
+    vf:primaryAccountable ex:Alice ;
+    . 
+
+
+ex:alicesApples2 
+    a vf:EconomicResource ;
+    vf:trackingIdentifier "lot-alice-apples-2018-10-11" ;
+    vf:primaryAccountable ex:Alice ;
+    vf:currentLocation wd:Q1741 ;
+    vf:resourceClassifiedAs wd:Q4917 ;    
+    vf:onhandQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "0"^^xsd:int ;
+    ]
+    .
+
+ex:event1 
+    a vf:EconomicEvent ;
+    vf:action vf:move ;
+    vf:atLocation wd:Q1741 ;
+    vf:provider ex:Alice ;
+    vf:receiver ex:Alice ;
+    vf:resourceInventoriedAs ex:alicesApples1 ;
+    vf:toResourceInventoriedAs ex:alicesApples2 ;
+    vf:resourceQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "30"^^xsd:int ;
+    ] .
+
+# Effects of ex:event1
+
+ex:alicesApples1-2
+    a vf:EconomicResource ;
+    vf:primaryAccountable ex:Alice ;
+    vf:resourceClassifiedAs wd:Q4917 ;    
+    vf:currentLocation wd:Q676832 ;
+    vf:accountingQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "230"^^xsd:int ; 
+    ] ;
+    vf:previousState ex:alicesApples1 ;
+    .
+
+
+ex:alicesApples2-2 a vf:EconomicResource ;
+    vf:trackingIdentifier "lot-alice-apples-2018-10-11" ;
+    vf:resourceClassifiedAs wd:Q4917 ;
+    vf:currentLocation wd:Q1741 ;
+    vf:primaryAccountable ex:Alice ;
+    vf:previousState ex:alicesApples2 ;
+    vf:onhandQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "30"^^xsd:int ;
+    ]
+    . 
