@@ -27,7 +27,7 @@
   sh:conforms  false ;
   sh:result    [ a                             sh:ValidationResult ;
                  sh:focusNode                  ex:event1 ;
-                 sh:resultMessage              "Both or neither resources of a 'move2' event must have the same vf:primaryAccountable, but this is not the case" , "Expression does not evaluate to true" ;
+                 sh:resultMessage              "Both or neither resources of a 'move2' event must have the same vf:primaryAccountable, but they" , "Expression does not evaluate to true" ;
                  sh:resultSeverity             sh:Violation ;
                  sh:sourceConstraint           []  ;
                  sh:sourceConstraintComponent  sh:ExpressionConstraintComponent ;
@@ -36,7 +36,7 @@
                ] ;
   sh:result    [ a                             sh:ValidationResult ;
                  sh:focusNode                  ex:event1 ;
-                 sh:resultMessage              "Both or neither resources of a 'move2' event must have the same vf:primaryAccountable, but they" , "Expression does not evaluate to true" ;
+                 sh:resultMessage              "Both or neither resources of a 'move2' event must have the same vf:primaryAccountable, but this is not the case" , "Expression does not evaluate to true" ;
                  sh:resultSeverity             sh:Violation ;
                  sh:sourceConstraint           []  ;
                  sh:sourceConstraintComponent  sh:ExpressionConstraintComponent ;

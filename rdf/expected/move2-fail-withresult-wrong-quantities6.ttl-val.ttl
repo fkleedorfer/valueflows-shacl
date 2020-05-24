@@ -27,19 +27,19 @@
   sh:conforms  false ;
   sh:result    [ a                             sh:ValidationResult ;
                  sh:focusNode                  ex:event1 ;
+                 sh:resultMessage              "Event http://example.org/ns#event1 must decrease its resource http://example.org/ns#alicesApples1 / https://w3id.org/valueflows#onhandQuantity value by 30, from 230 to 200, but the actual next value is 230." ;
+                 sh:resultPath                 vf:resourceQuantity ;
+                 sh:resultSeverity             sh:Violation ;
+                 sh:sourceConstraintComponent  vfs:EventDecreasesResourcePropertyConstraint ;
+                 sh:sourceShape                [] 
+               ] ;
+  sh:result    [ a                             sh:ValidationResult ;
+                 sh:focusNode                  ex:event1 ;
                  sh:resultMessage              "The only property allowed to be affected by a 'move2' event is `vf:onhandQuantity`, but others are, too" , "Expression does not evaluate to true" ;
                  sh:resultSeverity             sh:Violation ;
                  sh:sourceConstraint           []  ;
                  sh:sourceConstraintComponent  sh:ExpressionConstraintComponent ;
                  sh:sourceShape                vfs:EventShape_move_toResource ;
                  sh:value                      ex:event1
-               ] ;
-  sh:result    [ a                             sh:ValidationResult ;
-                 sh:focusNode                  ex:event1 ;
-                 sh:resultMessage              "Event http://example.org/ns#event1 must decrease its resource http://example.org/ns#alicesApples1 / https://w3id.org/valueflows#onhandQuantity value by 30, from 230 to 200, but the actual next value is 230." ;
-                 sh:resultPath                 vf:resourceQuantity ;
-                 sh:resultSeverity             sh:Violation ;
-                 sh:sourceConstraintComponent  vfs:EventDecreasesResourcePropertyConstraint ;
-                 sh:sourceShape                [] 
                ]
 ] .

@@ -23,18 +23,19 @@
 @prefix vs:    <http://www.w3.org/2003/06/sw-vocab-status/ns#> .
 @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
 
-<urn:wonvf:8b43c7ecfad5fe2a4f4dd89b22f24e4e2767640b82a50ffb8c73e5c3fab94f15>
-        a                      vf:EconomicResource ;
-        vf:accountingQuantity  [ om2:hasNumericalValue  "230"^^xsd:int ;
-                                 om2:hasUnit            om2:kilogram
-                               ] ;
-        vf:classifiedAs        wd:Q4917 ;
-        vf:currentLocation     wd:Q676832 ;
-        vf:previousState       ex:alicesApples1 ;
-        vf:primaryAccountable  ex:Alice .
+ex:event1  vf:resourceInventoriedAs  _:b0 .
 
-<urn:wonvf:66d391bbde3a62099f90334b82cb5e99e23199ed645bfcc4bc3563be388e96e0>
-        a                      vf:EconomicResource ;
-        vf:previousState       ex:alicesApples2 ;
-        vf:primaryAccountable  ex:Alice ;
-        vf:trackingIdentifier  "lot-alice-apples-2018-10-11" .
+_:b0    a       vf:EconomicResource .
+
+<urn:wonvf:9680d205e2becebef038f91c460aa1e0d325f70db054f3040a6b458699267cee>
+        vf:accountingQuantity    [ om2:hasNumericalValue  "100"^^xsd:int ;
+                                   om2:hasUnit            om2:kilogram
+                                 ] ;
+        vf:currentLocation       wd:Q1741 ;
+        vf:custodian             ex:Bob ;
+        vf:onhandQuantity        [ om2:hasNumericalValue  "100"^^xsd:int ;
+                                   om2:hasUnit            om2:kilogram
+                                 ] ;
+        vf:previousState         _:b0 ;
+        vf:primaryAccountable    ex:Bob ;
+        vf:resourceClassifiedAs  wd:Q4917 .
