@@ -1,5 +1,4 @@
 
-
 @prefix vf:    <https://w3id.org/valueflows#> .
 @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix owl:   <http://www.w3.org/2002/07/owl#> .
@@ -15,6 +14,12 @@
 @prefix dtype: <http://www.linkedmodel.org/schema/dtype#> .
 @prefix dfc:   <http://www.virtual-assembly.org/DataFoodConsortium/BusinessOntology#> .
 @prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+
+#################################################################
+#                 EXTENSIONS/ADAPTATIONS
+#################################################################
+
+vf:create a vf:Action .
 
 
 <https://w3id.org/valueflows/> a owl:Ontology;

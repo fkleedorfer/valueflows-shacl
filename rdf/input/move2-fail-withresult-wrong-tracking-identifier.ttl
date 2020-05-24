@@ -25,7 +25,7 @@ ex:alicesApples1 a vf:EconomicResource ;
         om2:hasUnit om2:kilogram ;
         om2:hasNumericalValue "230"^^xsd:int ;
     ] ;
-    vf:resourceClassifiedAs wd:Q4917 ;
+    vf:classifiedAs wd:Q4917 ;
     vf:currentLocation wd:Q676832 ;
     vf:primaryAccountable ex:Alice ;
     vf:trackingIdentifier "lot-alice-apples" ;
@@ -36,7 +36,7 @@ ex:alicesApples2
     a vf:EconomicResource ;
     vf:trackingIdentifier "lot-alice-apples-2018-10-11" ;
     vf:primaryAccountable ex:Alice ;
-    vf:resourceClassifiedAs wd:Q4917 ;    
+    vf:classifiedAs wd:Q4917 ;    
     vf:currentLocation wd:Q1741 ;
     vf:onhandQuantity [
         om2:hasUnit om2:kilogram ;
@@ -63,7 +63,7 @@ ex:alicesApples1-2
     a vf:EconomicResource ;
     vf:trackingIdentifier "hey, this changed!" ;    #wrong!
     vf:primaryAccountable ex:Alice ;
-    vf:resourceClassifiedAs wd:Q4917 ;    
+    vf:classifiedAs wd:Q4917 ;    
     vf:currentLocation wd:Q676832 ;
     vf:onhandQuantity [
         om2:hasUnit om2:kilogram ;
@@ -82,7 +82,7 @@ ex:alicesApples2-2 a vf:EconomicResource ;
         om2:hasUnit om2:kilogram ;
         om2:hasNumericalValue "200"^^xsd:int ;
     ] ;
-    vf:resourceClassifiedAs wd:Q4917 ;
+    vf:classifiedAs wd:Q4917 ;
     vf:trackingIdentifier "hey, this changed, too!" ;    #wrong!
     vf:currentLocation wd:Q1741 ;
     vf:primaryAccountable ex:Alice ;

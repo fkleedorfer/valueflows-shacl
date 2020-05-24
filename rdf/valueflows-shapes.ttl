@@ -62,6 +62,7 @@ vf:
         sh:property :ResourceInventoriedAsShape ;
         sh:property :ToResourceInventoriedAsShape ;
         sh:property :ResourceQuantityShape ;
+        sh:property :ResourceClassifiedAsShape ;
         
         .
 
@@ -70,7 +71,7 @@ vf:
         sh:targetClass  vf:EconomicResource ;
         sh:property     :AccountingQuantityShape ;
         sh:property     :OnhandQuantityShape ;
-        sh:property     :ResourceClassifiedAsShape ;
+        sh:property     :ClassifiedAsShape ;
         sh:property     :TrackingIdentifierShape ;
         sh:property     :ConformsToShape ;
         sh:property     :ContainedInShape ;
@@ -119,6 +120,14 @@ vf:
         a               sh:PropertyShape ;
         sh:path         vf:resourceClassifiedAs ;
         sh:nodeKind     sh:IRI ;        
+        sh:maxCount     1 ;
+        .
+
+:ClassifiedAsShape
+        a               sh:PropertyShape ;
+        sh:path         vf:classifiedAs ;
+        sh:nodeKind     sh:IRI ;        
+        sh:maxCount     1 ;        
         .
 
 :AccountingQuantityShape 
@@ -460,6 +469,40 @@ fn:allBound4
     """;
     .
 
+fn:greaterThan
+    a sh:SPARQLFunction ;
+    sh:parameter [
+        sh:path :op1 ;
+        sh:optional false ;
+        sh:nodeKind sh:Literal ;
+    ] ;
+    sh:parameter [
+        sh:path :op2 ;
+        sh:optional false ;
+        sh:nodeKind sh:Literal ;
+    ] ;
+    sh:select """
+        SELECT ( $op1 > $op2 as ?result )
+        WHERE {}
+    """;
+    .
+
+fn:equals
+    a sh:SPARQLFunction ;
+    sh:parameter [
+        sh:path :op1 ;
+        sh:optional false ;
+    ] ;
+    sh:parameter [
+        sh:path :op2 ;
+        sh:optional false ;
+    ] ;
+    sh:select """
+        SELECT ( $op1 = $op2 as ?result )
+        WHERE {}
+    """;
+    .    
+
 fn:or 
     a sh:SPARQLFunction ;
     sh:parameter [
@@ -747,42 +790,6 @@ fn:deepPathEquals4
     .
  
 
-# Effect of a current `move` action that has a 
-#    `vf:resourceInventoriedAs` and NO
-#    `vf:toResourceInventoriedAs` :
-# 
-# - It generates one new resource states for `resource`
-# - It copies all old values but changes the location to the event's location
-#
-# Note: there are problems with finding a boundary for the query so it can recurse in the star-shaped 
-#       environment of the resource, but it does not go to far. 
-
-
-fn:newNodeURI 
-        a           sh:SPARQLFunction ;
-        sh:parameter [
-            sh:path :parResourceUri ;
-            sh:optional false ;
-            sh:nodeKind sh:IRI ;
-            sh:order 1 ;
-        ] ;
-        sh:parameter [
-            sh:path :parEventUri ;
-            sh:optional false ;
-            sh:nodeKind sh:IRI ;
-            sh:order 2 ;
-        ] ;
-        sh:prefixes vf: ;
-        sh:select """
-            SELECT
-            (IRI(CONCAT("urn:wonvf:",
-                SHA256(CONCAT(STR(?parResourceUri), 
-                " ", 
-                STR(?parEventUri))))) 
-                as ?result) 
-            WHERE {}
-        """;
-        .
 
 
 fn:safeStr
@@ -822,6 +829,47 @@ fn:safeStr
 ###############################################################################
 #   Domain-specific helper functions
 ###############################################################################
+
+fn:newNodeURI 
+        a           sh:SPARQLFunction ;
+        sh:parameter [
+            sh:path :parEventUri ;
+            sh:optional false ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+        ] ;        
+        sh:parameter [
+            rdfs:comment "This parameter is optional as in the case of a 'create' event there is no resource to use for generating the next state's URI" ;
+            sh:path :parResourceUri ;
+            sh:optional true ;
+            sh:nodeKind sh:IRI ;
+            sh:order 2 ;
+        ] ;
+        sh:prefixes vf: ;
+        sh:select """
+            SELECT
+                (
+                    IRI(
+                        CONCAT(
+                            "urn:wonvf:",
+                            SHA256(
+                                CONCAT(
+                                    IF (
+                                        BOUND(?parResourceUri) && ISIRI(?parResourceUri),
+                                        STR(?parResourceUri),
+                                        "[no-resource]"  
+                                    ), 
+                                    " ", 
+                                    STR(?parEventUri)
+                                )
+                            )
+                        )
+                    )    
+                    as ?result
+                ) 
+            WHERE {}
+        """;
+        .
 
 :affectsNoResourcePropertiesExcept
     a sh:SPARQLFunction ;
@@ -956,6 +1004,7 @@ fn:safeStr
 			WHERE {
 				?this   
                     a                           vf:EconomicEvent ;
+                    vf:action                   ?parAction ;
                     vf:resourceInventoriedAs    [] ;
                 .
                 FILTER NOT EXISTS {
@@ -964,6 +1013,39 @@ fn:safeStr
  			}
 			""" ;
         .
+
+# SPARQLTarget shape for selecting 
+#   - all events 
+#   - by action
+#   - that have 
+#      * neither a `vf:resourceInventoriedAs` 
+#      * nor a `vf:toResourceInventoriedAs` 
+:EventsTarget_noResource
+		a sh:SPARQLTargetType ;
+        rdfs:subClassOf sh:Target ;
+		sh:prefixes vf: ;
+        sh:parameter [
+            sh:path :parAction ;
+            sh:nodeKind sh:IRI ;
+        ] ;
+		sh:select """
+			SELECT DISTINCT ?this
+			WHERE {
+				?this   
+                    a           vf:EconomicEvent ;
+                    vf:action   ?parAction ;        
+                .
+                FILTER NOT EXISTS {
+                    ?this vf:toResourceInventoriedAs  []               
+                }
+                FILTER NOT EXISTS {
+                    ?this vf:ResourceInventoriedAs  []               
+                }
+
+ 			}
+			""" ;
+        .
+
 
 # SPARQLTarget shape for selecting 
 #   - current events 
@@ -1046,6 +1128,40 @@ fn:safeStr
                 FILTER NOT EXISTS {
                     [] vf:previousState ?res 
                 } 
+			}
+			""" ;
+        .
+
+# SPARQLTarget shape for selecting 
+#   - by action
+#   - that have 
+#      * neither a `vf:resourceInventoriedAs` 
+#      * nor a `vf:toResourceInventoriedAs` 
+# ...By definition, these events are current: the only ones allowed in this
+# shape are events that CREATE a resource. The created resource can be 
+# inferred. As soon as these triples are added to the DB, the event is no longer
+# current.
+:CurrentCreateEventsTarget
+		a sh:SPARQLTargetType ;
+        rdfs:subClassOf sh:Target ;
+		sh:prefixes vf: ;
+        sh:parameter [
+            sh:path :parAction ;
+            sh:nodeKind sh:IRI ;
+        ] ;
+		sh:select """
+			SELECT DISTINCT ?this
+			WHERE {
+				?this   
+                    a                           vf:EconomicEvent ;
+                    vf:action                   ?parAction ;
+                    .
+                FILTER NOT EXISTS {
+                    ?this vf:toResourceInventoriedAs  []               
+                }
+                FILTER NOT EXISTS {
+                    ?this vf:ResourceInventoriedAs  []               
+                }
 			}
 			""" ;
         .
@@ -1419,6 +1535,7 @@ fn:safeStr
                     ?next vf:previousState ?res .
                 }
                 OPTIONAL {
+                    ?next vf:previousState ?res .
                     ?next ?eventDecreasesResourceProperty [
                         om2:hasUnit ?unit ;
                         om2:hasNumericalValue ?nextValue
@@ -1599,12 +1716,49 @@ fn:safeStr
 #           EconomicResource to its new state when an EconomicEvent happens.
 ###############################################################################
 
+
+:RuleCreateInitialAndNextState
+    a sh:SPARQLRule ;
+    sh:prefixes vf: ;
+    sh:construct """
+        CONSTRUCT {
+            ?this vf:resourceInventoriedAs  ?initial .
+            ?next vf:previousState ?initial .
+            ?initial a vf:EconomicResource .
+        } WHERE {
+            BIND(fn:newNodeURI(?this) as ?next)
+            BIND(BNODE() as ?initial) 
+         }
+    """ ;
+    .
+
+
+
+:RuleLinkFromNextState 
+    a sh:TripleRule ;
+    sh:subject [
+        fn:newNodeURI (
+            sh:this 
+            [ sh:path vf:resourceInventoriedAs ]
+        )
+    ] ;
+    sh:predicate vf:previousState ;
+    sh:object [
+        sh:path vf:resourceInventoriedAs ;
+    ] ;
+    .
+
+
+
+
+
+
 :RuleCreateNextState
     a sh:TripleRule ;
     sh:subject [
         fn:newNodeURI (
-            [ sh:path vf:resourceInventoriedAs ]
             sh:this 
+            [ sh:path vf:resourceInventoriedAs ]
         )
     ] ;
     sh:predicate rdf:type ;
@@ -1617,8 +1771,8 @@ fn:safeStr
     a sh:TripleRule ;
     sh:subject [
         fn:newNodeURI (
-            [ sh:path vf:resourceInventoriedAs ]
             sh:this 
+            [ sh:path vf:resourceInventoriedAs ]
         )
     ] ;
     sh:predicate vf:previousState ;
@@ -1631,8 +1785,8 @@ fn:safeStr
     a sh:TripleRule ;
     sh:subject [
         fn:newNodeURI (
-            [ sh:path vf:toResourceInventoriedAs ]
             sh:this 
+            [ sh:path vf:toResourceInventoriedAs ]
         )
     ] ;
     sh:predicate rdf:type ;
@@ -1643,8 +1797,8 @@ fn:safeStr
     a sh:TripleRule ;
     sh:subject [
         fn:newNodeURI (
-            [ sh:path vf:toResourceInventoriedAs ]
             sh:this 
+            [ sh:path vf:toResourceInventoriedAs ]
         )
     ] ;
     sh:predicate vf:previousState ;
@@ -1661,8 +1815,8 @@ fn:safeStr
     a sh:TripleRule ;
     sh:subject [ 
         fn:newNodeURI ( 
-            [ sh:path vf:resourceInventoriedAs ] 
             sh:this 
+            [ sh:path vf:resourceInventoriedAs ] 
         ) ;
     ] ;
     sh:predicate vf:currentLocation ;
@@ -1679,8 +1833,8 @@ fn:safeStr
     a sh:TripleRule ;
     sh:subject [ 
         fn:newNodeURI ( 
-            [ sh:path vf:resourceInventoriedAs ] 
             sh:this 
+            [ sh:path vf:resourceInventoriedAs ] 
         ) ;
     ] ;
     sh:predicate vf:currentLocation ;
@@ -1697,8 +1851,8 @@ fn:safeStr
     a sh:TripleRule ;
     sh:subject [ 
         fn:newNodeURI ( 
-            [ sh:path vf:toResourceInventoriedAs ] 
             sh:this 
+            [ sh:path vf:toResourceInventoriedAs ] 
         ) ;
     ] ;
     sh:predicate vf:currentLocation ;
@@ -1715,8 +1869,8 @@ fn:safeStr
     a sh:TripleRule ;
     sh:subject [ 
         fn:newNodeURI ( 
-            [ sh:path vf:resourceInventoriedAs ] 
             sh:this 
+            [ sh:path vf:resourceInventoriedAs ] 
         ) ;
     ] ;
     sh:predicate vf:primaryAccountable ;
@@ -1733,8 +1887,8 @@ fn:safeStr
     a sh:TripleRule ;
     sh:subject [ 
         fn:newNodeURI ( 
-            [ sh:path vf:toResourceInventoriedAs ] 
             sh:this 
+            [ sh:path vf:toResourceInventoriedAs ] 
         ) ;
     ] ;
     sh:predicate vf:primaryAccountable ;
@@ -1742,6 +1896,43 @@ fn:safeStr
         sh:path ( vf:toResourceInventoriedAs vf:primaryAccountable );
     ] ;
 .
+
+:RuleCopyPrimaryAccountableFromEventReceiverToNextState    
+    sh:condition [
+        sh:path vf:receiver ;
+        sh:nodeKind sh:IRI;
+    ] ;
+    a sh:TripleRule ;
+    sh:subject [ 
+        fn:newNodeURI ( 
+            sh:this 
+            [ sh:path vf:resourceInventoriedAs ] 
+        ) ;
+    ] ;
+    sh:predicate vf:primaryAccountable ;
+    sh:object [
+        sh:path vf:receiver ;
+    ] ;
+    .
+
+:RuleCopyCustodianFromEventProviderToNextState    
+    sh:condition [
+        sh:path vf:receiver ;
+        sh:nodeKind sh:IRI;
+    ] ;
+    a sh:TripleRule ;
+    sh:subject [ 
+        fn:newNodeURI ( 
+            sh:this 
+            [ sh:path vf:resourceInventoriedAs ] 
+        ) ;
+    ] ;
+    sh:predicate vf:custodian ;
+    sh:object [
+        sh:path vf:provider ;
+    ] ;
+    .
+
 
 :RuleCopyOnhandQuantityToNextState
         a sh:SPARQLRule ;
@@ -1754,7 +1945,7 @@ fn:safeStr
                 ] 
             } WHERE {
                 ?this vf:resourceInventoriedAs ?res .
-                BIND(fn:newNodeURI(?res, ?this) as ?next)
+                BIND(fn:newNodeURI(?this, ?res) as ?next)
                 ?res  vf:onhandQuantity [
                     om2:hasUnit ?unit ;
                     om2:hasNumericalValue ?value
@@ -1762,7 +1953,50 @@ fn:safeStr
             }""" ;
     .
 
+:RuleCopyOnhandQuantityFromEventToNextState
+        sh:condition [
+            sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ;
+            sh:nodeKind sh:Literal;
+        ] ;
+        a sh:SPARQLRule ;
+        sh:prefixes vf: ;
+        sh:construct """
+            CONSTRUCT {
+                ?next vf:onhandQuantity [
+                    om2:hasUnit ?unit ;
+                    om2:hasNumericalValue ?value
+                ] 
+            } WHERE {
+                BIND(fn:newNodeURI(?this, ?res) as ?next)
+                ?this vf:resourceQuantity [
+                    om2:hasUnit ?unit ;
+                    om2:hasNumericalValue ?value
+                ] .  
+            }""" ;
+        .
 
+
+:RuleCopyAccountingQuantityFromEventToNextState
+        sh:condition [
+            sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ;
+            sh:nodeKind sh:Literal;
+        ] ;
+        a sh:SPARQLRule ;
+        sh:prefixes vf: ;
+        sh:construct """
+            CONSTRUCT {
+                ?next vf:accountingQuantity [
+                    om2:hasUnit ?unit ;
+                    om2:hasNumericalValue ?value
+                ] 
+            } WHERE {
+                BIND(fn:newNodeURI(?this, ?res) as ?next)
+                ?this vf:resourceQuantity [
+                    om2:hasUnit ?unit ;
+                    om2:hasNumericalValue ?value
+                ] .  
+            }""" ;
+        .
 
 :RuleCopyOnhandQuantityDecreasedByEventQuantityToNextState
         a sh:SPARQLRule ;
@@ -1775,7 +2009,7 @@ fn:safeStr
                 ] 
             } WHERE {
                 ?this vf:resourceInventoriedAs ?res .
-                BIND(fn:newNodeURI(?res, ?this) as ?next)
+                BIND(fn:newNodeURI(?this, ?res) as ?next)
                 ?res  vf:onhandQuantity [
                     om2:hasUnit ?unit ;
                     om2:hasNumericalValue ?value
@@ -1794,6 +2028,129 @@ fn:safeStr
             }""" ;
     .
 
+
+:RuleCopyAccountingQuantityDecreasedByEventQuantityToNextState
+        a sh:SPARQLRule ;
+        sh:prefixes vf: ;
+        sh:construct """
+            CONSTRUCT {
+                ?next vf:accountingQuantity [
+                    om2:hasUnit ?unit ;
+                    om2:hasNumericalValue ?newValueLiteral
+                ] 
+            } WHERE {
+                ?this vf:resourceInventoriedAs ?res .
+                BIND(fn:newNodeURI(?this, ?res) as ?next)
+                ?res  vf:accountingQuantity [
+                    om2:hasUnit ?unit ;
+                    om2:hasNumericalValue ?value
+                ] .  
+                ?this vf:resourceQuantity [
+                    om2:hasUnit ?unit ;
+                    om2:hasNumericalValue ?eventValue 
+                ] .
+                BIND (
+                    fn:getTypedLiteralForOp2(
+                        ?value, 
+                        ?eventValue, 
+                        ?value - ?eventValue) 
+                    as ?newValueLiteral
+                )
+            }""" ;
+    .
+
+    
+:RuleCopyAccountingQuantityIncreasedByEventQuantityToNextState
+        a sh:SPARQLRule ;
+        sh:prefixes vf: ;
+        sh:construct """
+            CONSTRUCT {
+                ?next vf:accountingQuantity [
+                    om2:hasUnit ?unit ;
+                    om2:hasNumericalValue ?newValueLiteral
+                ] 
+            } WHERE {
+                ?this vf:resourceInventoriedAs ?res .
+                BIND(fn:newNodeURI(?this, ?res) as ?next)
+                ?res vf:accountingQuantity [
+                    om2:hasUnit ?unit ;
+                    om2:hasNumericalValue ?value
+                ] .  
+                ?this vf:resourceQuantity [
+                    om2:hasUnit ?unit ;
+                    om2:hasNumericalValue ?eventValue 
+                ]
+                BIND (
+                    fn:getTypedLiteralForOp2(
+                        ?value, 
+                        ?eventValue, 
+                        ?value + ?eventValue) 
+                    as ?newValueLiteral
+                )
+            }""" ;
+    .
+
+:RuleCopyOnhandQuantityIncreasedByEventQuantityToNextState
+        a sh:SPARQLRule ;
+        sh:prefixes vf: ;
+        sh:construct """
+            CONSTRUCT {
+                ?next vf:onhandQuantity [
+                    om2:hasUnit ?unit ;
+                    om2:hasNumericalValue ?newValueLiteral
+                ] 
+            } WHERE {
+                ?this vf:resourceInventoriedAs ?res .
+                BIND(fn:newNodeURI(?this, ?res) as ?next)
+                ?res vf:onhandQuantity [
+                    om2:hasUnit ?unit ;
+                    om2:hasNumericalValue ?value
+                ] .  
+                ?this vf:resourceQuantity [
+                    om2:hasUnit ?unit ;
+                    om2:hasNumericalValue ?eventValue 
+                ]
+                BIND (
+                    fn:getTypedLiteralForOp2(
+                        ?value, 
+                        ?eventValue, 
+                        ?value + ?eventValue) 
+                    as ?newValueLiteral
+                )
+            }""" ;
+    .
+
+:RuleCopyOnhandQuantityIncreasedByEventQuantityToNextState_toResource
+        a sh:SPARQLRule ;
+        sh:prefixes vf: ;
+        sh:construct """
+            CONSTRUCT {
+                ?next vf:accountingQuantity [
+                    om2:hasUnit ?unit ;
+                    om2:hasNumericalValue ?newValueLiteral
+                ] 
+            } WHERE {
+                ?this vf:toResourceInventoriedAs ?res .
+                BIND(fn:newNodeURI(?this, ?res) as ?next)
+                ?res vf:accountingQuantity [
+                    om2:hasUnit ?unit ;
+                    om2:hasNumericalValue ?value
+                ] .  
+                ?this vf:resourceQuantity [
+                    om2:hasUnit ?unit ;
+                    om2:hasNumericalValue ?eventValue 
+                ]
+                BIND (
+                    fn:getTypedLiteralForOp2(
+                        ?value, 
+                        ?eventValue, 
+                        ?value + ?eventValue) 
+                    as ?newValueLiteral
+                )
+            }""" ;
+    .
+
+
 :RuleCopyOnhandQuantityIncreasedByEventQuantityToNextState_toResource
         a sh:SPARQLRule ;
         sh:prefixes vf: ;
@@ -1805,7 +2162,7 @@ fn:safeStr
                 ] 
             } WHERE {
                 ?this vf:toResourceInventoriedAs ?res .
-                BIND(fn:newNodeURI(?res, ?this) as ?next)
+                BIND(fn:newNodeURI(?this, ?res) as ?next)
                 ?res vf:onhandQuantity [
                     om2:hasUnit ?unit ;
                     om2:hasNumericalValue ?value
@@ -1835,7 +2192,7 @@ fn:safeStr
                 ] 
             } WHERE {
                 ?this vf:toResourceInventoriedAs ?res .
-                BIND(fn:newNodeURI(?res, ?this) as ?next)
+                BIND(fn:newNodeURI(?this, ?res) as ?next)
                 ?res  vf:onhandQuantity [
                     om2:hasUnit ?unit ;
                     om2:hasNumericalValue ?value
@@ -1855,7 +2212,7 @@ fn:safeStr
                 ] 
             } WHERE {
                 ?this vf:resourceInventoriedAs ?res .
-                BIND(fn:newNodeURI(?res, ?this) as ?next)
+                BIND(fn:newNodeURI(?this, ?res) as ?next)
                 ?res  vf:accountingQuantity [
                     om2:hasUnit ?unit ;
                     om2:hasNumericalValue ?value
@@ -1874,7 +2231,7 @@ fn:safeStr
                 ] 
             } WHERE {
                 ?this vf:toResourceInventoriedAs ?res .
-                BIND(fn:newNodeURI(?res, ?this) as ?next)
+                BIND(fn:newNodeURI(?this, ?res) as ?next)
                 ?res  vf:accountingQuantity [
                     om2:hasUnit ?unit ;
                     om2:hasNumericalValue ?value
@@ -1893,7 +2250,7 @@ fn:safeStr
                 ?next ?p ?o
             } WHERE {
                 ?this vf:resourceInventoriedAs ?res .
-                BIND(fn:newNodeURI(?res, ?this) as ?next)
+                BIND(fn:newNodeURI(?this, ?res) as ?next)
                 ?res  ?p ?o .
                 FILTER(!ISBLANK(?o) 
                     && ! ( ?p IN (
@@ -1920,7 +2277,7 @@ fn:safeStr
                 ?next ?p ?o
             } WHERE {
                 ?this vf:toResourceInventoriedAs ?res .
-                BIND(fn:newNodeURI(?res, ?this) as ?next)
+                BIND(fn:newNodeURI(?this, ?res) as ?next)
                 ?res  ?p ?o .
                 FILTER(!ISBLANK(?o) 
                     && ! ( ?p IN (
@@ -1935,6 +2292,36 @@ fn:safeStr
                 )
             }""" ;
     .    
+
+
+# Any resource properties that are not affected by any events
+# are copied here, by explicitly omitting the properties
+# that we know are affected by events
+:RuleCopyOtherPropertiesFromEventToNextState
+        a sh:SPARQLRule ;
+        sh:prefixes vf: ;
+        sh:construct """
+            CONSTRUCT {
+                ?next ?p ?o
+            } WHERE {
+                BIND(fn:newNodeURI(?this, ?res) as ?next)
+                ?this  ?p ?o .
+                FILTER(!ISBLANK(?o) 
+                    && ! ( ?p IN (
+                            rdf:type,
+                            vf:action,
+                            vf:atLocation,
+                            vf:eventQuantity,
+                            vf:receiver,
+                            vf:provider
+                            )
+                        )
+                )
+            }""" ;
+    .
+
+
+
 
 # Any bnode-valued resource properties that are not affected by any events
 # are copied here, by explicitly omitting the properties
@@ -1951,7 +2338,7 @@ fn:safeStr
                 ?o4 ?p5 ?o5 .
             } WHERE {
                 ?this vf:resourceInventoriedAs ?res .
-                BIND(fn:newNodeURI(?res, ?this) as ?next)
+                BIND(fn:newNodeURI(?this, ?res) as ?next)
                 ?res  ?p ?o .
                 ?o ?p2 ?o2 . # not optional - what good would an unonnected BNODE be?
                 FILTER(ISBLANK(?o) 
@@ -1993,7 +2380,7 @@ fn:safeStr
                 ?o4 ?p5 ?o5 .
             } WHERE {
                 ?this vf:toResourceInventoriedAs ?res .
-                BIND(fn:newNodeURI(?res, ?this) as ?next)
+                BIND(fn:newNodeURI(?this, ?res) as ?next)
                 ?res  ?p ?o .
                 ?o ?p2 ?o2 . # not optional - what good would an unonnected BNODE be?
                 FILTER(ISBLANK(?o) 
@@ -2001,6 +2388,52 @@ fn:safeStr
                             vf:onhandQuantity,
                             vf:accountingQuantity
                             # we do not filter vf:currentLocation in case it's a BNODE structure
+                            )
+                        )
+                )
+                OPTIONAL {
+                    FILTER (ISBLANK(?o2))
+                    ?o2 ?p3 ?o3 
+                    OPTIONAL {
+                        FILTER (ISBLANK(?o3))
+                        ?o3 ?p4 ?o4 
+                        OPTIONAL {
+                            FILTER (ISBLANK(?o3))
+                            ?o4 ?p5 ?o5 
+                    }
+                    }
+                }
+            
+            }""" ;
+    .
+
+# Any bnode-valued event properties that are not affected by any events
+# are copied here, by explicitly omitting the properties
+# that we know are affected by events
+:RuleCopyOtherBNodeStructuresFromEventToNextState 
+        a sh:SPARQLRule ;
+        sh:prefixes vf: ;
+        sh:construct """
+            CONSTRUCT {
+                ?next ?pMapped ?o .
+                ?o ?p2 ?o2 .
+                ?o2 ?p3 ?o3 .
+                ?o3 ?p4 ?o4 .
+                ?o4 ?p5 ?o5 .
+            } WHERE {
+                ?this vf:resourceInventoriedAs ?res .
+                BIND(fn:newNodeURI(?this, ?res) as ?next)
+                ?res  ?p ?o .
+                BIND(IF(?p = vf:atLocation, vf:currentLocation, ?p) as ?pMapped)
+                ?o ?p2 ?o2 . # not optional - what good would an unonnected BNODE be?
+                FILTER(ISBLANK(?o) 
+                    && ! ( ?p IN (
+                            vf:eventQuantity,
+                            vf:receiver,
+                            vf:provider,
+                            vf:action
+                            # we do not filter vf:atLocation in case it's a BNODE structure
+                            # but we have to map the name to vf:currentLocation if that is the case
                             )
                         )
                 )
@@ -2151,12 +2584,12 @@ fn:safeStr
             )
         ] ;
         sh:expression [
-            sh:message "Both or neither resources of a 'move2' event must have the same vf:resourceClassifiedAs, but this is not the case." ;
+            sh:message "Both or neither resources of a 'move2' event must have the same vf:classifiedAs, but this is not the case." ;
             fn:pathEqualsOrBothEmpty (
                 [ sh:path vf:resourceInventoriedAs ]
-                vf:resourceClassifiedAs
+                vf:classifiedAs
                 [ sh:path vf:toResourceInventoriedAs ]
-                vf:resourceClassifiedAs
+                vf:classifiedAs
             )
         ] ;
         sh:expression [
@@ -2253,7 +2686,7 @@ fn:safeStr
 ###############################################################################
 #                       Events with action `vf:produce` 
 #
-#  New resource was created in that process or an existing stock resource was
+#  (New resource was created in that process or) an existing stock resource was
 #  added to.
 #
 #  This action is the only one that can create a resource. It is not specified
@@ -2262,7 +2695,7 @@ fn:safeStr
 #  to vf:add. 
 #  The optionas are:
 #  * There is no resource prior to the event
-#       - Option A: the event references the URI of the new event via 
+#       - Option A: the event references the URI of the new resource via 
 #         `vf:resourceInventoriedAs`; the framework then generates the rest 
 #          of the data.
 #        - Option B: the event does not use `vf:resourceInventoriedAs`
@@ -2270,39 +2703,252 @@ fn:safeStr
 #          the event.
 #  * Option C: Prior to the `vf:produce` event, there MUST be a new, prepared, 
 #    empty resource already.
+#  
+#  Here, we wanted to choose option B. Reasoning: with C, there is no difference
+#  to `vf:add` and we are still left unsure how resources ever start to exist. 
+#  B allows for C as the case in which `vf:produce` is essentially `vf:add`, but 
+#  maybe somehow still different (we'll see if that turns out to be true).
+#
+#  However it turned out that many other events can create resources, and the
+#  resulting complication for verification doesn't seem to be worth it. So:
+#
+#  After some thought: We'll try to do it this way and see what we end up with:
+#  * Only a 'create' action can create a resource.
+#  * Only a 'destroy' action can cause a resource to cease to exist. (if needed)
+#  * Non-flow properties are set by an 'edit' action.
+# 
+#  Consequence: `vf:produce` cannot create a resource
+#
 ###############################################################################
 
+# Invariants for `vf:produce` actions
+# - The event must have a `vf:resourceInventoriedAs` (and it must exist)
+# - The event must have the same `vf:atLocation` as the `vf:currentLocation` of the resource
+# - The event must have a quantity > 0
+# - The event must have the same unit of measurement as the resource
+# - The event's quantity must increase the resource's next state
+# - The event's `vf:resourceClassifiedAs` must be equal to the resource's `vf:classifiedAs`
 
-# Invariants for produce actions with `vf:resourceInventoriedAs`:
-# - The event must have different `vf:atLocation` value than the resource's `vf:currentLocation` 
-# - The event must have a quantity that must be equal to the resource's quantity
-# - If the event is not current, the resource states must differ by vf:currentLocation
-:EventShape_move
+:EventShape_produce
         a           sh:NodeShape ;
         sh:target [
             a :EventsTarget_noToResource;
-            :parAction vf:move
+            :parAction vf:produce
         ] ;
         sh:expression [
-            sh:message "The only property allowed to be affected by a 'move' event is `vf:currentLocation`, but others are, too" ;            
+            sh:message "A 'produce' event may only affect vf:onhandQuantity and vf:accountingQuantity, but other are affected, too." ;
             :affectsNoResourcePropertiesExcept (
                 sh:this 
                 [ fn:stringConcatWithSpace (
-                    vf:currentLocation
-                    vf:previousState
+                    vf:onhandQuantity
+                    vf:accountingQuantity
                 )]
             )
         ] ;
-        sh:not [
-            sh:message "Event with action 'move': vf:atLocation must be different from resource's vf:currentLocation, but it is not." ; 
-            sh:property [
-                sh:path vf:atLocation ;
-                :sameAsResourceProperty vf:currentLocation ;
-                :resourcePath vf:resourceInventoriedAs ;
-                sh:minCount 1 ;
-                sh:maxCount 1 ;
-            ] ;
+        sh:expression [
+            sh:message "A 'produce' event must have a positive quantity." ;
+            fn:greaterThan ( 
+                [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                0 
+            )
         ] ;
+        sh:expression [
+            sh:message "A 'produce' event must use the same units as its resource/onhand quantity, but this is not the case." ;
+            fn:equals ( 
+                [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasUnit )]
+            )
+        ] ;        
+        sh:expression [
+            sh:message "A 'produce' event must use the same units as its resource/accounting quantity, but this is not the case." ;
+            fn:equals ( 
+                [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasUnit )]
+            )
+        ] ;        
+        sh:property [
+            sh:path vf:resourceClassifiedAs ;
+            :sameAsResourceProperty vf:classifiedAs ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:atLocation ;
+            :sameAsResourceProperty vf:currentLocation ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :eventIncreasesResourceProperty vf:onhandQuantity ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :eventIncreasesResourceProperty vf:accountingQuantity ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        .
+
+
+# Effect of a current `produce` action 
+# 
+# - It generates one new resource state for its resource
+# - It copies all old values but changes accounting and onhand quantities by 
+#   the event's quantities
+:CurrentEventEffectsShape_produce
+        a           sh:NodeShape ;
+        sh:target [
+            a :CurrentEventsTarget ;
+            :parAction vf:produce
+        ] ;
+        sh:rule :RuleCreateNextState ;
+        sh:rule :RuleLinkFromNextState ;
+        sh:rule :RuleCopyLocationToNextState ; 
+        sh:rule :RuleCopyPrimaryAccountableToNextState ;
+        sh:rule :RuleCopyOnhandQuantityIncreasedByEventQuantityToNextState ;
+        sh:rule :RuleCopyAccountingQuantityIncreasedByEventQuantityToNextState ;
+        sh:rule :RuleCopyOtherPropertiesToNextState ;
+        sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
+        .
+
+###############################################################################
+#                       Events with action `vf:consume` 
+#  For example an ingredient or component composed into the output, after the process 
+#  the ingredient is gone.
+#  We reinterpret this as simple lowering effect, opposite of consume
+###############################################################################
+
+# Invariants for `vf:consume` actions
+# - The event must have a `vf:resourceInventoriedAs` (and it must exist)
+# - The event must have the same `vf:atLocation` as the `vf:currentLocation` of the resource
+# - The event must have a quantity > 0
+# - The resource must have a onhand/accounting quantity greater than the event's quantity.
+# - The event must have the same unit of measurement as the resource
+# - The event's quantity must decrease the resource's next state
+# - The event's `vf:resourceClassifiedAs` must be equal to the resource's `vf:classifiedAs`
+
+:EventShape_consume
+        a           sh:NodeShape ;
+        sh:target [
+            a :EventsTarget_noToResource;
+            :parAction vf:consume
+        ] ;
+        sh:expression [
+            sh:message "A 'consume' event may only affect vf:onhandQuantity and vf:accountingQuantity, but other are affected, too." ;
+            :affectsNoResourcePropertiesExcept (
+                sh:this 
+                [ fn:stringConcatWithSpace (
+                    vf:onhandQuantity
+                    vf:accountingQuantity
+                )]
+            )
+        ] ;
+        sh:expression [
+            sh:message "A 'consume' event must have a positive quantity." ;
+            fn:greaterThan ( 
+                [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                0 
+            )
+        ] ;
+        sh:expression [
+            sh:message "A 'consume' event must use the same units as its resource/onhand quantity, but this is not the case." ;
+            fn:equals ( 
+                [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasUnit )]
+            )
+        ] ;        
+        sh:expression [
+            sh:message "A 'consume' event must use the same units as its resource/accounting quantity, but this is not the case." ;
+            fn:equals ( 
+                [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasUnit )]
+            )
+        ] ;        
+        sh:property [
+            sh:path vf:resourceClassifiedAs ;
+            :sameAsResourceProperty vf:classifiedAs ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:atLocation ;
+            :sameAsResourceProperty vf:currentLocation ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :eventDecreasesResourceProperty vf:onhandQuantity ;
+            :resourcePath vf:resourceInventoriedAs ;
+            :allowResultBelowZero false ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :eventDecreasesResourceProperty vf:accountingQuantity ;
+            :resourcePath vf:resourceInventoriedAs ;
+            :allowResultBelowZero false ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        .
+
+
+# Effect of a current `consume` action 
+# 
+# - It generates one new resource state for its resource
+# - It copies all old values but decreases accounting and onhand quantities by 
+#   the event's quantities
+:CurrentEventEffectsShape_consume
+        a           sh:NodeShape ;
+        sh:target [
+            a :CurrentEventsTarget ;
+            :parAction vf:consume
+        ] ;
+        sh:rule :RuleCreateNextState ;
+        sh:rule :RuleLinkFromNextState ;
+        sh:rule :RuleCopyLocationToNextState ; 
+        sh:rule :RuleCopyPrimaryAccountableToNextState ;
+        sh:rule :RuleCopyOnhandQuantityDecreasedByEventQuantityToNextState ;
+        sh:rule :RuleCopyAccountingQuantityDecreasedByEventQuantityToNextState ;
+        sh:rule :RuleCopyOtherPropertiesToNextState ;
+        sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
+        .
+
+
+
+###############################################################################
+#                       Events with action `vf:create` 
+###############################################################################
+#
+# Invariants for create actions:
+# * Either the `vf:resourceInventoriedAs` triple is not there. Then:
+#       - I cannot think of any specific invariants
+#       - The new resource will be inferred
+# * Or the `vf:resourceInventoriedAs` is present. Then:
+#       - [event]/`vf:atLocation` = [resource]/`vf:currentLocation` 
+#       - [event]/`vf:resourceClassifiedAs` = [resource]/`vf:classifiedAs`
+#       - [event]/`vf:receiver` = [resource]/`vf:primaryAccountable` # so we can model that A produces X for B
+#       - [event]/`vf:provider` = [resource]/`vf:custodian` # experimental
+#       - [event]/`vf:resourceQuantity` =deep= [resource]/`vf:onhandQuantity
+#       - [event]/`vf:accountingQuantity` =deep= [resource]/`vf:accountingQuantity
+:EventShape_create
+        a           sh:NodeShape ;
+        sh:target [
+            a :EventsTarget_noToResource; 
+            :parAction vf:create
+        ] ;
+        
         sh:property [
             sh:path vf:atLocation ;
             :sameAsNextResourceProperty vf:currentLocation ;
@@ -2319,34 +2965,62 @@ fn:safeStr
         ] ;
         sh:property [
             sh:path vf:resourceQuantity ;
-            :sameAsResourceProperty vf:onhandQuantity ;
+            :sameAsNextResourceProperty vf:accountingQuantity ;
             :resourcePath vf:resourceInventoriedAs ;
             sh:minCount 1 ;
             sh:maxCount 1 ;
         ] ;
+        sh:property [
+            sh:path vf:receiver ;
+            :sameAsNextResourceProperty vf:primaryAccountable ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;        
+        sh:property [
+            sh:path vf:provider ;
+            :sameAsNextResourceProperty vf:custodian ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;                
         .
 
 
-# Effect of a current `move` action that has a 
-#    `vf:resourceInventoriedAs` and NO
-#    `vf:toResourceInventoriedAs` :
+# Effect of a current `create` action, which is
+# a `vf:create` action that does not yet have a
+# `vf:resourceInventoriedAs` 
+#
+# This is a bit tricky:
+# We want each resource to have only one event associated with it. That event
+# causes the next resource state. Now 'create' is special because if we
+# take a current create event, generate the resource, and then link it 
+# to the event, the resource has already one event attached and cannot
+# get another one that modifies it later. So instead, the 'create' event
+# has to create two resources. The first one can be empty - a blank node sounds
+# reasonable. That is the one we link to the event. Then, we can generate a 
+# next state of that resource, applying all the effects of the create event.
 # 
-# - It generates one new resource states for `resource`
-# - It copies all old values but changes the location to the event's location
+# So here is what happens with a current create event:
+# - It generates a new blank node of type `vf:EconomicResource` (call that R0)
+# - It links the event to R0
+# - It generates one new resource state R1 for R0 and links it using `vf:previousState`
+# - It copies all data from the event to the resource (as usual)
 # - Copying includes blank node structures connected to the resource, 
 #   but not infinitely deep (see RuleCopyOtherBNodeStructuresToNextState)
-:CurrentEventEffectsShape_move
+#
+:CurrentEventEffectsShape_create
         a           sh:NodeShape ;
         sh:target [
-            a :CurrentEventsTarget ;
-            :parAction vf:move
+            a :EventsTarget_noResource ;
+            :parAction vf:create
         ] ;
-        sh:rule :RuleCreateNextState ;
-        sh:rule :RuleLinkFromNextState ;
+        sh:rule :RuleCreateInitialAndNextState ;
         sh:rule :RuleCopyLocationFromEventToNextState ; 
-        sh:rule :RuleCopyPrimaryAccountableToNextState ;
-        sh:rule :RuleCopyOnhandQuantityToNextState ;
-        sh:rule :RuleCopyAccountingQuantityToNextState ;
-        sh:rule :RuleCopyOtherPropertiesToNextState ;
-        sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
+        sh:rule :RuleCopyPrimaryAccountableFromEventReceiverToNextState ;
+        sh:rule :RuleCopyCustodianFromEventProviderToNextState ;
+        sh:rule :RuleCopyOnhandQuantityFromEventToNextState ;
+        sh:rule :RuleCopyAccountingQuantityFromEventToNextState ;
+        sh:rule :RuleCopyOtherPropertiesFromEventToNextState ;
+        sh:rule :RuleCopyOtherBNodeStructuresFromEventToNextState ;
         .
