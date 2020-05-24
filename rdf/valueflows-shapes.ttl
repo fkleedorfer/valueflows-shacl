@@ -1366,7 +1366,7 @@ fn:safeStr
                             STR(?sameAsNextResourceProperty),
                             " to its value of property ",
                             fn:safeStr(?PATH,"PATH"),
-                            ", but one of these two values is missing." 
+                            ", but at least one of these two values is missing." 
                         )
                     )
                     as ?message
@@ -1413,9 +1413,12 @@ fn:safeStr
                     ] .  
                 }
                 OPTIONAL {
-                    # we make ?next optional so we can check for below-zero values
+                    # we make ?next optional independently of the property
+                    # so we can check for below-zero values
                     # even without the next state
                     ?next vf:previousState ?res .
+                }
+                OPTIONAL {
                     ?next ?eventDecreasesResourceProperty [
                         om2:hasUnit ?unit ;
                         om2:hasNumericalValue ?nextValue
@@ -1428,16 +1431,22 @@ fn:safeStr
                         ?resValue - ?eventValue) 
                     as ?expectedNextValue
                 )
-                BIND ((fn:allBound3(?eventValue, ?resValue, ?expectedNextValue) 
+                BIND ((fn:allBound2(?eventValue, ?resValue) 
                         && ( ! ?allowResultBelowZero )
                         && ( ?resValue - ?eventValue < 0)) as ?opForbidden)
-                FILTER (BOUND(?nextValue) || ?opForbidden)  # if there is no next state, we only produce a result if the event would decrease below 0                      
+                # allow to produce result(error) even without a next state
                 FILTER (
-                    ?opForbidden 
+                    ?opForbidden
                     ||
-                    ! fn:allBound4(?eventValue, ?resValue, ?nextValue, ?expectedNextValue) 
-                    || 
-                    ( ?expectedNextValue != ?nextValue  )
+                    (
+                        BOUND(?next)
+                        &&
+                        (
+                            ! fn:allBound4(?eventValue, ?resValue, ?nextValue, ?expectedNextValue) 
+                            || 
+                            ( ?expectedNextValue != ?nextValue  )
+                        )
+                    )
                 )
                 BIND (IF(?opForbidden,
                         CONCAT(
@@ -1483,7 +1492,7 @@ fn:safeStr
                                 STR(?eventDecreasesResourceProperty),
                                 " value by ", 
                                 STR(?eventValue), 
-                                " but one of the properties is missing."
+                                " but at least one of the properties is missing."
                             )
                         )
                     )
@@ -2019,6 +2028,9 @@ fn:safeStr
 
 ###############################################################################
 #                       Events with action `vf:move` 
+#
+# Change location and possibly identifier, if location is part of the 
+# identification, of a resource with no change of agent rights or possession.
 ###############################################################################
 
 ## `vf:move` connected to only one resource
@@ -2236,4 +2248,105 @@ fn:safeStr
         sh:rule :RuleCopyOtherPropertiesToNextState_toResource ;
         sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
         sh:rule :RuleCopyOtherBNodeStructuresToNextState_toResource ;
+        .
+
+###############################################################################
+#                       Events with action `vf:produce` 
+#
+#  New resource was created in that process or an existing stock resource was
+#  added to.
+#
+#  This action is the only one that can create a resource. It is not specified
+#  in the documentation how exactly that works. The case in which quantity is 
+#  just added to an existing resource is not a problem - essentially identical 
+#  to vf:add. 
+#  The optionas are:
+#  * There is no resource prior to the event
+#       - Option A: the event references the URI of the new event via 
+#         `vf:resourceInventoriedAs`; the framework then generates the rest 
+#          of the data.
+#        - Option B: the event does not use `vf:resourceInventoriedAs`
+#          The framework generates the resource URI, its data and links it to
+#          the event.
+#  * Option C: Prior to the `vf:produce` event, there MUST be a new, prepared, 
+#    empty resource already.
+###############################################################################
+
+
+# Invariants for produce actions with `vf:resourceInventoriedAs`:
+# - The event must have different `vf:atLocation` value than the resource's `vf:currentLocation` 
+# - The event must have a quantity that must be equal to the resource's quantity
+# - If the event is not current, the resource states must differ by vf:currentLocation
+:EventShape_move
+        a           sh:NodeShape ;
+        sh:target [
+            a :EventsTarget_noToResource;
+            :parAction vf:move
+        ] ;
+        sh:expression [
+            sh:message "The only property allowed to be affected by a 'move' event is `vf:currentLocation`, but others are, too" ;            
+            :affectsNoResourcePropertiesExcept (
+                sh:this 
+                [ fn:stringConcatWithSpace (
+                    vf:currentLocation
+                    vf:previousState
+                )]
+            )
+        ] ;
+        sh:not [
+            sh:message "Event with action 'move': vf:atLocation must be different from resource's vf:currentLocation, but it is not." ; 
+            sh:property [
+                sh:path vf:atLocation ;
+                :sameAsResourceProperty vf:currentLocation ;
+                :resourcePath vf:resourceInventoriedAs ;
+                sh:minCount 1 ;
+                sh:maxCount 1 ;
+            ] ;
+        ] ;
+        sh:property [
+            sh:path vf:atLocation ;
+            :sameAsNextResourceProperty vf:currentLocation ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :sameAsNextResourceProperty vf:onhandQuantity ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :sameAsResourceProperty vf:onhandQuantity ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        .
+
+
+# Effect of a current `move` action that has a 
+#    `vf:resourceInventoriedAs` and NO
+#    `vf:toResourceInventoriedAs` :
+# 
+# - It generates one new resource states for `resource`
+# - It copies all old values but changes the location to the event's location
+# - Copying includes blank node structures connected to the resource, 
+#   but not infinitely deep (see RuleCopyOtherBNodeStructuresToNextState)
+:CurrentEventEffectsShape_move
+        a           sh:NodeShape ;
+        sh:target [
+            a :CurrentEventsTarget ;
+            :parAction vf:move
+        ] ;
+        sh:rule :RuleCreateNextState ;
+        sh:rule :RuleLinkFromNextState ;
+        sh:rule :RuleCopyLocationFromEventToNextState ; 
+        sh:rule :RuleCopyPrimaryAccountableToNextState ;
+        sh:rule :RuleCopyOnhandQuantityToNextState ;
+        sh:rule :RuleCopyAccountingQuantityToNextState ;
+        sh:rule :RuleCopyOtherPropertiesToNextState ;
+        sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
         .
