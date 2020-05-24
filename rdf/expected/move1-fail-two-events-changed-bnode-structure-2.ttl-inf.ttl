@@ -1,0 +1,39 @@
+@prefix dfc:   <http://www.virtual-assembly.org/DataFoodConsortium/BusinessOntology#> .
+@prefix schema: <http://schema.org/> .
+@prefix vfs:   <https://w3id.org/valueflows-shapes#> .
+@prefix org:   <http://www.w3.org/ns/org#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix tosh:  <http://topbraid.org/tosh#> .
+@prefix fn:    <https://w3id.org/shacl-commons/functions#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix dtype: <http://www.linkedmodel.org/schema/dtype#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix wd:    <http://www.wikidata.org/entity/> .
+@prefix vf:    <https://w3id.org/valueflows#> .
+@prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix ex:    <http://example.org/ns#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix om2:   <http://www.ontology-of-units-of-measure.org/resource/om-2/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix time:  <http://www.w3.org/2006/time#> .
+@prefix swa:   <http://topbraid.org/swa#> .
+@prefix dash:  <http://datashapes.org/dash#> .
+@prefix vs:    <http://www.w3.org/2003/06/sw-vocab-status/ns#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+
+<urn:wonvf:ef10bc26f50280ec594d912ad89ca3b566c8c6f5f1ee97bb67f2400b1783a189>
+        a                        vf:EconomicResource ;
+        ex:someProperty          [ ex:some  [ ex:otherwiseFunny
+                                    [ ex:structure  "there" ] ] ] ;
+        vf:accountingQuantity    [ om2:hasNumericalValue  "100"^^xsd:int ;
+                                   om2:hasUnit            om2:kilogram
+                                 ] ;
+        vf:currentLocation       wd:Q676832 ;
+        vf:onhandQuantity        [ om2:hasNumericalValue  "100"^^xsd:int ;
+                                   om2:hasUnit            om2:kilogram
+                                 ] ;
+        vf:previousState         ex:bobsApples2 ;
+        vf:primaryAccountable    ex:Bob ;
+        vf:resourceClassifiedAs  wd:Q4917 .

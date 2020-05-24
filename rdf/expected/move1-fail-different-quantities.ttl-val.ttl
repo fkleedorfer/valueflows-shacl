@@ -1,20 +1,25 @@
-@prefix schema: <http://schema.org/> .
 @prefix dfc:   <http://www.virtual-assembly.org/DataFoodConsortium/BusinessOntology#> .
+@prefix schema: <http://schema.org/> .
+@prefix vfs:   <https://w3id.org/valueflows-shacl/shapes#> .
 @prefix org:   <http://www.w3.org/ns/org#> .
 @prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix tosh:  <http://topbraid.org/tosh#> .
+@prefix fn:    <https://w3id.org/shacl-commons/functions#> .
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
-@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
 @prefix dtype: <http://www.linkedmodel.org/schema/dtype#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix wd:    <urn:www.wikidata.org/entity/> .
-@prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix wd:    <http://www.wikidata.org/entity/> .
 @prefix vf:    <https://w3id.org/valueflows#> .
+@prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
 @prefix ex:    <http://example.org/ns#> .
 @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix om2:   <http://www.ontology-of-units-of-measure.org/resource/om-2/> .
 @prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix om2:   <http://www.ontology-of-units-of-measure.org/resource/om-2/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix time:  <http://www.w3.org/2006/time#> .
+@prefix swa:   <http://topbraid.org/swa#> .
+@prefix dash:  <http://datashapes.org/dash#> .
 @prefix vs:    <http://www.w3.org/2003/06/sw-vocab-status/ns#> .
 @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
 
@@ -22,10 +27,10 @@
   sh:conforms  false ;
   sh:result    [ a                             sh:ValidationResult ;
                  sh:focusNode                  ex:event2 ;
-                 sh:resultMessage              "Value does not have shape :RequireSameQuantitiesOnEventAndResource" ;
+                 sh:resultMessage              "Event http://example.org/ns#event2, / https://w3id.org/valueflows#resourceQuantity (which is a bnode structure)  must be equal to its https://w3id.org/valueflows#resourceInventoriedAs resource http://example.org/ns#bobsApples2, / https://w3id.org/valueflows#onhandQuantity but the structures differ." ;
+                 sh:resultPath                 vf:resourceQuantity ;
                  sh:resultSeverity             sh:Violation ;
-                 sh:sourceConstraintComponent  sh:NodeConstraintComponent ;
-                 sh:sourceShape                <https://w3id.org/valueflows-shapes#MoveEventWithoutToResourceShape> ;
-                 sh:value                      ex:event2
+                 sh:sourceConstraintComponent  vfs:SameAsResourcePropertyConstraint ;
+                 sh:sourceShape                [] 
                ]
 ] .
