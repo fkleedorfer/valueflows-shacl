@@ -68,8 +68,54 @@ vf:
         sh:property :ResourceInventoriedAsShape ;
         sh:property :ToResourceInventoriedAsShape ;
         sh:property :ResourceQuantityShape ;
+        sh:property :EffortQuantityShape ;
         sh:property :ResourceClassifiedAsShape ;
-        
+        .
+
+:IntentShape
+        a               sh:NodeShape ;
+        sh:targetClass vf:Intent ;
+        sh:property :ProviderShape ;
+        sh:property :ReceiverShape ;
+        sh:property :ActionShape ;
+        sh:property :ResourceInventoriedAsShape ;
+        sh:property :ToResourceInventoriedAsShape ;
+        sh:property :ResourceQuantityShape ;
+        sh:property :EffortQuantityShape ;
+        sh:property :ResourceClassifiedAsShape ;
+        .
+
+:CommitmentShape
+        a               sh:NodeShape ;
+        sh:targetClass vf:Commitment ;
+        sh:property :RequireProviderShape ;
+        sh:property :RequireReceiverShape ;
+        sh:property :ActionShape ;
+        sh:property :ResourceInventoriedAsShape ;
+        sh:property :ToResourceInventoriedAsShape ;
+        sh:property :ResourceQuantityShape ;
+        sh:property :EffortQuantityShape ;
+        sh:property :ResourceClassifiedAsShape ;
+        sh:property [
+            sh:inversePath vf:satisfiedBy ;
+            sh:minCount 1 ;
+        ] ;
+        .
+
+:SatisfactionShape
+        a               sh:NodeShape ;
+        sh:targetClass  vf:Satisfaction ;
+        sh:property     :ResourceQuantityShape ;
+        sh:property [
+            sh:path vf:satisfies ;
+            sh:class vf:Intent ;
+            sh:minCount 1;
+        ] ;
+        sh:property [
+            sh:path vf:satisfiedBy ;
+            sh:class vf:Commitment ;
+            sh:minCount 1;
+        ] ;
         .
 
 :EconomicResourceShape
@@ -89,6 +135,7 @@ vf:
 #       sh:property     :stateShape ;
 #       sh:property     :TrackingIdentifierShape ;
     .
+
 :PrimaryAccountableShape
         a               sh:PropertyShape ;
         sh:path         vf:primaryAccountable ;
@@ -182,6 +229,12 @@ vf:
         sh:path         vf:resourceQuantity ;
         .
 
+:EffortQuantityShape
+        a               sh:PropertyShape ;
+        sh:node         :QuantityNodeShape ;
+        sh:path         vf:effortQuantity ;
+        .
+
 :ResourceInventoriedAsShape
         a               sh:PropertyShape ;
         sh:class        vf:EconomicResource ;
@@ -196,6 +249,14 @@ vf:
         sh:maxCount     1 ;
         .
 
+:ProviderShape
+        a               sh:PropertyShape ;
+        sh:path         vf:provider;
+        sh:class        foaf:Agent ;
+        sh:maxCount     1 ;
+        sh:minCount     0 ;
+        sh:nodeKind     sh:IRI ;
+        .
 
 :RequireProviderShape
         a               sh:PropertyShape ;
@@ -203,6 +264,15 @@ vf:
         sh:class        foaf:Agent ;
         sh:maxCount     1 ;
         sh:minCount     1 ;
+        sh:nodeKind     sh:IRI ;
+        .
+
+:ReceiverShape
+        a               sh:PropertyShape ;
+        sh:path         vf:provider;
+        sh:class        foaf:Agent ;
+        sh:maxCount     1 ;
+        sh:minCount     0 ;
         sh:nodeKind     sh:IRI ;
         .
 
@@ -1193,6 +1263,27 @@ fn:newNodeURI
 			}
 			""" ;
         .
+
+
+# SPARQLTarget shape for selecting 
+#   - current commitments
+:CurrentCommitmentsTarget
+		a sh:SPARQLTargetType ;
+        rdfs:subClassOf sh:Target ;
+		sh:prefixes vf: ;
+		sh:select """
+			SELECT DISTINCT ?this
+			WHERE {
+				?this   
+                    a                           vf:Commitment ;
+                    .
+                FILTER NOT EXISTS {
+                    ?this vf:satisfies  []               
+                }
+			}
+			""" ;
+        .
+
 
 ###############################################################################
 #    Invariant-checking constraints
@@ -4898,3 +4989,133 @@ fn:newNodeURI
         sh:rule :RuleCopyOtherPropertiesFromEventToNextState ;
         sh:rule :RuleCopyOtherBNodeStructuresFromEventToNextState ;
         .
+
+
+
+
+###############################################################################
+#                   Commitments and Satisfactions
+###############################################################################
+
+# We try to compute satisfactions automatically, let's see how far we get
+# The problem is that any intent may be satisfied by any commitment, so
+# the solution may become big; also one intent can be satisfied by multiple
+# commitments and one commitment can satisfy mutliple intents. But we'll try:
+
+# NOT NEEDED, keep as template for now
+:unsatisfiedIntentQuantity
+    a           sh:SPARQLFunction ;
+    sh:parameter [
+        sh:path :parIntent ;
+        sh:order 1 ;
+        sh:optional false ;
+    ] ;
+    sh:prefixes vf: ;
+    sh:select """
+        SELECT 
+            (
+                IF (
+                    BOUND(?intResValue), 
+                    ?intResValue - SUM(?resValue),
+                    IF (
+                        BOUND(?intEffValue) ,
+                        ?intEffValue - SUM(?effValue),
+                        "ERROR: Intent has no quantity"
+                    )
+                )
+                as ?result
+            )
+        {
+            ?parIntent      a   vf:Intent ;
+            OPTIONAL {
+                ?parIntent
+                    vf:resourceQuantity [
+                        om2:hasUnit ?resUnit ;
+                        om2:hasNumericalValue ?intResValue ;
+                    ]
+            }
+            OPTIONAL {
+                ?parIntent
+                    vf:effortQuantity [
+                        om2:hasUnit ?effUnit ;
+                        om2:hasNumericalValue ?intEffValue ;
+                    ]
+            }
+            OPTIONAL {
+                ?parIntent vf:satisfiedBy ?sat
+            }
+            OPTIONAL {
+                ?parIntent vf:satisfiedBy ?sat .
+                ?sat
+                    vf:resourceQuantity [
+                        om2:hasUnit ?resUnit ;
+                        om2:hasNumericalValue ?satResValue ;
+                    ]
+            }
+            OPTIONAL {
+                ?parIntent vf:satisfiedBy ?sat .
+                ?sat
+                    vf:effortQuantity [
+                        om2:hasUnit ?effUnit ;
+                        om2:hasNumericalValue ?satEffValue ;
+                    ]
+            }
+            FILTER(BOUND(?sat))
+            FILTER(fn:onlyOneBound(?intResValue, ?intEffValue))
+            BIND(IF(BOUND(?satResValue),?satResValue, 0) as ?resValue)
+            BIND(IF(BOUND(?satEffValue),?satEffValue, 0) as ?effValue)
+        } 
+        GROUP BY ?parIntent ?intResValue ?intEffValue
+    """ ;
+    .
+
+## TODO: won't need this!
+:CurrentCommitmentsTarget
+    a           sh:NodeShape ;
+    sh:target [
+        a   :CurrentCommitmentsTarget 
+    ] ;
+    sh:rule [
+        a sh:SPARQLRule ;
+        sh:prefixes vf: ;
+        sh:construct """
+        CONSTRUCT {
+            ?this vf:satisfies          ?satisfaction .
+            ?uIntent vf:satisfiedBy     ?satisfaction .
+            ?satisfaction a             vf:Satisfaction .
+            ?satisfaction ?quant        ?quantnode .
+            ?quantnode 
+                om2:hasUnit             ?quantUnit ;
+                om2:hasNumericalValue   ?quantValue .
+
+        } WHERE {
+            BIND( fn:newNodeURI(?this, ?uIntent) as ?satisfaction )
+
+            # select all unsatisfied intents that match the commitment (except for quantity)
+            {
+                SELECT ?uIntent ?uQuantValue
+                WHERE {
+                    ?uIntent 
+                            a vf:Intent ;
+                            ?p ?o ;
+                    BIND(vfs:unsatisfiedIntentQuantity(?uIntent) as ?uQuantValue)
+                    FILTER(?uQuantValue > 0)
+                    FILTER (?p IN(
+                        vf:resourceClassifiedAs, 
+                        vf:resourceConformsTo, 
+                        vf:atLocation, 
+                        vf:resourceInventoriedAs,
+                        vf:toResourceInventoriedAs, 
+                        vf:resourceQuantity/om2:hasUnit,
+                        vf:effortQuantity/om2:hasUnit
+                    ))     
+                    FILTER NOT EXISTS {
+                        ?this ?p ?o ;                        
+                    }
+                }
+            }
+        }
+        """ ;
+    ] 
+    .
+
