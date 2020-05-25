@@ -1,0 +1,52 @@
+@prefix schema: <http://schema.org/> .
+@prefix dfc:   <http://www.virtual-assembly.org/DataFoodConsortium/BusinessOntology#> .
+@prefix vfs:   <https://w3id.org/valueflows-shacl/shapes#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix org:   <http://www.w3.org/ns/org#> .
+@prefix tosh:  <http://topbraid.org/tosh#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix fn:    <https://w3id.org/shacl-commons/functions#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix dtype: <http://www.linkedmodel.org/schema/dtype#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix wd:    <http://www.wikidata.org/entity/> .
+@prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix vf:    <https://w3id.org/valueflows#> .
+@prefix ex:    <http://example.org/ns#> .
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix om2:   <http://www.ontology-of-units-of-measure.org/resource/om-2/> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix time:  <http://www.w3.org/2006/time#> .
+@prefix dash:  <http://datashapes.org/dash#> .
+@prefix swa:   <http://topbraid.org/swa#> .
+@prefix vs:    <http://www.w3.org/2003/06/sw-vocab-status/ns#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+
+<urn:wonvf:f042d9f1fdfe92bc899341059947b9785460541574bd8ecd45096dc7eb046327>
+        a                      vf:EconomicResource ;
+        vf:accountingQuantity  [ om2:hasNumericalValue  "0"^^xsd:int ;
+                                 om2:hasUnit            om2:one
+                               ] ;
+        vf:classifiedAs        wd:Q260521 ;
+        vf:currentLocation     wd:Q676832 ;
+        vf:custodian           ex:Bob ;
+        vf:onhandQuantity      [ om2:hasNumericalValue  "1"^^xsd:int ;
+                                 om2:hasUnit            om2:one
+                               ] ;
+        vf:previousState       ex:bobsLawnmowers1 ;
+        vf:primaryAccountable  ex:Bob .
+
+<urn:wonvf:a05c160c1b984e6538ebdd00ef9030c9c1d7ba7d06c02e1a082289c8cfeea695>
+        a                      vf:EconomicResource ;
+        vf:accountingQuantity  [ om2:hasNumericalValue  "1"^^xsd:int ;
+                                 om2:hasUnit            om2:one
+                               ] ;
+        vf:classifiedAs        wd:Q260521 ;
+        vf:currentLocation     wd:Q676832 ;
+        vf:custodian           ex:Alice ;
+        vf:onhandQuantity      [ om2:hasNumericalValue  "0"^^xsd:int ;
+                                 om2:hasUnit            om2:one
+                               ] ;
+        vf:previousState       ex:alicesLawnmowers1 ;
+        vf:primaryAccountable  ex:Alice .

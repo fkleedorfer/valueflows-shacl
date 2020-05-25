@@ -1,21 +1,21 @@
-@prefix dfc:   <http://www.virtual-assembly.org/DataFoodConsortium/BusinessOntology#> .
 @prefix schema: <http://schema.org/> .
+@prefix dfc:   <http://www.virtual-assembly.org/DataFoodConsortium/BusinessOntology#> .
 @prefix vfs:   <https://w3id.org/valueflows-shacl/shapes#> .
-@prefix org:   <http://www.w3.org/ns/org#> .
 @prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix org:   <http://www.w3.org/ns/org#> .
 @prefix tosh:  <http://topbraid.org/tosh#> .
-@prefix fn:    <https://w3id.org/shacl-commons/functions#> .
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
-@prefix dtype: <http://www.linkedmodel.org/schema/dtype#> .
+@prefix fn:    <https://w3id.org/shacl-commons/functions#> .
 @prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix dtype: <http://www.linkedmodel.org/schema/dtype#> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix wd:    <http://www.wikidata.org/entity/> .
-@prefix vf:    <https://w3id.org/valueflows#> .
 @prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix vf:    <https://w3id.org/valueflows#> .
 @prefix ex:    <http://example.org/ns#> .
-@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix om2:   <http://www.ontology-of-units-of-measure.org/resource/om-2/> .
 @prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix om2:   <http://www.ontology-of-units-of-measure.org/resource/om-2/> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix time:  <http://www.w3.org/2006/time#> .
 @prefix dash:  <http://datashapes.org/dash#> .
@@ -27,10 +27,18 @@
   sh:conforms  false ;
   sh:result    [ a                             sh:ValidationResult ;
                  sh:focusNode                  ex:event1 ;
-                 sh:resultMessage              "Event http://example.org/ns#event1 must decrease its resource http://example.org/ns#alicesApples1 / https://w3id.org/valueflows#onhandQuantity value by 30 but at least one of the properties is missing." ;
-                 sh:resultPath                 vf:resourceQuantity ;
+                 sh:resultMessage              "Property needs to have at least 1 values, but found 0" ;
+                 sh:resultPath                 vf:atLocation ;
                  sh:resultSeverity             sh:Violation ;
-                 sh:sourceConstraintComponent  vfs:EventDecreasesResourcePropertyConstraint ;
+                 sh:sourceConstraintComponent  sh:MinCountConstraintComponent ;
+                 sh:sourceShape                [] 
+               ] ;
+  sh:result    [ a                             sh:ValidationResult ;
+                 sh:focusNode                  ex:event1 ;
+                 sh:resultMessage              "Property needs to have at least 1 values, but found 0" ;
+                 sh:resultPath                 vf:atLocation ;
+                 sh:resultSeverity             sh:Violation ;
+                 sh:sourceConstraintComponent  sh:MinCountConstraintComponent ;
                  sh:sourceShape                [] 
                ] ;
   sh:result    [ a                             sh:ValidationResult ;
@@ -42,18 +50,10 @@
                ] ;
   sh:result    [ a                             sh:ValidationResult ;
                  sh:focusNode                  ex:event1 ;
-                 sh:resultMessage              "Property needs to have at least 1 values, but found 0" ;
-                 sh:resultPath                 vf:atLocation ;
+                 sh:resultMessage              "Event http://example.org/ns#event1 must decrease its resource http://example.org/ns#alicesApples1 / https://w3id.org/valueflows#onhandQuantity value by 30 but at least one of the properties is missing." ;
+                 sh:resultPath                 vf:resourceQuantity ;
                  sh:resultSeverity             sh:Violation ;
-                 sh:sourceConstraintComponent  sh:MinCountConstraintComponent ;
-                 sh:sourceShape                [] 
-               ] ;
-  sh:result    [ a                             sh:ValidationResult ;
-                 sh:focusNode                  ex:event1 ;
-                 sh:resultMessage              "Property needs to have at least 1 values, but found 0" ;
-                 sh:resultPath                 vf:atLocation ;
-                 sh:resultSeverity             sh:Violation ;
-                 sh:sourceConstraintComponent  sh:MinCountConstraintComponent ;
+                 sh:sourceConstraintComponent  vfs:EventDecreasesResourcePropertyConstraint ;
                  sh:sourceShape                [] 
                ]
 ] .

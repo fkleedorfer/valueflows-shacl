@@ -1,0 +1,36 @@
+@prefix schema: <http://schema.org/> .
+@prefix dfc:   <http://www.virtual-assembly.org/DataFoodConsortium/BusinessOntology#> .
+@prefix vfs:   <https://w3id.org/valueflows-shacl/shapes#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix org:   <http://www.w3.org/ns/org#> .
+@prefix tosh:  <http://topbraid.org/tosh#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix fn:    <https://w3id.org/shacl-commons/functions#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix dtype: <http://www.linkedmodel.org/schema/dtype#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix wd:    <http://www.wikidata.org/entity/> .
+@prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix vf:    <https://w3id.org/valueflows#> .
+@prefix ex:    <http://example.org/ns#> .
+@prefix om2:   <http://www.ontology-of-units-of-measure.org/resource/om-2/> .
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix time:  <http://www.w3.org/2006/time#> .
+@prefix dash:  <http://datashapes.org/dash#> .
+@prefix swa:   <http://topbraid.org/swa#> .
+@prefix vs:    <http://www.w3.org/2003/06/sw-vocab-status/ns#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+
+[ a            sh:ValidationReport ;
+  sh:conforms  false ;
+  sh:result    [ a                             sh:ValidationResult ;
+                 sh:focusNode                  ex:event1 ;
+                 sh:resultMessage              "Event http://example.org/ns#event1 must increase its resource http://example.org/ns#bobsLawnmower1 / https://w3id.org/valueflows#onhandQuantity value by 1, from 0 to 1, but the actual next value is 0." ;
+                 sh:resultPath                 vf:resourceQuantity ;
+                 sh:resultSeverity             sh:Violation ;
+                 sh:sourceConstraintComponent  vfs:EventIncreasesResourcePropertyConstraint ;
+                 sh:sourceShape                [] 
+               ]
+] .
