@@ -21,6 +21,12 @@
 @prefix fn: <https://w3id.org/shacl-commons/functions#> .
 
 
+# Note: more info on validation rules:
+#
+# https://github.com/valueflows/vf-apps/issues/5
+#
+
+
 vf: 
     sh:declare [
         sh:prefix "om2" ;
@@ -487,6 +493,25 @@ fn:greaterThan
     """;
     .
 
+
+fn:greaterThanOrEquals
+    a sh:SPARQLFunction ;
+    sh:parameter [
+        sh:path :op1 ;
+        sh:optional false ;
+        sh:nodeKind sh:Literal ;
+    ] ;
+    sh:parameter [
+        sh:path :op2 ;
+        sh:optional false ;
+        sh:nodeKind sh:Literal ;
+    ] ;
+    sh:select """
+        SELECT ( $op1 >= $op2 as ?result )
+        WHERE {}
+    """;
+    .    
+
 fn:equals
     a sh:SPARQLFunction ;
     sh:parameter [
@@ -882,7 +907,7 @@ fn:newNodeURI
     sh:parameter [
         sh:path :parAffectedList ;
         sh:nodeKind xsd:string ;
-        sh:optional false ;
+        sh:optional true ;
         sh:order 2 ;
     ] ;
     sh:prefixes vf: ;
@@ -890,8 +915,8 @@ fn:newNodeURI
         SELECT ( 
             vfs:_affectsNoResourcePropertiesExcept(
                 ?parEvent, 
-                ?parAffectedList, 
-                vf:resourceInventoriedAs) 
+                vf:resourceInventoriedAs,
+                ?parAffectedList) 
             as ?result
         )
         WHERE {}
@@ -909,7 +934,7 @@ fn:newNodeURI
     sh:parameter [
         sh:path :parAffectedList ;
         sh:nodeKind xsd:string ;
-        sh:optional false ;
+        sh:optional true ;
         sh:order 2 ;
     ] ;
     sh:prefixes vf: ;
@@ -917,8 +942,8 @@ fn:newNodeURI
         SELECT ( 
             vfs:_affectsNoResourcePropertiesExcept(
                 ?parEvent, 
-                ?parAffectedList, 
-                vf:toResourceInventoriedAs) 
+                vf:toResourceInventoriedAs, 
+                ?parAffectedList) 
             as ?result
         )
         WHERE {}
@@ -934,15 +959,15 @@ fn:newNodeURI
         sh:order 1 ;
     ] ;
     sh:parameter [
-        sh:path :parAffectedList ;
-        sh:nodeKind xsd:string ;
+        sh:path :parConnectingProp;
+        sh:nodeKind sh:IRI ;
         sh:optional false ;
         sh:order 2 ;
     ] ;
     sh:parameter [
-        sh:path :parConnectingProp;
-        sh:nodeKind sh:IRI ;
-        sh:optional false ;
+        sh:path :parAffectedList ;
+        sh:nodeKind xsd:string ;
+        sh:optional true ;
         sh:order 3 ;
     ] ;
     sh:prefixes vf: ;
@@ -1088,6 +1113,7 @@ fn:newNodeURI
         sh:parameter [
             sh:path :parAction ;
             sh:nodeKind sh:IRI ;
+            sh:optional false ;
         ] ;
 		sh:select """
 			SELECT DISTINCT ?this
@@ -1096,6 +1122,7 @@ fn:newNodeURI
                     a                           vf:EconomicEvent ;
                     vf:resourceInventoriedAs    [] ;
                     vf:toResourceInventoriedAs  [] ;
+                    vf:action                   ?parAction ;
                     .
  			}
 			""" ;
@@ -1112,6 +1139,7 @@ fn:newNodeURI
         sh:parameter [
             sh:path :parAction ;
             sh:nodeKind sh:IRI ;
+            sh:optional false ;
         ] ;
 		sh:select """
 			SELECT DISTINCT ?this
@@ -1915,9 +1943,27 @@ fn:newNodeURI
     ] ;
     .
 
+:RuleCopyCustodianToNextState    
+    sh:condition [
+        sh:path ( vf:resourceInventoriedAs vf:custodian ) ;
+        sh:nodeKind sh:IRIOrLiteral;
+    ] ;
+    a sh:TripleRule ;
+    sh:subject [ 
+        fn:newNodeURI ( 
+            sh:this 
+            [ sh:path vf:resourceInventoriedAs ] 
+        ) ;
+    ] ;
+    sh:predicate vf:custodian ;
+    sh:object [
+        sh:path ( vf:resourceInventoriedAs vf:custodian );
+    ] ;
+.
+
 :RuleCopyCustodianFromEventProviderToNextState    
     sh:condition [
-        sh:path vf:receiver ;
+        sh:path vf:provider ;
         sh:nodeKind sh:IRI;
     ] ;
     a sh:TripleRule ;
@@ -1933,6 +1979,23 @@ fn:newNodeURI
     ] ;
     .
 
+:RuleCopyCustodianFromEventReceiverToNextState    
+    sh:condition [
+        sh:path vf:receiver ;
+        sh:nodeKind sh:IRI;
+    ] ;
+    a sh:TripleRule ;
+    sh:subject [ 
+        fn:newNodeURI ( 
+            sh:this 
+            [ sh:path vf:resourceInventoriedAs ] 
+        ) ;
+    ] ;
+    sh:predicate vf:custodian ;
+    sh:object [
+        sh:path vf:receiver ;
+    ] ;
+    .
 
 :RuleCopyOnhandQuantityToNextState
         a sh:SPARQLRule ;
@@ -2059,6 +2122,35 @@ fn:newNodeURI
             }""" ;
     .
 
+:RuleCopyAccountingQuantityIncreasedByEventQuantityToNextState_toResource
+        a sh:SPARQLRule ;
+        sh:prefixes vf: ;
+        sh:construct """
+            CONSTRUCT {
+                ?next vf:accountingQuantity [
+                    om2:hasUnit ?unit ;
+                    om2:hasNumericalValue ?newValueLiteral
+                ] 
+            } WHERE {
+                ?this vf:toResourceInventoriedAs ?res .
+                BIND(fn:newNodeURI(?this, ?res) as ?next)
+                ?res  vf:accountingQuantity [
+                    om2:hasUnit ?unit ;
+                    om2:hasNumericalValue ?value
+                ] .  
+                ?this vf:resourceQuantity [
+                    om2:hasUnit ?unit ;
+                    om2:hasNumericalValue ?eventValue 
+                ] .
+                BIND (
+                    fn:getTypedLiteralForOp2(
+                        ?value, 
+                        ?eventValue, 
+                        ?value + ?eventValue) 
+                    as ?newValueLiteral
+                )
+            }""" ;
+    .
     
 :RuleCopyAccountingQuantityIncreasedByEventQuantityToNextState
         a sh:SPARQLRule ;
@@ -2259,7 +2351,8 @@ fn:newNodeURI
                             vf:currentLocation,
                             vf:onhandQuantity,
                             vf:accountingQuantity,
-                            vf:primaryAccountable
+                            vf:primaryAccountable, 
+                            vf:custodian
                             )
                         )
                 )
@@ -2286,7 +2379,8 @@ fn:newNodeURI
                             vf:currentLocation,
                             vf:onhandQuantity,
                             vf:accountingQuantity,
-                            vf:primaryAccountable
+                            vf:primaryAccountable,
+                            vf:custodian
                             )
                         )
                 )
@@ -2683,6 +2777,653 @@ fn:newNodeURI
         sh:rule :RuleCopyOtherBNodeStructuresToNextState_toResource ;
         .
 
+
+
+
+###############################################################################
+#                       Events with action `vf:transfer` 
+#
+#  Give full rights and responsibilities plus physical custody.
+###############################################################################
+
+## `vf:transfer` connected to only one resource
+
+# Invariants for transfer actions with `vf:resourceInventoriedAs` and NO `vf:toResourceInventoriedAs`:
+# - The event's `vf:receiver`must be different from the resource's `vf:primaryAccountable` 
+# - The event's `vf:provider`must be the same as the resource's `vf:primaryAccountable` 
+# - The event's `vf:provider`must be the same as the resource's `vf:custodian` 
+# - The event's `vf:resourceQuantity` must be the same as the resource's `vf:onhandQuantity` and `vf:accountingQuantity` 
+# - If the event is not current, the resource states must differ by vf:`primaryAccountable`
+# - If the event is not current, the resource states must differ by vf:`custodian`
+# - The event's `vf:atLocation` must be the same as the resource's `vf:currentLocation`
+:EventShape_transfer
+        a           sh:NodeShape ;
+        sh:target [
+            a :EventsTarget_noToResource;
+            :parAction vf:transfer
+        ] ;
+        sh:expression [
+            sh:message "The only properties allowed to be affected by a 'transfer' event are `vf:primaryAccountable` and `vf:custodian`, but others are, too" ;            
+            :affectsNoResourcePropertiesExcept (
+                sh:this 
+                [ fn:stringConcatWithSpace (
+                    vf:primaryAccountable
+                    vf:custodian
+                )]
+            )
+        ] ;
+        sh:expression [
+            sh:message "A 'transfer' event is only allowed if the resource's onhand and accounting quantities are equal ." ;
+            fn:and (
+                [ fn:equals ( 
+                    [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasUnit )]
+                    [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasUnit )]
+                )]
+                [ fn:equals ( 
+                    [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasNumericalValue )]
+                    [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasNumericalValue )]
+                )]
+            )
+        ] ;        
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :sameAsResourceProperty vf:accountingQuantity ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:provider ;
+            :sameAsResourceProperty vf:primaryAccountable ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:provider ;
+            :sameAsResourceProperty vf:custodian ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:receiver ;
+            :sameAsNextResourceProperty vf:primaryAccountable ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:receiver ;
+            :sameAsNextResourceProperty vf:custodian ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;        
+        sh:property [
+            sh:path vf:atLocation ;
+            :sameAsResourceProperty vf:currentLocation ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+
+
+        .
+
+
+# Effect of a current `transfer` action that has a 
+#    `vf:resourceInventoriedAs` and NO
+#    `vf:toResourceInventoriedAs` :
+# 
+# - It generates one new resource states for `resource`
+# - It copies all old values but changes the `vf:primaryAccountable` and `vf:custodian` properties
+# - Copying includes blank node structures connected to the resource, 
+#   but not infinitely deep (see RuleCopyOtherBNodeStructuresToNextState)
+:CurrentEventEffectsShape_transfer
+        a           sh:NodeShape ;
+        sh:target [
+            a :CurrentEventsTarget ;
+            :parAction vf:transfer
+        ] ;
+        sh:rule :RuleCreateNextState ;
+        sh:rule :RuleLinkFromNextState ;
+        sh:rule :RuleCopyLocationFromEventToNextState ; 
+        sh:rule :RuleCopyPrimaryAccountableFromEventReceiverToNextState ;
+        sh:rule :RuleCopyCustodianFromEventReceiverToNextState ;
+        sh:rule :RuleCopyOnhandQuantityToNextState ;
+        sh:rule :RuleCopyAccountingQuantityToNextState ;
+        sh:rule :RuleCopyOtherPropertiesToNextState ;
+        sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
+        .
+
+## `vf:transfer` connected to two resources (we also call that 'transfer2')
+
+# Invariants for transfer actions with `vf:resourceInventoriedAs` AND `vf:toResourceInventoriedAs`:
+# - The event's vf:atLocation` value must be the same as `vf:currentLocation` 
+# - The event's vf:atLocation` value must be the same as toResource's `vf:currentLocation` 
+# - The event's `vf:resourcequantity` must not be smaller than the resource's `vf:onhandQuantity`
+# - The the resource's `vf:onhandQuantity` must decrement by the event's `vf:resourceQuantity`
+# - The the resource's `vf:accountingQuantity` must decrement by the event's `vf:resourceQuantity`
+# - The the toResource's `vf:onhandQuantity` must increment by the event's `vf:resourceQuantity`
+# - The the toResource's `vf:accountingQuantity` must increment by the event's `vf:resourceQuantity`
+# - The event's `vf:provider`must be the same as the resource's `vf:primaryAccountable` 
+# - The event's `vf:provider`must be the same as the resource's `vf:custodian` 
+# - The event's `vf:receiver`must be the same as the toResource's `vf:primaryAccountable` 
+# - The event's `vf:receiver`must be the same as the toResource's `vf:custodian` 
+# - The successor resources must not differ from their predecessors except in quantity, custodian and primaryAccountable
+
+
+:EventShape_transfer_toResource 
+        a           sh:NodeShape ;
+        sh:target [
+            a :EventsTarget_toResource;
+            :parAction vf:transfer
+        ] ;
+        sh:expression [
+            sh:message "The only properties allowed to be affected by a 'transfer2' are vf:onhandQuantity, vf:accountingQuantity, vf:custodian, vf:primaryAccountable, but others are, too" ;            
+            :affectsNoResourcePropertiesExcept (
+                sh:this 
+                [ fn:stringConcatWithSpace (
+                    vf:onhandQuantity
+                    vf:accountingQuantity
+                    vf:previousState
+                )]
+            )
+        ] ;
+        sh:property [
+            sh:path vf:provider ;
+            :sameAsResourceProperty vf:primaryAccountable ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:provider ;
+            :sameAsResourceProperty vf:custodian ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:receiver ;
+            :sameAsResourceProperty vf:primaryAccountable ;
+            :resourcePath vf:toResourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:receiver ;
+            :sameAsResourceProperty vf:custodian ;
+            :resourcePath vf:toResourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :eventDecreasesResourceProperty vf:onhandQuantity ;
+            :resourcePath vf:resourceInventoriedAs ;
+            :allowResultBelowZero false ;            
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :eventDecreasesResourceProperty vf:accountingQuantity ;
+            :allowResultBelowZero false ;            
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :eventIncreasesResourceProperty vf:onhandQuantity ;
+            :resourcePath vf:toResourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :eventIncreasesResourceProperty vf:accountingQuantity ;
+            :resourcePath vf:toResourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        .
+
+# Effect of a current `transfer` action that has a 
+#    `vf:resourceInventoriedAs` and a
+#    `vf:toResourceInventoriedAs` :
+# 
+# It generates new resource states for `resource` and `toResource`
+#   - sets both `vf:onhandQuantity` based on the event `vf:resourceQuantity`
+# 
+:CurrentEventEffectsShape_transfer_toResource
+        a           sh:NodeShape ;
+        sh:target [
+            a :CurrentEventsTarget_toResource ;
+            :parAction vf:transfer
+        ] ;
+        sh:rule :RuleCreateNextState ;
+        sh:rule :RuleCreateNextState_toResource ;
+        sh:rule :RuleLinkFromNextState ;
+        sh:rule :RuleLinkFromNextState_toResource ;
+        sh:rule :RuleCopyOnhandQuantityDecreasedByEventQuantityToNextState ;
+        sh:rule :RuleCopyOnhandQuantityIncreasedByEventQuantityToNextState_toResource ;
+        sh:rule :RuleCopyAccountingQuantityDecreasedByEventQuantityToNextState ;
+        sh:rule :RuleCopyAccountingQuantityIncreasedByEventQuantityToNextState_toResource ;
+        sh:rule :RuleCopyLocationToNextState ; 
+        sh:rule :RuleCopyLocationToNextState_toResource ; 
+        sh:rule :RuleCopyPrimaryAccountableToNextState ;
+        sh:rule :RuleCopyPrimaryAccountableToNextState_toResource ;
+        sh:rule :RuleCopyOtherPropertiesToNextState ;
+        sh:rule :RuleCopyOtherPropertiesToNextState_toResource ;
+        sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
+        sh:rule :RuleCopyOtherBNodeStructuresToNextState_toResource ;
+        .
+
+
+
+
+
+###############################################################################
+#                       Events with action `vf:transfer-custody` 
+#
+#  Give physical custody and control of a resource, without full accounting or ownership rights.
+###############################################################################
+
+## `vf:transfer-custody` connected to only one resource
+
+# Invariants for transfer-custody actions with `vf:resourceInventoriedAs` and NO `vf:toResourceInventoriedAs`:
+# - The event's `vf:receiver`must be different from the resource's `vf:custodian` 
+# - The event's `vf:provider`must be the same as the resource's `vf:custodian` 
+# - The event's `vf:resourceQuantity` must be the same as the resource's `vf:onhandQuantity` and `vf:accountingQuantity` 
+# - If the event is not current, the resource states must differ by vf:`custodian`
+# - The event's `vf:atLocation` must be the same as the resource's `vf:currentLocation`
+:EventShape_transfer-custody
+        a           sh:NodeShape ;
+        sh:target [
+            a :EventsTarget_noToResource;
+            :parAction vf:transfer-custody
+        ] ;
+        sh:expression [
+            sh:message "The only properties allowed to be affected by a 'transfer-custody' event are `vf:primaryAccountable` and `vf:custodian`, but others are, too" ;            
+            :affectsNoResourcePropertiesExcept (
+                sh:this 
+                [ fn:stringConcatWithSpace (
+                    vf:custodian
+                )]
+            )
+        ] ;
+        sh:expression [
+            sh:message "A 'transfer-custody' event is only allowed if the resource's onhand and accounting quantities are equal ." ;
+            fn:and (
+                [ fn:equals ( 
+                    [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasUnit )]
+                    [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasUnit )]
+                )]
+                [ fn:equals ( 
+                    [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasNumericalValue )]
+                    [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasNumericalValue )]
+                )]
+            )
+        ] ;        
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :sameAsResourceProperty vf:accountingQuantity ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:provider ;
+            :sameAsResourceProperty vf:custodian ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+       sh:property [
+            sh:path vf:receiver ;
+            :sameAsNextResourceProperty vf:custodian ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;        
+        sh:property [
+            sh:path vf:atLocation ;
+            :sameAsResourceProperty vf:currentLocation ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+
+
+        .
+
+
+# Effect of a current `transfer-custody` action that has a 
+#    `vf:resourceInventoriedAs` and NO
+#    `vf:toResourceInventoriedAs` :
+# 
+# - It generates one new resource states for `resource`
+# - It copies all old values but changes the `vf:primaryAccountable` and `vf:custodian` properties
+# - Copying includes blank node structures connected to the resource, 
+#   but not infinitely deep (see RuleCopyOtherBNodeStructuresToNextState)
+:CurrentEventEffectsShape_transfer-custody
+        a           sh:NodeShape ;
+        sh:target [
+            a :CurrentEventsTarget ;
+            :parAction vf:transfer-custody
+        ] ;
+        sh:rule :RuleCreateNextState ;
+        sh:rule :RuleLinkFromNextState ;
+        sh:rule :RuleCopyLocationFromEventToNextState ; 
+        sh:rule :RuleCopyPrimaryAccountableToNextState ;
+        sh:rule :RuleCopyCustodianFromEventReceiverToNextState ;
+        sh:rule :RuleCopyOnhandQuantityToNextState ;
+        sh:rule :RuleCopyAccountingQuantityToNextState ;
+        sh:rule :RuleCopyOtherPropertiesToNextState ;
+        sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
+        .
+
+## `vf:transfer-custody` connected to two resources (we also call that 'transfer-custody2')
+
+# Invariants for transfer-custody actions with `vf:resourceInventoriedAs` AND `vf:toResourceInventoriedAs`:
+# - The event's vf:atLocation` value must be the same as `vf:currentLocation` 
+# - The event's vf:atLocation` value must be the same as toResource's `vf:currentLocation` 
+# - The event's `vf:resourceQuantity` must not be smaller than the resource's `vf:onhandQuantity`
+# - The the resource's `vf:onhandQuantity` must decrement by the event's `vf:resourceQuantity`
+# - The the resource's `vf:accountingQuantity` must not change
+# - The the toResource's `vf:onhandQuantity` must increment by the event's `vf:resourceQuantity`
+# - The the toResource's `vf:accountingQuantity` must not change
+# - The event's `vf:provider`must be the same as the resource's `vf:custodian` 
+# - The event's `vf:receiver`must be the same as the toResource's `vf:custodian` 
+# - The successor resources must not differ from their predecessors except in quantity, custodian and primaryAccountable
+
+
+:EventShape_transfer-custody_toResource 
+        a           sh:NodeShape ;
+        sh:target [
+            a :EventsTarget_toResource;
+            :parAction vf:transfer-custody
+        ] ;
+        sh:expression [
+            sh:message "The only properties allowed to be affected by a 'transfer-custody2' are vf:onhandQuantity, vf:accountingQuantity, vf:custodian, vf:primaryAccountable, but others are, too" ;            
+            :affectsNoResourcePropertiesExcept (
+                sh:this 
+                [ fn:stringConcatWithSpace (
+                    vf:onhandQuantity
+                    vf:accountingQuantity
+                    vf:previousState
+                )]
+            )
+        ] ;
+        sh:property [
+            sh:path vf:provider ;
+            :sameAsResourceProperty vf:custodian ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:receiver ;
+            :sameAsResourceProperty vf:custodian ;
+            :resourcePath vf:toResourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :eventDecreasesResourceProperty vf:onhandQuantity ;
+            :resourcePath vf:resourceInventoriedAs ;
+            :allowResultBelowZero false ;            
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :eventIncreasesResourceProperty vf:onhandQuantity ;
+            :resourcePath vf:toResourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        .
+
+# Effect of a current `transfer-custody` action that has a 
+#    `vf:resourceInventoriedAs` and a
+#    `vf:toResourceInventoriedAs` :
+# 
+# It generates new resource states for `resource` and `toResource`
+#   - sets both `vf:onhandQuantity` based on the event `vf:resourceQuantity`
+# 
+:CurrentEventEffectsShape_transfer-custody_toResource
+        a           sh:NodeShape ;
+        sh:target [
+            a :CurrentEventsTarget_toResource ;
+            :parAction vf:transfer-custody
+        ] ;
+        sh:rule :RuleCreateNextState ;
+        sh:rule :RuleCreateNextState_toResource ;
+        sh:rule :RuleLinkFromNextState ;
+        sh:rule :RuleLinkFromNextState_toResource ;
+        sh:rule :RuleCopyOnhandQuantityDecreasedByEventQuantityToNextState ;
+        sh:rule :RuleCopyOnhandQuantityIncreasedByEventQuantityToNextState_toResource ;
+        sh:rule :RuleCopyAccountingQuantityDecreasedByEventQuantityToNextState ;
+        sh:rule :RuleCopyAccountingQuantityIncreasedByEventQuantityToNextState_toResource ;
+        sh:rule :RuleCopyLocationToNextState ; 
+        sh:rule :RuleCopyLocationToNextState_toResource ; 
+        sh:rule :RuleCopyPrimaryAccountableToNextState ;
+        sh:rule :RuleCopyPrimaryAccountableToNextState_toResource ;
+        sh:rule :RuleCopyOtherPropertiesToNextState ;
+        sh:rule :RuleCopyOtherPropertiesToNextState_toResource ;
+        sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
+        sh:rule :RuleCopyOtherBNodeStructuresToNextState_toResource ;
+        .
+
+
+
+
+
+
+###############################################################################
+#                       Events with action `vf:transfer-all-rights` 
+#
+#  Give full rights and responsibilities plus physical custody.
+###############################################################################
+
+## `vf:transfer-all-rights` connected to only one resource
+
+# Invariants for transfer-all-rights actions with `vf:resourceInventoriedAs` and NO `vf:toResourceInventoriedAs`:
+# - The event's `vf:receiver`must be different from the resource's `vf:primaryAccountable` 
+# - The event's `vf:provider`must be the same as the resource's `vf:primaryAccountable` 
+# - The event's `vf:resourceQuantity` must be the same as the resource's `vf:onhandQuantity` and `vf:accountingQuantity` 
+# - If the event is not current, the resource states must differ by vf:`primaryAccountable`
+# - The event's `vf:atLocation` must be the same as the resource's `vf:currentLocation`
+:EventShape_transfer-all-rights
+        a           sh:NodeShape ;
+        sh:target [
+            a :EventsTarget_noToResource;
+            :parAction vf:transfer-all-rights
+        ] ;
+        sh:expression [
+            sh:message "The only properties allowed to be affected by a 'transfer-all-rights' event are `vf:primaryAccountable` and `vf:custodian`, but others are, too" ;            
+            :affectsNoResourcePropertiesExcept (
+                sh:this 
+                [ fn:stringConcatWithSpace (
+                    vf:primaryAccountable
+                )]
+            )
+        ] ;
+        sh:expression [
+            sh:message "A 'transfer-all-rights' event is only allowed if the resource's onhand and accounting quantities are equal ." ;
+            fn:and (
+                [ fn:equals ( 
+                    [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasUnit )]
+                    [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasUnit )]
+                )]
+                [ fn:equals ( 
+                    [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasNumericalValue )]
+                    [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasNumericalValue )]
+                )]
+            )
+        ] ;        
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :sameAsResourceProperty vf:accountingQuantity ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:provider ;
+            :sameAsResourceProperty vf:primaryAccountable ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:receiver ;
+            :sameAsNextResourceProperty vf:primaryAccountable ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:atLocation ;
+            :sameAsResourceProperty vf:currentLocation ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+
+
+        .
+
+
+# Effect of a current `transfer-all-rights` action that has a 
+#    `vf:resourceInventoriedAs` and NO
+#    `vf:toResourceInventoriedAs` :
+# 
+# - It generates one new resource states for `resource`
+# - It copies all old values but changes the `vf:primaryAccountable` and `vf:custodian` properties
+# - Copying includes blank node structures connected to the resource, 
+#   but not infinitely deep (see RuleCopyOtherBNodeStructuresToNextState)
+:CurrentEventEffectsShape_transfer-all-rights
+        a           sh:NodeShape ;
+        sh:target [
+            a :CurrentEventsTarget ;
+            :parAction vf:transfer-all-rights
+        ] ;
+        sh:rule :RuleCreateNextState ;
+        sh:rule :RuleLinkFromNextState ;
+        sh:rule :RuleCopyLocationFromEventToNextState ; 
+        sh:rule :RuleCopyPrimaryAccountableFromEventReceiverToNextState ;
+        sh:rule :RuleCopyCustodianToNextState ;
+        sh:rule :RuleCopyOnhandQuantityToNextState ;
+        sh:rule :RuleCopyAccountingQuantityToNextState ;
+        sh:rule :RuleCopyOtherPropertiesToNextState ;
+        sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
+        .
+
+## `vf:transfer-all-rights` connected to two resources (we also call that 'transfer-all-rights2')
+
+# Invariants for transfer-all-rights actions with `vf:resourceInventoriedAs` AND `vf:toResourceInventoriedAs`:
+# - The event's vf:atLocation` value must be the same as `vf:currentLocation` 
+# - The event's vf:atLocation` value must be the same as toResource's `vf:currentLocation` 
+# - The event's `vf:resourcequantity` must not be smaller than the resource's `vf:accountingQuantity`
+# - The the resource's `vf:onhandQuantity` must not change
+# - The the resource's `vf:accountingQuantity` must decrement by the event's `vf:resourceQuantity`
+# - The the toResource's `vf:onhandQuantity` must not change
+# - The the toResource's `vf:accountingQuantity` must increment by the event's `vf:resourceQuantity`
+# - The event's `vf:provider`must be the same as the resource's `vf:primaryAccountable` 
+# - The event's `vf:receiver`must be the same as the toResource's `vf:primaryAccountable` 
+# - The successor resources must not differ from their predecessors except in quantity
+
+
+:EventShape_transfer-all-rights_toResource 
+        a           sh:NodeShape ;
+        sh:target [
+            a :EventsTarget_toResource;
+            :parAction vf:transfer-all-rights
+        ] ;
+        sh:expression [
+            sh:message "The only properties allowed to be affected by a 'transfer-all-rights2' are vf:onhandQuantity, vf:accountingQuantity, vf:custodian, vf:primaryAccountable, but others are, too" ;            
+            :affectsNoResourcePropertiesExcept (
+                sh:this 
+                [ fn:stringConcatWithSpace (
+                    vf:accountingQuantity
+                    vf:previousState
+                )]
+            )
+        ] ;
+        sh:property [
+            sh:path vf:provider ;
+            :sameAsResourceProperty vf:primaryAccountable ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:receiver ;
+            :sameAsResourceProperty vf:primaryAccountable ;
+            :resourcePath vf:toResourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :eventDecreasesResourceProperty vf:accountingQuantity ;
+            :allowResultBelowZero false ;            
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :eventIncreasesResourceProperty vf:accountingQuantity ;
+            :resourcePath vf:toResourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        .
+
+# Effect of a current `transfer-all-rights` action that has a 
+#    `vf:resourceInventoriedAs` and a
+#    `vf:toResourceInventoriedAs` :
+# 
+# It generates new resource states for `resource` and `toResource`
+#   - sets both `vf:onhandQuantity` based on the event `vf:resourceQuantity`
+# 
+:CurrentEventEffectsShape_transfer-all-rights_toResource
+        a           sh:NodeShape ;
+        sh:target [
+            a :CurrentEventsTarget_toResource ;
+            :parAction vf:transfer-all-rights
+        ] ;
+        sh:rule :RuleCreateNextState ;
+        sh:rule :RuleCreateNextState_toResource ;
+        sh:rule :RuleLinkFromNextState ;
+        sh:rule :RuleLinkFromNextState_toResource ;
+        sh:rule :RuleCopyOnhandQuantityToNextState ;
+        sh:rule :RuleCopyOnhandQuantityToNextState_toResource ;
+        sh:rule :RuleCopyAccountingQuantityDecreasedByEventQuantityToNextState ;
+        sh:rule :RuleCopyAccountingQuantityIncreasedByEventQuantityToNextState_toResource ;
+        sh:rule :RuleCopyLocationToNextState ; 
+        sh:rule :RuleCopyLocationToNextState_toResource ; 
+        sh:rule :RuleCopyPrimaryAccountableToNextState ;
+        sh:rule :RuleCopyPrimaryAccountableToNextState_toResource ;
+        sh:rule :RuleCopyOtherPropertiesToNextState ;
+        sh:rule :RuleCopyOtherPropertiesToNextState_toResource ;
+        sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
+        sh:rule :RuleCopyOtherBNodeStructuresToNextState_toResource ;
+        .
+
+
+
+
+
+
+
 ###############################################################################
 #                       Events with action `vf:produce` 
 #
@@ -2819,6 +3560,203 @@ fn:newNodeURI
         .
 
 ###############################################################################
+#                       Events with action `vf:raise` 
+# Adjusts a quantity up based on a beginning balance or inventory count.
+###############################################################################
+
+# Invariants for `vf:raise` actions
+# - The event must have a `vf:resourceInventoriedAs` (and it must exist)
+# - The event must have the same `vf:atLocation` as the `vf:currentLocation` of the resource
+# - The event must have a quantity > 0
+# - The event must have the same unit of measurement as the resource
+# - The event's quantity must increase the resource's next state
+# - The event's `vf:resourceClassifiedAs` must be equal to the resource's `vf:classifiedAs`
+
+:EventShape_raise
+        a           sh:NodeShape ;
+        sh:target [
+            a :EventsTarget_noToResource;
+            :parAction vf:raise
+        ] ;
+        sh:expression [
+            sh:message "A 'raise' event may only affect vf:onhandQuantity and vf:accountingQuantity, but other are affected, too." ;
+            :affectsNoResourcePropertiesExcept (
+                sh:this 
+                [ fn:stringConcatWithSpace (
+                    vf:onhandQuantity
+                    vf:accountingQuantity
+                )]
+            )
+        ] ;
+        sh:expression [
+            sh:message "A 'raise' event must have a positive quantity." ;
+            fn:greaterThan ( 
+                [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                0 
+            )
+        ] ;
+        sh:expression [
+            sh:message "A 'raise' event must use the same units as its resource/onhand quantity, but this is not the case." ;
+            fn:equals ( 
+                [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasUnit )]
+            )
+        ] ;        
+        sh:expression [
+            sh:message "A 'raise' event must use the same units as its resource/accounting quantity, but this is not the case." ;
+            fn:equals ( 
+                [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasUnit )]
+            )
+        ] ;        
+        sh:property [
+            sh:path vf:resourceClassifiedAs ;
+            :sameAsResourceProperty vf:classifiedAs ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:atLocation ;
+            :sameAsResourceProperty vf:currentLocation ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :eventIncreasesResourceProperty vf:onhandQuantity ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :eventIncreasesResourceProperty vf:accountingQuantity ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        .
+
+
+# Effect of a current `raise` action 
+# 
+# - It generates one new resource state for its resource
+# - It copies all old values but changes accounting and onhand quantities by 
+#   the event's quantities
+:CurrentEventEffectsShape_raise
+        a           sh:NodeShape ;
+        sh:target [
+            a :CurrentEventsTarget ;
+            :parAction vf:raise
+        ] ;
+        sh:rule :RuleCreateNextState ;
+        sh:rule :RuleLinkFromNextState ;
+        sh:rule :RuleCopyLocationToNextState ; 
+        sh:rule :RuleCopyPrimaryAccountableToNextState ;
+        sh:rule :RuleCopyOnhandQuantityIncreasedByEventQuantityToNextState ;
+        sh:rule :RuleCopyAccountingQuantityIncreasedByEventQuantityToNextState ;
+        sh:rule :RuleCopyOtherPropertiesToNextState ;
+        sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
+        .
+
+###############################################################################
+#                       Events with action `vf:modify` 
+#  In processes like repair or modification, the same resource will appear 
+#  in the input.
+###############################################################################
+
+# Invariants for `vf:modify` actions
+# - The event must have a `vf:resourceInventoriedAs` (and it must exist)
+# - The event must have the same `vf:atLocation` as the `vf:currentLocation` of the resource
+# - The event must have a quantity > 0
+# - The event must have the same unit of measurement as the resource
+# - The event's quantity must increase the resource's next state (only `vf:onhandQuantity`)
+# - The event's `vf:resourceClassifiedAs` must be equal to the resource's `vf:classifiedAs`
+
+:EventShape_modify
+        a           sh:NodeShape ;
+        sh:target [
+            a :EventsTarget_noToResource;
+            :parAction vf:modify
+        ] ;
+        sh:expression [
+            sh:message "A 'modify' event may only affect vf:onhandQuantity and vf:accountingQuantity, but other are affected, too." ;
+            :affectsNoResourcePropertiesExcept (
+                sh:this 
+                [ fn:stringConcatWithSpace (
+                    vf:onhandQuantity
+                )]
+            )
+        ] ;
+        sh:expression [
+            sh:message "A 'modify' event must have a positive quantity." ;
+            fn:greaterThan ( 
+                [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                0 
+            )
+        ] ;
+        sh:expression [
+            sh:message "A 'modify' event must use the same units as its resource/onhand quantity, but this is not the case." ;
+            fn:equals ( 
+                [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasUnit )]
+            )
+        ] ;        
+        sh:expression [
+            sh:message "A 'modify' event must use the same units as its resource/accounting quantity, but this is not the case." ;
+            fn:equals ( 
+                [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasUnit )]
+            )
+        ] ;        
+        sh:property [
+            sh:path vf:resourceClassifiedAs ;
+            :sameAsResourceProperty vf:classifiedAs ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:atLocation ;
+            :sameAsResourceProperty vf:currentLocation ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :eventIncreasesResourceProperty vf:onhandQuantity ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        .
+
+
+# Effect of a current `modify` action 
+# 
+# - It generates one new resource state for its resource
+# - It copies all old values but changes accounting and onhand quantities by 
+#   the event's quantities
+:CurrentEventEffectsShape_modify
+        a           sh:NodeShape ;
+        sh:target [
+            a :CurrentEventsTarget ;
+            :parAction vf:modify
+        ] ;
+        sh:rule :RuleCreateNextState ;
+        sh:rule :RuleLinkFromNextState ;
+        sh:rule :RuleCopyLocationToNextState ; 
+        sh:rule :RuleCopyPrimaryAccountableToNextState ;
+        sh:rule :RuleCopyOnhandQuantityIncreasedByEventQuantityToNextState ;
+        sh:rule :RuleCopyAccountingQuantityToNextState ;
+        sh:rule :RuleCopyOtherPropertiesToNextState ;
+        sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
+        .
+
+###############################################################################
 #                       Events with action `vf:consume` 
 #  For example an ingredient or component composed into the output, after the process 
 #  the ingredient is gone.
@@ -2925,6 +3863,917 @@ fn:newNodeURI
         sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
         .
 
+
+
+
+###############################################################################
+#                       Events with action `vf:lower` 
+#  For example an ingredient or component composed into the output, after the process 
+#  the ingredient is gone.
+#  We reinterpret this as simple lowering effect, opposite of lower
+###############################################################################
+
+# Invariants for `vf:lower` actions
+# - The event must have a `vf:resourceInventoriedAs` (and it must exist)
+# - The event must have the same `vf:atLocation` as the `vf:currentLocation` of the resource
+# - The event must have a quantity > 0
+# - The resource must have a onhand/accounting quantity greater than the event's quantity.
+# - The event must have the same unit of measurement as the resource
+# - The event's quantity must decrease the resource's next state
+# - The event's `vf:resourceClassifiedAs` must be equal to the resource's `vf:classifiedAs`
+
+:EventShape_lower
+        a           sh:NodeShape ;
+        sh:target [
+            a :EventsTarget_noToResource;
+            :parAction vf:lower
+        ] ;
+        sh:expression [
+            sh:message "A 'lower' event may only affect vf:onhandQuantity and vf:accountingQuantity, but other are affected, too." ;
+            :affectsNoResourcePropertiesExcept (
+                sh:this 
+                [ fn:stringConcatWithSpace (
+                    vf:onhandQuantity
+                    vf:accountingQuantity
+                )]
+            )
+        ] ;
+        sh:expression [
+            sh:message "A 'lower' event must have a positive quantity." ;
+            fn:greaterThan ( 
+                [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                0 
+            )
+        ] ;
+        sh:expression [
+            sh:message "A 'lower' event must use the same units as its resource/onhand quantity, but this is not the case." ;
+            fn:equals ( 
+                [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasUnit )]
+            )
+        ] ;        
+        sh:expression [
+            sh:message "A 'lower' event must use the same units as its resource/accounting quantity, but this is not the case." ;
+            fn:equals ( 
+                [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasUnit )]
+            )
+        ] ;        
+        sh:property [
+            sh:path vf:resourceClassifiedAs ;
+            :sameAsResourceProperty vf:classifiedAs ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:atLocation ;
+            :sameAsResourceProperty vf:currentLocation ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :eventDecreasesResourceProperty vf:onhandQuantity ;
+            :resourcePath vf:resourceInventoriedAs ;
+            :allowResultBelowZero false ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :eventDecreasesResourceProperty vf:accountingQuantity ;
+            :resourcePath vf:resourceInventoriedAs ;
+            :allowResultBelowZero false ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        .
+
+
+# Effect of a current `lower` action 
+# 
+# - It generates one new resource state for its resource
+# - It copies all old values but decreases accounting and onhand quantities by 
+#   the event's quantities
+:CurrentEventEffectsShape_lower
+        a           sh:NodeShape ;
+        sh:target [
+            a :CurrentEventsTarget ;
+            :parAction vf:lower
+        ] ;
+        sh:rule :RuleCreateNextState ;
+        sh:rule :RuleLinkFromNextState ;
+        sh:rule :RuleCopyLocationToNextState ; 
+        sh:rule :RuleCopyPrimaryAccountableToNextState ;
+        sh:rule :RuleCopyOnhandQuantityDecreasedByEventQuantityToNextState ;
+        sh:rule :RuleCopyAccountingQuantityDecreasedByEventQuantityToNextState ;
+        sh:rule :RuleCopyOtherPropertiesToNextState ;
+        sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
+        .
+
+
+###############################################################################
+#                       Events with action `vf:accept` 
+#  In processes like repair or modification or testing, the same resource 
+#  will appear in the output.
+###############################################################################
+
+# Invariants for `vf:accept` actions
+# - The event must have a `vf:resourceInventoriedAs` (and it must exist)
+# - The event must have the same `vf:atLocation` as the `vf:currentLocation` of the resource
+# - The event must have a quantity > 0
+# - The resource must have a onhand/accounting quantity greater than the event's quantity.
+# - The event must have the same unit of measurement as the resource
+# - The event's quantity must decrease the resource's next state (only vf:onhandQuantity`)
+# - The event's `vf:resourceClassifiedAs` must be equal to the resource's `vf:classifiedAs`
+
+:EventShape_accept
+        a           sh:NodeShape ;
+        sh:target [
+            a :EventsTarget_noToResource;
+            :parAction vf:accept
+        ] ;
+        sh:expression [
+            sh:message "A 'accept' event may only affect vf:onhandQuantity and vf:accountingQuantity, but other are affected, too." ;
+            :affectsNoResourcePropertiesExcept (
+                sh:this 
+                [ fn:stringConcatWithSpace (
+                    vf:onhandQuantity
+                )]
+            )
+        ] ;
+        sh:expression [
+            sh:message "A 'accept' event must have a positive quantity." ;
+            fn:greaterThan ( 
+                [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                0 
+            )
+        ] ;
+        sh:expression [
+            sh:message "A 'accept' event must use the same units as its resource/onhand quantity, but this is not the case." ;
+            fn:equals ( 
+                [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasUnit )]
+            )
+        ] ;        
+        sh:expression [
+            sh:message "A 'accept' event must use the same units as its resource/accounting quantity, but this is not the case." ;
+            fn:equals ( 
+                [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasUnit )]
+            )
+        ] ;        
+        sh:property [
+            sh:path vf:resourceClassifiedAs ;
+            :sameAsResourceProperty vf:classifiedAs ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:atLocation ;
+            :sameAsResourceProperty vf:currentLocation ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:resourceQuantity ;
+            :eventDecreasesResourceProperty vf:onhandQuantity ;
+            :resourcePath vf:resourceInventoriedAs ;
+            :allowResultBelowZero false ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        .
+
+
+# Effect of a current `accept` action 
+# 
+# - It generates one new resource state for its resource
+# - It copies all old values but decreases accounting and onhand quantities by 
+#   the event's quantities
+:CurrentEventEffectsShape_accept
+        a           sh:NodeShape ;
+        sh:target [
+            a :CurrentEventsTarget ;
+            :parAction vf:accept
+        ] ;
+        sh:rule :RuleCreateNextState ;
+        sh:rule :RuleLinkFromNextState ;
+        sh:rule :RuleCopyLocationToNextState ; 
+        sh:rule :RuleCopyPrimaryAccountableToNextState ;
+        sh:rule :RuleCopyOnhandQuantityDecreasedByEventQuantityToNextState ;
+        sh:rule :RuleCopyAccountingQuantityToNextState ;
+        sh:rule :RuleCopyOtherPropertiesToNextState ;
+        sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
+        .
+
+
+###############################################################################
+#                       Events with action `vf:use` 
+###############################################################################
+
+# Invariants: nothing changes
+# - The event must have a `vf:resourceInventoriedAs` (and it must exist)
+# - The event must have the same `vf:atLocation` as the `vf:currentLocation` of the resource
+# - If the event has a quantity:
+#   * The resource must have a onhand/accounting quantity greater than the event's quantity.
+#   * The event must have the same unit of measurement as the resource
+# - The event's quantity must not affect the resource quantity.
+# - If present, the `vf:resourceClassifiedAs` must be equal to the resource's `vf:classifiedAs`
+
+:EventShape_use
+        a           sh:NodeShape ;
+        sh:target [
+            a :EventsTarget_noToResource;
+            :parAction vf:use
+        ] ;
+        a           sh:NodeShape ;
+        sh:class    vf:EconomicEvent ;
+        sh:expression [
+            sh:message "A 'use' event may not affect any resource properties, but this one does" ;
+            :affectsNoResourcePropertiesExcept (
+                sh:this 
+                # no properties are exempt - they all have to stay the same
+            )
+        ] ;
+        sh:expression [
+            sh:message "If a 'use' event has a quantity, it must use the same units as its resource/onhand quantity and the resource must have a greater or equal quantity, but this is not the case." ;
+            fn:or (
+                [ fn:not ( 
+                    [fn:bound ( 
+                        [ sh:path vf:resourceQuantity ] 
+                    )]
+                )]
+                [ fn:and (
+                    [ fn:greaterThan ( 
+                       [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                        "0"^^xsd:int 
+                    )]
+                    [ fn:greaterThanOrEquals (
+                        [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasNumericalValue )]
+                        [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                    )]
+                    [ fn:equals ( 
+                        [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasUnit )]
+                        [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                    )]
+                )]
+            )
+        ] ;      
+        sh:expression [
+            sh:message "If a 'use' event has a quantity, it must use the same units as its resource/accounting quantity and the resource must have a greater or equal quantity, but this is not the case." ;
+            fn:or (
+                [ fn:not ( 
+                    [ fn:bound ( 
+                        [ sh:path vf:resourceQuantity ] 
+                    )]
+                )]
+                [ fn:and (
+                    [ fn:greaterThan ( 
+                       [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                        0 
+                    )]
+                    [ fn:greaterThanOrEquals (
+                        [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasNumericalValue )]
+                        [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                    )]
+                    [ fn:equals ( 
+                        [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasUnit )]
+                        [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                    )]
+                )]
+            )
+        ] ;        
+        sh:property [
+            sh:path vf:resourceClassifiedAs ;
+            :sameAsResourceProperty vf:classifiedAs ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 0 ; 
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:atLocation ;
+            :sameAsResourceProperty vf:currentLocation ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        .
+
+
+# Effect of a current `use` action 
+# 
+# - It generates one new resource state for its resource
+# - It copies all old values 
+:CurrentEventEffectsShape_use
+        a           sh:NodeShape ;
+        sh:target [
+            a :CurrentEventsTarget ;
+            :parAction vf:use
+        ] ;
+
+        a           sh:NodeShape ;
+        sh:class vf:EconomicEvent ;
+        sh:rule :RuleCreateNextState ;
+        sh:rule :RuleLinkFromNextState ;
+        sh:rule :RuleCopyLocationToNextState ; 
+        sh:rule :RuleCopyPrimaryAccountableToNextState ;
+        sh:rule :RuleCopyOnhandQuantityToNextState ;
+        sh:rule :RuleCopyAccountingQuantityToNextState ;
+        sh:rule :RuleCopyOtherPropertiesToNextState ;
+        sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
+        .
+
+###############################################################################
+#                       Events with action `vf:work` 
+#  Labor power applied to a process.
+###############################################################################
+
+# Invariants: nothing changes
+# - The event must have a `vf:resourceInventoriedAs` (and it must exist)
+# - The event must have the same `vf:atLocation` as the `vf:currentLocation` of the resource
+# - If the event has a quantity:
+#   * The resource must have a onhand/accounting quantity greater than the event's quantity.
+#   * The event must have the same unit of measurement as the resource
+# - The event's quantity must not affect the resource quantity.
+# - If present, the `vf:resourceClassifiedAs` must be equal to the resource's `vf:classifiedAs`
+
+:EventShape_work
+        a           sh:NodeShape ;
+        sh:target [
+            a :EventsTarget_noToResource;
+            :parAction vf:work
+        ] ;
+        a           sh:NodeShape ;
+        sh:class    vf:EconomicEvent ;
+        sh:expression [
+            sh:message "A 'work' event may not affect any resource properties, but this one does" ;
+            :affectsNoResourcePropertiesExcept (
+                sh:this 
+                # no properties are exempt - they all have to stay the same
+            )
+        ] ;
+        sh:expression [
+            sh:message "If a 'work' event has a quantity, it must work the same units as its resource/onhand quantity and the resource must have a greater or equal quantity, but this is not the case." ;
+            fn:or (
+                [ fn:not ( 
+                    [fn:bound ( 
+                        [ sh:path vf:resourceQuantity ] 
+                    )]
+                )]
+                [ fn:and (
+                    [ fn:greaterThan ( 
+                       [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                        "0"^^xsd:int 
+                    )]
+                    [ fn:greaterThanOrEquals (
+                        [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasNumericalValue )]
+                        [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                    )]
+                    [ fn:equals ( 
+                        [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasUnit )]
+                        [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                    )]
+                )]
+            )
+        ] ;      
+        sh:expression [
+            sh:message "If a 'work' event has a quantity, it must work the same units as its resource/accounting quantity and the resource must have a greater or equal quantity, but this is not the case." ;
+            fn:or (
+                [ fn:not ( 
+                    [ fn:bound ( 
+                        [ sh:path vf:resourceQuantity ] 
+                    )]
+                )]
+                [ fn:and (
+                    [ fn:greaterThan ( 
+                       [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                        0 
+                    )]
+                    [ fn:greaterThanOrEquals (
+                        [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasNumericalValue )]
+                        [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                    )]
+                    [ fn:equals ( 
+                        [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasUnit )]
+                        [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                    )]
+                )]
+            )
+        ] ;        
+        sh:property [
+            sh:path vf:resourceClassifiedAs ;
+            :sameAsResourceProperty vf:classifiedAs ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 0 ; 
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:atLocation ;
+            :sameAsResourceProperty vf:currentLocation ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        .
+
+
+# Effect of a current `work` action 
+# 
+# - It generates one new resource state for its resource
+# - It copies all old values 
+:CurrentEventEffectsShape_work
+        a           sh:NodeShape ;
+        sh:target [
+            a :CurrentEventsTarget ;
+            :parAction vf:work
+        ] ;
+
+        a           sh:NodeShape ;
+        sh:class vf:EconomicEvent ;
+        sh:rule :RuleCreateNextState ;
+        sh:rule :RuleLinkFromNextState ;
+        sh:rule :RuleCopyLocationToNextState ; 
+        sh:rule :RuleCopyPrimaryAccountableToNextState ;
+        sh:rule :RuleCopyOnhandQuantityToNextState ;
+        sh:rule :RuleCopyAccountingQuantityToNextState ;
+        sh:rule :RuleCopyOtherPropertiesToNextState ;
+        sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
+        .
+
+###############################################################################
+#                       Events with action `vf:cite` 
+#  For example a design file, neither used nor consumed, the file remains 
+#  available at all times.
+###############################################################################
+
+# Invariants: nothing changes
+# - The event must have a `vf:resourceInventoriedAs` (and it must exist)
+# - The event must have the same `vf:atLocation` as the `vf:currentLocation` of the resource
+# - If the event has a quantity:
+#   * The resource must have a onhand/accounting quantity greater than the event's quantity.
+#   * The event must have the same unit of measurement as the resource
+# - The event's quantity must not affect the resource quantity.
+# - If present, the `vf:resourceClassifiedAs` must be equal to the resource's `vf:classifiedAs`
+
+:EventShape_cite
+        a           sh:NodeShape ;
+        sh:target [
+            a :EventsTarget_noToResource;
+            :parAction vf:cite
+        ] ;
+        a           sh:NodeShape ;
+        sh:class    vf:EconomicEvent ;
+        sh:expression [
+            sh:message "A 'cite' event may not affect any resource properties, but this one does" ;
+            :affectsNoResourcePropertiesExcept (
+                sh:this 
+                # no properties are exempt - they all have to stay the same
+            )
+        ] ;
+        sh:expression [
+            sh:message "If a 'cite' event has a quantity, it must cite the same units as its resource/onhand quantity and the resource must have a greater or equal quantity, but this is not the case." ;
+            fn:or (
+                [ fn:not ( 
+                    [fn:bound ( 
+                        [ sh:path vf:resourceQuantity ] 
+                    )]
+                )]
+                [ fn:and (
+                    [ fn:greaterThan ( 
+                       [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                        "0"^^xsd:int 
+                    )]
+                    [ fn:greaterThanOrEquals (
+                        [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasNumericalValue )]
+                        [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                    )]
+                    [ fn:equals ( 
+                        [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasUnit )]
+                        [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                    )]
+                )]
+            )
+        ] ;      
+        sh:expression [
+            sh:message "If a 'cite' event has a quantity, it must cite the same units as its resource/accounting quantity and the resource must have a greater or equal quantity, but this is not the case." ;
+            fn:or (
+                [ fn:not ( 
+                    [ fn:bound ( 
+                        [ sh:path vf:resourceQuantity ] 
+                    )]
+                )]
+                [ fn:and (
+                    [ fn:greaterThan ( 
+                       [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                        0 
+                    )]
+                    [ fn:greaterThanOrEquals (
+                        [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasNumericalValue )]
+                        [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                    )]
+                    [ fn:equals ( 
+                        [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasUnit )]
+                        [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                    )]
+                )]
+            )
+        ] ;        
+        sh:property [
+            sh:path vf:resourceClassifiedAs ;
+            :sameAsResourceProperty vf:classifiedAs ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 0 ; 
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:atLocation ;
+            :sameAsResourceProperty vf:currentLocation ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        .
+
+
+# Effect of a current `cite` action 
+# 
+# - It generates one new resource state for its resource
+# - It copies all old values 
+:CurrentEventEffectsShape_cite
+        a           sh:NodeShape ;
+        sh:target [
+            a :CurrentEventsTarget ;
+            :parAction vf:cite
+        ] ;
+
+        a           sh:NodeShape ;
+        sh:class vf:EconomicEvent ;
+        sh:rule :RuleCreateNextState ;
+        sh:rule :RuleLinkFromNextState ;
+        sh:rule :RuleCopyLocationToNextState ; 
+        sh:rule :RuleCopyPrimaryAccountableToNextState ;
+        sh:rule :RuleCopyOnhandQuantityToNextState ;
+        sh:rule :RuleCopyAccountingQuantityToNextState ;
+        sh:rule :RuleCopyOtherPropertiesToNextState ;
+        sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
+        .
+
+###############################################################################
+#                       Events with action `vf:pickup` 
+#  Transported resource or person enters the process; the same resource 
+#  will appear in the output.
+###############################################################################
+
+# Invariants: nothing changes
+# - The event must have a `vf:resourceInventoriedAs` (and it must exist)
+# - The event must have the same `vf:atLocation` as the `vf:currentLocation` of the resource
+# - If the event has a quantity:
+#   * The resource must have a onhand/accounting quantity greater than the event's quantity.
+#   * The event must have the same unit of measurement as the resource
+# - The event's quantity must not affect the resource quantity.
+# - If present, the `vf:resourceClassifiedAs` must be equal to the resource's `vf:classifiedAs`
+
+:EventShape_pickup
+        a           sh:NodeShape ;
+        sh:target [
+            a :EventsTarget_noToResource;
+            :parAction vf:pickup
+        ] ;
+        a           sh:NodeShape ;
+        sh:class    vf:EconomicEvent ;
+        sh:expression [
+            sh:message "A 'pickup' event may not affect any resource properties, but this one does" ;
+            :affectsNoResourcePropertiesExcept (
+                sh:this 
+                # no properties are exempt - they all have to stay the same
+            )
+        ] ;
+        sh:expression [
+            sh:message "If a 'pickup' event has a quantity, it must pickup the same units as its resource/onhand quantity and the resource must have a greater or equal quantity, but this is not the case." ;
+            fn:or (
+                [ fn:not ( 
+                    [fn:bound ( 
+                        [ sh:path vf:resourceQuantity ] 
+                    )]
+                )]
+                [ fn:and (
+                    [ fn:greaterThan ( 
+                       [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                        "0"^^xsd:int 
+                    )]
+                    [ fn:greaterThanOrEquals (
+                        [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasNumericalValue )]
+                        [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                    )]
+                    [ fn:equals ( 
+                        [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasUnit )]
+                        [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                    )]
+                )]
+            )
+        ] ;      
+        sh:expression [
+            sh:message "If a 'pickup' event has a quantity, it must pickup the same units as its resource/accounting quantity and the resource must have a greater or equal quantity, but this is not the case." ;
+            fn:or (
+                [ fn:not ( 
+                    [ fn:bound ( 
+                        [ sh:path vf:resourceQuantity ] 
+                    )]
+                )]
+                [ fn:and (
+                    [ fn:greaterThan ( 
+                       [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                        0 
+                    )]
+                    [ fn:greaterThanOrEquals (
+                        [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasNumericalValue )]
+                        [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                    )]
+                    [ fn:equals ( 
+                        [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasUnit )]
+                        [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                    )]
+                )]
+            )
+        ] ;        
+        sh:property [
+            sh:path vf:resourceClassifiedAs ;
+            :sameAsResourceProperty vf:classifiedAs ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 0 ; 
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:atLocation ;
+            :sameAsResourceProperty vf:currentLocation ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        .
+
+
+# Effect of a current `pickup` action 
+# 
+# - It generates one new resource state for its resource
+# - It copies all old values 
+:CurrentEventEffectsShape_pickup
+        a           sh:NodeShape ;
+        sh:target [
+            a :CurrentEventsTarget ;
+            :parAction vf:pickup
+        ] ;
+
+        a           sh:NodeShape ;
+        sh:class vf:EconomicEvent ;
+        sh:rule :RuleCreateNextState ;
+        sh:rule :RuleLinkFromNextState ;
+        sh:rule :RuleCopyLocationToNextState ; 
+        sh:rule :RuleCopyPrimaryAccountableToNextState ;
+        sh:rule :RuleCopyOnhandQuantityToNextState ;
+        sh:rule :RuleCopyAccountingQuantityToNextState ;
+        sh:rule :RuleCopyOtherPropertiesToNextState ;
+        sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
+        .
+
+###############################################################################
+#                       Events with action `vf:dropoff` 
+#  Transported resource or person leaves the process; the same resource or 
+#  person appeared in the input.
+###############################################################################
+
+# Invariants: nothing changes
+# - The event must have a `vf:resourceInventoriedAs` (and it must exist)
+# - The event must have the same `vf:atLocation` as the `vf:currentLocation` of the resource
+# - If the event has a quantity:
+#   * The resource must have a onhand/accounting quantity greater than the event's quantity.
+#   * The event must have the same unit of measurement as the resource
+# - The event's quantity must not affect the resource quantity.
+# - If present, the `vf:resourceClassifiedAs` must be equal to the resource's `vf:classifiedAs`
+
+:EventShape_dropoff
+        a           sh:NodeShape ;
+        sh:target [
+            a :EventsTarget_noToResource;
+            :parAction vf:dropoff
+        ] ;
+        a           sh:NodeShape ;
+        sh:class    vf:EconomicEvent ;
+        sh:expression [
+            sh:message "A 'dropoff' event may not affect any resource properties, but this one does" ;
+            :affectsNoResourcePropertiesExcept (
+                sh:this 
+                # no properties are exempt - they all have to stay the same
+            )
+        ] ;
+        sh:expression [
+            sh:message "If a 'dropoff' event has a quantity, it must dropoff the same units as its resource/onhand quantity and the resource must have a greater or equal quantity, but this is not the case." ;
+            fn:or (
+                [ fn:not ( 
+                    [fn:bound ( 
+                        [ sh:path vf:resourceQuantity ] 
+                    )]
+                )]
+                [ fn:and (
+                    [ fn:greaterThan ( 
+                       [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                        "0"^^xsd:int 
+                    )]
+                    [ fn:greaterThanOrEquals (
+                        [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasNumericalValue )]
+                        [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                    )]
+                    [ fn:equals ( 
+                        [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasUnit )]
+                        [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                    )]
+                )]
+            )
+        ] ;      
+        sh:expression [
+            sh:message "If a 'dropoff' event has a quantity, it must dropoff the same units as its resource/accounting quantity and the resource must have a greater or equal quantity, but this is not the case." ;
+            fn:or (
+                [ fn:not ( 
+                    [ fn:bound ( 
+                        [ sh:path vf:resourceQuantity ] 
+                    )]
+                )]
+                [ fn:and (
+                    [ fn:greaterThan ( 
+                       [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                        0 
+                    )]
+                    [ fn:greaterThanOrEquals (
+                        [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasNumericalValue )]
+                        [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                    )]
+                    [ fn:equals ( 
+                        [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasUnit )]
+                        [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                    )]
+                )]
+            )
+        ] ;        
+        sh:property [
+            sh:path vf:resourceClassifiedAs ;
+            :sameAsResourceProperty vf:classifiedAs ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 0 ; 
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:atLocation ;
+            :sameAsResourceProperty vf:currentLocation ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        .
+
+
+# Effect of a current `dropoff` action 
+# 
+# - It generates one new resource state for its resource
+# - It copies all old values 
+:CurrentEventEffectsShape_dropoff
+        a           sh:NodeShape ;
+        sh:target [
+            a :CurrentEventsTarget ;
+            :parAction vf:dropoff
+        ] ;
+
+        a           sh:NodeShape ;
+        sh:class vf:EconomicEvent ;
+        sh:rule :RuleCreateNextState ;
+        sh:rule :RuleLinkFromNextState ;
+        sh:rule :RuleCopyLocationToNextState ; 
+        sh:rule :RuleCopyPrimaryAccountableToNextState ;
+        sh:rule :RuleCopyOnhandQuantityToNextState ;
+        sh:rule :RuleCopyAccountingQuantityToNextState ;
+        sh:rule :RuleCopyOtherPropertiesToNextState ;
+        sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
+        .
+
+###############################################################################
+#                       Events with action `vf:deliver-service` 
+###############################################################################
+
+# Invariants: nothing changes
+# - The event must have a `vf:resourceInventoriedAs` (and it must exist)
+# - The event must have the same `vf:atLocation` as the `vf:currentLocation` of the resource
+# - If the event has a quantity:
+#   * The resource must have a onhand/accounting quantity greater than the event's quantity.
+#   * The event must have the same unit of measurement as the resource
+# - The event's quantity must not affect the resource quantity.
+# - If present, the `vf:resourceClassifiedAs` must be equal to the resource's `vf:classifiedAs`
+
+:EventShape_deliver-service
+        a           sh:NodeShape ;
+        sh:target [
+            a :EventsTarget_noToResource;
+            :parAction vf:deliver-service
+        ] ;
+        a           sh:NodeShape ;
+        sh:class    vf:EconomicEvent ;
+        sh:expression [
+            sh:message "A 'deliver-service' event may not affect any resource properties, but this one does" ;
+            :affectsNoResourcePropertiesExcept (
+                sh:this 
+                # no properties are exempt - they all have to stay the same
+            )
+        ] ;
+        sh:expression [
+            sh:message "If a 'deliver-service' event has a quantity, it must deliver-service the same units as its resource/onhand quantity and the resource must have a greater or equal quantity, but this is not the case." ;
+            fn:or (
+                [ fn:not ( 
+                    [fn:bound ( 
+                        [ sh:path vf:resourceQuantity ] 
+                    )]
+                )]
+                [ fn:and (
+                    [ fn:greaterThan ( 
+                       [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                        "0"^^xsd:int 
+                    )]
+                    [ fn:greaterThanOrEquals (
+                        [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasNumericalValue )]
+                        [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                    )]
+                    [ fn:equals ( 
+                        [ sh:path ( vf:resourceInventoriedAs vf:onhandQuantity om2:hasUnit )]
+                        [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                    )]
+                )]
+            )
+        ] ;      
+        sh:expression [
+            sh:message "If a 'deliver-service' event has a quantity, it must deliver-service the same units as its resource/accounting quantity and the resource must have a greater or equal quantity, but this is not the case." ;
+            fn:or (
+                [ fn:not ( 
+                    [ fn:bound ( 
+                        [ sh:path vf:resourceQuantity ] 
+                    )]
+                )]
+                [ fn:and (
+                    [ fn:greaterThan ( 
+                       [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                        0 
+                    )]
+                    [ fn:greaterThanOrEquals (
+                        [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasNumericalValue )]
+                        [ sh:path ( vf:resourceQuantity om2:hasNumericalValue ) ]
+                    )]
+                    [ fn:equals ( 
+                        [ sh:path ( vf:resourceInventoriedAs vf:accountingQuantity om2:hasUnit )]
+                        [ sh:path ( vf:resourceQuantity om2:hasUnit ) ]
+                    )]
+                )]
+            )
+        ] ;        
+        sh:property [
+            sh:path vf:resourceClassifiedAs ;
+            :sameAsResourceProperty vf:classifiedAs ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 0 ; 
+            sh:maxCount 1 ;
+        ] ;
+        sh:property [
+            sh:path vf:atLocation ;
+            :sameAsResourceProperty vf:currentLocation ;
+            :resourcePath vf:resourceInventoriedAs ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+        ] ;
+        .
+
+
+# Effect of a current `deliver-service` action 
+# 
+# - It generates one new resource state for its resource
+# - It copies all old values 
+:CurrentEventEffectsShape_deliver-service
+        a           sh:NodeShape ;
+        sh:target [
+            a :CurrentEventsTarget ;
+            :parAction vf:deliver-service
+        ] ;
+
+        a           sh:NodeShape ;
+        sh:class vf:EconomicEvent ;
+        sh:rule :RuleCreateNextState ;
+        sh:rule :RuleLinkFromNextState ;
+        sh:rule :RuleCopyLocationToNextState ; 
+        sh:rule :RuleCopyPrimaryAccountableToNextState ;
+        sh:rule :RuleCopyOnhandQuantityToNextState ;
+        sh:rule :RuleCopyAccountingQuantityToNextState ;
+        sh:rule :RuleCopyOtherPropertiesToNextState ;
+        sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
+        .
 
 
 ###############################################################################
