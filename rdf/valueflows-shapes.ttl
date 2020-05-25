@@ -24,7 +24,7 @@
 # Note: more info on validation rules:
 #
 # https://github.com/valueflows/vf-apps/issues/5
-#
+#   
 
 
 vf: 
@@ -1961,6 +1961,25 @@ fn:newNodeURI
     ] ;
 .
 
+
+:RuleCopyCustodianToNextState_toResource   
+    sh:condition [
+        sh:path ( vf:toResourceInventoriedAs vf:custodian ) ;
+        sh:nodeKind sh:IRIOrLiteral;
+    ] ;
+    a sh:TripleRule ;
+    sh:subject [ 
+        fn:newNodeURI ( 
+            sh:this 
+            [ sh:path vf:toResourceInventoriedAs ] 
+        ) ;
+    ] ;
+    sh:predicate vf:custodian ;
+    sh:object [
+        sh:path ( vf:toResourceInventoriedAs vf:custodian );
+    ] ;
+.
+
 :RuleCopyCustodianFromEventProviderToNextState    
     sh:condition [
         sh:path vf:provider ;
@@ -3016,6 +3035,8 @@ fn:newNodeURI
         sh:rule :RuleCopyLocationToNextState_toResource ; 
         sh:rule :RuleCopyPrimaryAccountableToNextState ;
         sh:rule :RuleCopyPrimaryAccountableToNextState_toResource ;
+        sh:rule :RuleCopyCustodianToNextState ;
+        sh:rule :RuleCopyCustodianToNextState_toResource ;
         sh:rule :RuleCopyOtherPropertiesToNextState ;
         sh:rule :RuleCopyOtherPropertiesToNextState_toResource ;
         sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
@@ -3214,6 +3235,8 @@ fn:newNodeURI
         sh:rule :RuleCopyLocationToNextState_toResource ; 
         sh:rule :RuleCopyPrimaryAccountableToNextState ;
         sh:rule :RuleCopyPrimaryAccountableToNextState_toResource ;
+        sh:rule :RuleCopyCustodianToNextState ;
+        sh:rule :RuleCopyCustodianToNextState_toResource ;        
         sh:rule :RuleCopyOtherPropertiesToNextState ;
         sh:rule :RuleCopyOtherPropertiesToNextState_toResource ;
         sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
@@ -3412,6 +3435,8 @@ fn:newNodeURI
         sh:rule :RuleCopyLocationToNextState_toResource ; 
         sh:rule :RuleCopyPrimaryAccountableToNextState ;
         sh:rule :RuleCopyPrimaryAccountableToNextState_toResource ;
+        sh:rule :RuleCopyCustodianToNextState ;
+        sh:rule :RuleCopyCustodianToNextState_toResource ;
         sh:rule :RuleCopyOtherPropertiesToNextState ;
         sh:rule :RuleCopyOtherPropertiesToNextState_toResource ;
         sh:rule :RuleCopyOtherBNodeStructuresToNextState ;
