@@ -64,11 +64,14 @@ vf:
         sh:targetClass vf:EconomicEvent ;
         sh:property :RequireProviderShape ;
         sh:property :RequireReceiverShape ;
-        sh:property :ActionShape ;
+        sh:property :RequireActionShape ;
         sh:property :ResourceInventoriedAsShape ;
         sh:property :ToResourceInventoriedAsShape ;
-        sh:property :ResourceQuantityShape ;
-        sh:property :EffortQuantityShape ;
+        sh:propety  :AtLocationShape ;
+        sh:xone (
+            [ sh:property :ResourceQuantityRequiredShape ]
+            [ sh:property :EffortQuantityRequiredShape ; ]
+        ) ;
         sh:property :ResourceClassifiedAsShape ;
         .
 
@@ -77,24 +80,43 @@ vf:
         sh:targetClass vf:Intent ;
         sh:property :ProviderShape ;
         sh:property :ReceiverShape ;
-        sh:property :ActionShape ;
+        sh:property :RequireActionShape ;
         sh:property :ResourceInventoriedAsShape ;
         sh:property :ToResourceInventoriedAsShape ;
-        sh:property :ResourceQuantityShape ;
-        sh:property :EffortQuantityShape ;
-        sh:property :ResourceClassifiedAsShape ;
+        sh:xone (
+            [ sh:property :ResourceQuantityRequiredShape ]
+            [ sh:property :EffortQuantityRequiredShape ; ]
+        ) ;
+        sh:property :ResourceClassifiedAsRequiredShape ;
         .
+
+:RecipeFlowShape
+        a               sh:NodeShape ;
+        sh:targetClass vf:RecipeFlow ;
+        sh:property :ProviderOrSlotShape ;
+        sh:property :ReceiverOrSlotShape ;
+        sh:property :RequireActionShape ;
+       # sh:property :ResourceInventoriedAsOrSlotShape ;
+       # sh:property :ToResourceInventoriedAsOrSlotShape ;
+        sh:xone (
+            [ sh:property :ResourceQuantityOrSlotRequiredShape ]
+            [ sh:property :EffortQuantityOrSlotRequiredShape ; ]
+        ) ;
+       # sh:property :ResourceClassifiedAsOrSlotShape ;
+        .        
 
 :CommitmentShape
         a               sh:NodeShape ;
         sh:targetClass vf:Commitment ;
         sh:property :RequireProviderShape ;
         sh:property :RequireReceiverShape ;
-        sh:property :ActionShape ;
+        sh:property :RequireActionShape ;
         sh:property :ResourceInventoriedAsShape ;
         sh:property :ToResourceInventoriedAsShape ;
-        sh:property :ResourceQuantityShape ;
-        sh:property :EffortQuantityShape ;
+        sh:xone (
+            [ sh:property :ResourceQuantityRequiredShape ; ]
+            [ sh:property :EffortQuantityRequiredShape ; ]
+        ) ;
         sh:property :ResourceClassifiedAsShape ;
         sh:property [
             sh:inversePath vf:satisfiedBy ;
@@ -105,7 +127,7 @@ vf:
 :SatisfactionShape
         a               sh:NodeShape ;
         sh:targetClass  vf:Satisfaction ;
-        sh:property     :ResourceQuantityShape ;
+        sh:property     :ResourceQuantityRequiredShape ;
         sh:property [
             sh:path vf:satisfies ;
             sh:class vf:Intent ;
@@ -143,6 +165,11 @@ vf:
         sh:maxCount     1 ;
         .
 
+:AtLocationShape
+        a               sh:PropertyShape ;
+        sh:path         vf:atLocation ;
+        sh:maxCount     1 ;
+        .
 
 :CurrentLocationShape
         a               sh:PropertyShape ;
@@ -175,6 +202,14 @@ vf:
         sh:nodeKind     sh:IRI ;        
         sh:maxCount     1 ;
         .
+
+:ResourceClassifiedAsRequiredShape
+        a               sh:PropertyShape ;
+        sh:path         vf:resourceClassifiedAs ;
+        sh:nodeKind     sh:IRI ;        
+        sh:maxCount     1 ;
+        sh:minCount     1 ;
+        .        
 
 :ClassifiedAsShape
         a               sh:PropertyShape ;
@@ -223,16 +258,42 @@ vf:
         sh:nodeKind     sh:BlankNodeOrIRI ;         
         .
 
-:ResourceQuantityShape
+:ResourceQuantityRequiredShape
         a               sh:PropertyShape ;
         sh:node         :QuantityNodeShape ;
         sh:path         vf:resourceQuantity ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
         .
 
-:EffortQuantityShape
+:ResourceQuantityOrSlotRequiredShape
+        a               sh:PropertyShape ;
+        sh:or(
+            [ sh:node         :QuantityNodeShape ] 
+            [ sh:class        vf:ResourceQuantitySlot ]
+        ) ;
+        sh:path         vf:resourceQuantity ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        .
+
+:EffortQuantityOrSlotRequiredShape
+        a               sh:PropertyShape ;
+        sh:or ( 
+            [ sh:node         :QuantityNodeShape ]
+            [ sh:class        vf:EffortQuantitySlot ]
+        ) ;
+        sh:path         vf:effortQuantity ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        .
+
+:EffortQuantityRequiredShape
         a               sh:PropertyShape ;
         sh:node         :QuantityNodeShape ;
         sh:path         vf:effortQuantity ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
         .
 
 :ResourceInventoriedAsShape
@@ -255,7 +316,17 @@ vf:
         sh:class        foaf:Agent ;
         sh:maxCount     1 ;
         sh:minCount     0 ;
-        sh:nodeKind     sh:IRI ;
+        .
+
+:ProviderOrSlotShape
+        a               sh:PropertyShape ;
+        sh:path         vf:provider;
+        sh:or (
+            [ sh:class  foaf:Agent ]
+            [ sh:class  vf:AgentSlot ]
+        ) ;
+        sh:maxCount     1 ;
+        sh:minCount     0 ;
         .
 
 :RequireProviderShape
@@ -276,6 +347,17 @@ vf:
         sh:nodeKind     sh:IRI ;
         .
 
+:ReceiverOrSlotShape
+        a               sh:PropertyShape ;
+        sh:path         vf:provider;
+        sh:or (
+            [ sh:class  foaf:Agent ]
+            [ sh:class  vf:AgentSlot ]
+        ) ;
+        sh:maxCount     1 ;
+        sh:minCount     0 ;
+        .           
+
 :RequireReceiverShape
         a               sh:PropertyShape ;
         sh:path         vf:provider;
@@ -285,13 +367,14 @@ vf:
         sh:nodeKind     sh:IRI ;
         .
 
-:ActionShape
+:RequireActionShape
         a               sh:PropertyShape ;
         sh:path         vf:action ;
         sh:class        vf:Action ;
         sh:maxCount     1 ;
         sh:minCount     1 ;
         .      
+
 
 ###############################################################################
 #   Domain-independent helper functions
@@ -460,7 +543,7 @@ fn:bound
     """ ;
     .
 
-fn:onlyOneBound
+fn:xoneBound
     a sh:SPARQLFunction ;
     sh:parameter [
         sh:path :op1 ;
@@ -660,6 +743,40 @@ fn:not
     WHERE {}
     """;
     .
+
+fn:min
+    a sh:SPARQLFunction ;
+    sh:parameter [
+        sh:order 1 ;
+        sh:path :arg1 ;
+        sh:optional false ;
+    ] ;
+    sh:parameter [
+        sh:order 2 ;
+        sh:path :arg2 ;
+        sh:optional false ;
+    ] ;
+    sh:select """
+        SELECT (IF(?arg1 < ?arg2, ?arg1, ?arg2) as ?result) 
+        WHERE {}
+    """ .
+
+fn:max
+    a sh:SPARQLFunction ;
+    sh:parameter [
+        sh:order 1 ;
+        sh:path :arg1 ;
+        sh:optional false ;
+    ] ;
+    sh:parameter [
+        sh:order 2 ;
+        sh:path :arg2 ;
+        sh:optional false ;
+    ] ;
+    sh:select """
+        SELECT (IF(?arg1 > ?arg2, ?arg1, ?arg2) as ?result) 
+        WHERE {}
+    """ .
 
 fn:pathEquals
     a sh:SPARQLFunction ;
@@ -1066,7 +1183,7 @@ fn:newNodeURI
             # - if values aren't equal
             # - if only one is bound (property appeared or disappeared)
             FILTER(
-                fn:onlyOneBound(?val, ?nextVal)
+                fn:xoneBound(?val, ?nextVal)
                 || 
                 ! fn:pathEquals(
                     ?res, ?resProp, 
@@ -1333,7 +1450,7 @@ fn:newNodeURI
                            ?res, ?unaffectedResourceProperty, 
                            ?next, ?unaffectedResourceProperty)
                     || # error if only one property of the two is present
-                        fn:onlyOneBound(?val, ?nextVal) 
+                        fn:xoneBound(?val, ?nextVal) 
                 )
                 BIND(IF(
                         BOUND(?val) && BOUND(?nextVal),
@@ -1397,7 +1514,7 @@ fn:newNodeURI
                 }
                 FILTER(BOUND(?next))
                 FILTER(
-                    fn:onlyOneBound(?val, ?nextVal)
+                    fn:xoneBound(?val, ?nextVal)
                     ||
                     ! fn:pathEquals(?res, ?unaffectedResourceProperty_toResource, ?next, ?unaffectedResourceProperty_toResource)
                 )
@@ -1465,7 +1582,7 @@ fn:newNodeURI
                     ?res ?sameAsResourceProperty ?val .
                 }
                 FILTER(
-                    fn:onlyOneBound(?val, ?eventVal)
+                    fn:xoneBound(?val, ?eventVal)
                     || ! fn:pathEquals(?this, ?PATH, ?res, ?sameAsResourceProperty)
                 )
                 BIND(
@@ -1549,7 +1666,7 @@ fn:newNodeURI
                     ?next ?sameAsNextResourceProperty ?nextVal .
                 }
                 FILTER(
-                    fn:onlyOneBound(?eventVal, ?nextVal)
+                    fn:xoneBound(?eventVal, ?nextVal)
                     ||
                     ! fn:pathEquals(?this, ?PATH, ?next, ?sameAsNextResourceProperty)
                 )
@@ -5061,7 +5178,7 @@ fn:newNodeURI
                     ]
             }
             FILTER(BOUND(?sat))
-            FILTER(fn:onlyOneBound(?intResValue, ?intEffValue))
+            FILTER(fn:xoneBound(?intResValue, ?intEffValue))
             BIND(IF(BOUND(?satResValue),?satResValue, 0) as ?resValue)
             BIND(IF(BOUND(?satEffValue),?satEffValue, 0) as ?effValue)
         } 
@@ -5119,3 +5236,204 @@ fn:newNodeURI
     ] 
     .
 
+
+# Intent matching
+
+:UnfinishedIntentsTarget
+    a sh:SPARQLTargetType ;
+        rdfs:subClassOf sh:Target ;
+		sh:prefixes vf: ;
+        sh:parameter [
+            sh:path :parAction ;
+            sh:nodeKind sh:IRI ;
+        ] ;
+		sh:select """
+			SELECT DISTINCT ?this
+            WHERE {
+                ?this a vf:Intent.
+                FILTER NOT EXISTS {
+                    ?this vf:finished true ;
+                }
+            }
+        """ ;
+        .
+
+:MatchingIntentsShape
+    a   sh:NodeShape ;
+    sh:target [
+        a :UnfinishedIntentsTarget ;
+    ] ;
+    sh:rule [
+        a sh:TripleRule ;
+        sh:subject sh:this ;
+        sh:predicate vf:matches ;
+        sh:object [
+            fn:findMatches ( sh:this )
+        ] ;
+    ] ;
+    .
+
+fn:findMatches 
+    a sh:SPARQLFunction ;
+    sh:parameter [
+        sh:optional false;
+        sh:order 1;
+        sh:nodeKind sh:BlankNodeOrIRI ;
+        sh:path :parIntent 
+    ] ;
+    sh:prefixes vf: ;
+    sh:select """
+        SELECT ?other 
+        WHERE {
+            ?parIntent a vf:Intent ;
+                vf:action ?action ;
+            .
+            OPTIONAL {
+                ?parIntent vf:resourceClassifiedAs ?resClass ;
+            } 
+            OPTIONAL {
+                ?parIntent vf:resourceInventoriedAs/vf:resourceClassifiedAs ?resClass ;
+            }
+            OPTIONAL {
+                ?parIntent vf:receiver ?receiver ;
+            }
+            OPTIONAL {
+                ?parIntent vf:provider ?provider ;
+            }
+            FILTER(BOUND(?receiver) || BOUND(?provider))
+            .
+                        
+            ?other a vf:Intent ;
+                vf:action ?action ;
+            FILTER NOT EXISTS {
+                ?other vf:finished true ;
+            }
+            OPTIONAL {
+                ?other vf:resourceClassifiedAs ?otherResClass ;
+            } 
+            OPTIONAL {
+                ?other vf:resourceInventoriedAs/vf:resourceClassifiedAs ?otherResClass ;
+            }
+            
+            FILTER(fn:allBound2(?resClass, ?otherResClass) 
+                && ?resClass = ?otherResClass)
+            
+            OPTIONAL {
+                ?other vf:resourceInventoriedAs ?res
+            }
+            OPTIONAL {
+                ?other vf:provider ?otherProvider ;
+            }
+            OPTIONAL {
+                ?other vf:receiver ?otherReceiver ;
+            }
+            FILTER(fn:xoneBound(?receiver, ?otherReceiver))
+            FILTER(fn:xoneBound(?provider, ?otherProvider))
+
+            FILTER(?other != ?parIntent)
+            .
+            # location must match if present
+            OPTIONAL {
+                ?parIntent vf:atLocation ?loc ;
+            }
+            OPTIONAL {
+                ?parIntent vf:resourceInventoriedAs/vf:currentLocation ?loc ;
+            }
+            OPTIONAL {
+                ?other vf:atLocation ?otherLoc ;
+            }
+            OPTIONAL {
+                ?other vf:resourceInventoriedAs/vf:currentLocation ?otherLoc ;
+            }
+            FILTER((!BOUND(?loc) && !BOUND(?otherLoc)) || ?loc = ?otherLoc)
+            # quantity: units must match or 
+            OPTIONAL{
+                ?parIntent 
+                    vf:resourceQuantity/om2:hasUnit ?resUnit ;
+                    vf:resourceQuantity/om2:hasNumericalValue ?resQuantity ;
+            }
+            OPTIONAL{
+                ?other 
+                    vf:resourceQuantity/om2:hasUnit ?otherResUnit ;
+                    vf:resourceQuantity/om2:hasNumericalValue ?otherResQuantity ;
+            } 
+            OPTIONAL{
+                ?parIntent 
+                    vf:effortQuantity/om2:hasUnit ?effUnit ;
+                    vf:effortQuantity/om2:hasNumericalValue ?effQuantity ;
+            }
+            OPTIONAL{
+                ?other 
+                    vf:effortQuantity/om2:hasUnit ?otherEffUnit ;
+                    vf:effortQuantity/om2:hasNumericalValue ?otherEffQuantity ;
+            } 
+            FILTER (
+                (fn:allBound2(?resUnit, ?otherResUnit) && ?resUnit = ?otherResUnit)
+                || 
+                (fn:allBound2(?effUnit, ?otherEffUnit) && ?effUnit = ?otherEffUnit)
+            )
+            # score by fraction of quantities. the closer to 1, the better
+            BIND(COALESCE(?resQuantity,?effQuantity) as ?quantity)
+            BIND(COALESCE(?effQuantity,?otherEffQuantity) as ?otherQuantity)
+            BIND(fn:min(?otherQuantity/?quantity , 1)   
+                as ?quantitySatisfaction)
+            BIND(IF(BOUND(?loc),0.5,0) + ?quantitySatisfaction as ?score)
+        } order by desc(?score) limit 30
+    """;
+    .
+
+:resolveRecipeShape
+    a sh:NodeShape ;
+    sh:targetClass vf:RecipeExchange ;
+    sh:rule [
+        a sh:SPARQLRule ;
+        sh:prefixes vf: ;
+        sh:construct """
+        CONSTRUCT {
+            ?result ?slot ?val
+        } WHERE {
+            #BIND(fn:newNodeURI(?result) as ?newNode)
+            ?this a vf:RecipeExchange .
+            ?result vf:recipeResultOf ?this .
+            ?result ?prop ?slot .
+            ?slot ?slotOf ?this .
+            ?slot a vf:Slot .
+            ?intent a vf:Intent .
+            ?intent ?prop ?val .
+            {   
+                SELECT ?flow ?slot
+                WHERE {
+                    ?flow a vf:RecipeFlow .
+                    ?flow vf:clauseOf ?this .
+                    ?flow ?flowSlotProp ?slot .
+                }
+            }
+
+            
+            FILTER NOT EXISTS {
+                ?intent vf:finished true .
+            }            
+            {
+                # query that finds result/intent pairs that 
+                # match when only regarding non-slot properties
+                SELECT ?result ?intent
+                WHERE {
+                    ?result vf:recipeResultOf ?this .
+                    ?result ?nonSlotProp ?nonSlotVal .
+                    FILTER(?nonSlotProp != rdf:type)
+                    FILTER NOT EXISTS {
+                        ?nonSlotVal a vf:Slot ;
+                    }
+                    ?intent ?nonSlotProp ?nonSlotVal .
+                    ?intent a vf:Intent .
+                    FILTER NOT EXISTS {
+                        ?intent vf:finished true .
+                    } 
+                } 
+            }
+
+
+
+        }
+        """ ;
+    ] .

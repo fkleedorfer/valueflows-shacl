@@ -85,8 +85,8 @@ then
     compareToExpected=true
     expectedOutputDir="$( cd "$4" >/dev/null 2>&1 && pwd )"
 fi
-
-for dataFile in ${dataFolder}/*.ttl
+shopt -s globstar
+for dataFile in ${dataFolder}/**/*.ttl
 do
     command="${script_path}/shacl-single.sh ${shapesFile} ${dataFile}"
     if (${outputToDir})

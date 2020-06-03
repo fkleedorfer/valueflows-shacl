@@ -1,0 +1,59 @@
+@prefix ex: <http://example.org/ns#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix vf:    <https://w3id.org/valueflows#> .
+@prefix om2: <http://www.ontology-of-units-of-measure.org/resource/om-2/> .
+@prefix wd: <http://www.wikidata.org/entity/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+# move with only one resource
+ex:Alice
+    a foaf:Agent .
+
+ex:Bob
+    a foaf:Agent .
+
+ex:bobsApples1
+    a vf:EconomicResource ;
+    vf:primaryAccountable ex:Bob ;
+    vf:classifiedAs wd:Q3127261 ;    
+    vf:currentLocation wd:Q1741 ;
+    vf:onhandQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "0"^^xsd:int ;
+    ] ;
+    vf:accountingQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "0"^^xsd:int ;
+    ]
+    .
+
+ex:intent1
+    a vf:Intent ;
+    vf:action vf:produce ;
+    vf:receiver ex:Bob ;
+    vf:resourceInventoriedAs ex:bobsApples1 ;
+    vf:resourceClassifiedAs wd:Q3127261 ;
+    vf:atLocation wd:Q1741 ;
+    vf:resourceQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "100"^^xsd:int ;
+    ] ; 
+    .
+
+ex:intent2
+    a vf:Intent ;
+    vf:action vf:produce ;
+    vf:provider ex:Alice ;
+    vf:resourceClassifiedAs wd:Q3127261 ;
+    vf:atLocation wd:Q676832 ;
+    vf:resourceQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "100"^^xsd:int ;
+    ] ; 
+    .    
+
+

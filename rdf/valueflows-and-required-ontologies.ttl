@@ -20,7 +20,12 @@
 #################################################################
 
 vf:create a vf:Action .
-
+vf:matches a owl:ObjectProperty ;
+        rdfs:label          "matches" ;
+        rdfs:domain         vf:Intent ;
+        rdfs:range          vf:Intent ;
+        vs:term_status      "unstable" ;
+        rdfs:comment        "States that there may be a vf:Commitment possible that would satisfy both Intents" .
 
 <https://w3id.org/valueflows/> a owl:Ontology;
     dcterms:title "Value Flows Ontology";

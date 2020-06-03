@@ -16,16 +16,31 @@ usage: $0 <shapes-file> <data-file> [output-directory] [expected-output-director
 EOF
 }
 script_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+input_path="$( cd ${script_path}/../rdf/input >/dev/null 2>&1 && pwd )" # determine where our input files are
 
 source ${script_path}/common.sh 
 source ${script_path}/settings.sh 
 
+
+
 if $( ! ${outputToDir})
 then
     outputToDir=true
-    outputDir=${script_path}/../tmp/out
+    outputDir="$( cd ${script_path}/../tmp/out >/dev/null 2>&1 && pwd )"
 fi
 mkdir -p ${outputDir}
+echo "input_path:${input_path}"
+if [[ $dataFile =~ "${input_path}" ]]
+then 
+    dataFileDir="$( cd "$( dirname "$dataFile" )" >/dev/null 2>&1 && pwd )"
+    outputSubDir=${dataFileDir#$input_path}
+else  
+    outputSubDir=""
+fi 
+outputDir=${outputDir}$outputSubDir
+echo "output to: ${outputDir}"
+mkdir -p ${outputDir}
+
 
 valSuffix="-val.ttl"
 infSuffix="-inf.ttl"
@@ -76,10 +91,9 @@ fi
 
 if (${compareToExpected})
 then
-    compareValTo=${expectedOutputDir}/`basename ${dataFile}`${valSuffix}
-    compareInfTo=${expectedOutputDir}/`basename ${dataFile}`${infSuffix}
+    compareValTo=${expectedOutputDir}${outputSubDir}/`basename ${dataFile}`${valSuffix}
+    compareInfTo=${expectedOutputDir}${outputSubDir}/`basename ${dataFile}`${infSuffix}
 fi
-
 tmpFile=$(mktemp ${script_path}/../tmp/tmp-data.XXX.ttl)
 cat ${dataFile} > ${tmpFile}
 additionalValueflowsData=`dirname ${shapesFile}`/"valueflows-and-required-ontologies.ttl"

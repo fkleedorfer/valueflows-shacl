@@ -1,0 +1,287 @@
+@prefix ex: <http://example.org/ns#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix vf:    <https://w3id.org/valueflows#> .
+@prefix om2: <http://www.ontology-of-units-of-measure.org/resource/om-2/> .
+@prefix wd: <http://www.wikidata.org/entity/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+# no match because of different locations
+ex:Alice
+    a foaf:Agent .
+
+ex:Bob
+    a foaf:Agent .
+
+ex:Claudia
+    a foaf:Agent .
+
+
+# Bob wants to receive apples in Vienna
+ex:wantApples
+    a vf:Intent ;
+    vf:action vf:transfer-custody ;
+    vf:receiver ex:Bob ;
+    vf:resourceClassifiedAs wd:Q3127261 ;
+    vf:atLocation wd:Q1741 ;
+    vf:resourceQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "100"^^xsd:int ;
+    ] ; 
+    .
+
+# Alice wants to hand over apples in Rossatz
+ex:offerApples
+    a vf:Intent ;
+    vf:action vf:transfer-custody ;
+    vf:provider ex:Alice ;
+    vf:resourceClassifiedAs wd:Q3127261 ;
+    vf:atLocation wd:Q676832 ;
+    vf:resourceQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "100"^^xsd:int ;
+    ] ; 
+    .    
+
+# Claudia offers to perform a transport
+#  (not sure: we could use slots here, but it's not a recipe... Should
+#   we formulate her offer as a recipe, too? Hers could have the two handovers
+#  the result (the transport service, and different slots no transporter slot))
+
+## or she's already instantiated the recipe, setting the transporter slot... 
+## raises the question when a recipe is instantiated.. only when all slots are filled?
+
+ex:offerTransport
+    a  vf:Intent ;
+    vf:action vf:deliver-service ;
+    vf:provider ex:Claudia ;
+    vf:resourceClassifiedAs wd:Q7590 ; #transport
+    vf:resourceQuantity [
+        om2:hasUnit om2:one ;
+        om2:hasNumericalValue "1"^^xsd:int ;
+    ]
+    .
+
+
+###############################################################################
+#                        The transport recipe
+###############################################################################
+@prefix tr: <https://example.org/recipe/transport#> .
+_:consignorSlot a vf:AgentSlot, vf:Slot ;
+    vf:slotOf tr:transportRecipe ;
+    vf:name "consignor".
+_:consigneeSlot a vf:AgentSlot, vf:Slot ;
+    vf:slotOf tr:transportRecipe;
+    vf:name "consignee" .    
+_:transporterSlot a vf:AgentSlot, vf:Slot ;
+    vf:slotOf tr:transportRecipe;
+    vf:name "transporter" .
+_:resourceClassSlot a vf:ResourceClassSlot, vf:Slot ;
+    vf:slotOf tr:transportRecipe;
+    vf:name "resourceClass" .
+_:resourceQuantitySlot a vf:ResourceQuantitySlot, vf:Slot ;
+    vf:slotOf tr:transportRecipe;
+    vf:name "quantity" .
+_:consignorLocationSlot a vf:LocationSlot, vf:Slot ;
+    vf:slotOf tr:transportRecipe;
+    vf:name "consignorLocation" .
+_:consigneeLocationSlot a vf:LocationSlot, vf:Slot ;
+    vf:slotOf tr:transportRecipe;
+    vf:name "consigneeLocation" .
+
+tr:transportRecipe
+    a   vf:RecipeExchange ;
+    vf:name "Transport Recipe" ;
+    .
+# step 1
+tr:initialHandover 
+    a   vf:RecipeFlow ;
+    vf:clauseOf tr:transportRecipe ;
+    vf:action vf:transfer-custody ;
+    vf:provider _:consignorSlot ;
+    vf:receiver _:transporterSlot ;
+    vf:resourceQuantity _:resourceQuantitySlot ;
+    vf:resourceClassifiedAs _:resourceClassSlot ;
+    vf:atLocation _:consignorLocationSlot ;
+    .
+# step 2
+tr:concludingHandover 
+    a   vf:RecipeFlow ;
+    vf:clauseOf tr:transportRecipe ;
+    vf:action vf:transfer-custody ;
+    vf:provider _:transporterSlot ;
+    vf:receiver _:consigneeSlot ;
+    vf:resourceQuantity _:resourceQuantitySlot ;
+    vf:resourceClassifiedAs _:resourceClassSlot ;
+    vf:atLocation _:consigneeLocationSlot ;
+    .
+
+# result 3 (matches Alice's intent)
+tr:resultForTransporter 
+    a vf:RecipeFlow ;
+    vf:recipeResultOf tr:transportRecipe ;
+    vf:action vf:deliver-service ;
+    vf:resourceClassifiedAs wd:Q7590 ; #transport
+    vf:provider _:transporterSlot ;
+    vf:resourceQuantity [
+        om2:hasUnit om2:one ;
+        om2:hasNumericalValue "1"^^xsd:int ;
+    ]
+    .
+
+tr:transportRecipe 
+    tr:sparql """
+    PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX tr: <https://example.org/recipe/transport#> 
+PREFIX om2: <http://www.ontology-of-units-of-measure.org/resource/om-2/> 
+PREFIX vf:    <https://w3id.org/valueflows#> 
+PREFIX wd: <http://www.wikidata.org/entity/> 
+
+CONSTRUCT { 
+  ?transportProposal    
+    a vf:Proposal ;
+    skos:name "Transport Proposal"
+	.
+
+  ?initialHandoverProposedIntent
+    a 	vf:ProposedIntent ;
+  	vf:publishedIn ?transportProposal ;
+  	vf:publishes ?initialHandoverInt ;
+  	vf:resourceQuantity[
+      om2:hasUnit ?resUnit ;
+      om2:hasNumericalValue ?resQuantity ;
+    ] ;
+  .
+  
+?initialHandoverInt 
+    a   vf:Intent ; #RecipeFlow -> intent
+    vf:action vf:transfer-custody ;
+    vf:resourceQuantity[
+      om2:hasUnit ?resUnit ;
+      om2:hasNumericalValue ?resQuantity ;
+    ] ;
+    vf:resourceClassifiedAs ?resClass ;
+    vf:atLocation ?consignorLoc ;
+    vf:provider ?consignor ;
+	vf:receiver ?transporter ;
+    . 
+
+  ?concludingHandoverProposedIntent
+    a 	vf:ProposedIntent ;
+    vf:publishedIn ?transportProposal ;
+  	vf:publishes ?initialHandoverInt ;
+  	vf:resourceQuantity[
+      om2:hasUnit ?resUnit ;
+      om2:hasNumericalValue ?resQuantity ;
+    ] ;
+  .    
+
+# step 2
+?concludingHandoverInt
+    a   vf:Intent ;
+    vf:action vf:transfer-custody ;
+	vf:resourceQuantity [
+      	om2:hasUnit ?resUnit ;
+    	om2:hasNumericalValue ?resQuantity ;
+    ] ;
+    vf:resourceClassifiedAs ?resClass ;
+    vf:atLocation ?consigneeLoc ;
+    vf:provider ?transporter ;
+    vf:receiver ?consignee ;
+    .
+
+?transportProposedIntent
+	a vf:ProposedIntent ;
+    vf:publishedIn ?transportProposal ;
+	vf:publishes ?transportInt ;
+	vf:resourceQuantity [
+        om2:hasUnit om2:one ;
+        om2:hasNumericalValue "1"^^xsd:int ;
+    ]
+	.
+
+?transportInt
+    a vf:Intent ;
+    vf:action vf:deliver-service ;
+    vf:resourceClassifiedAs wd:Q7590 ; #transport
+    vf:provider ?transporter ;
+    vf:resourceQuantity [
+        om2:hasUnit om2:one ;
+        om2:hasNumericalValue "1"^^xsd:int ;
+    ]
+    .
+}
+WHERE {
+BIND(UUID() as ?transportProposal)
+BIND(UUID() as ?initialHandoverInt)
+BIND(UUID() as ?initialHandoverProposedIntent)
+BIND(UUID() as ?concludingHandoverInt)
+BIND(UUID() as ?concludingHandoverProposedIntent)
+BIND(UUID() as ?transportInt)
+BIND(UUID() as ?transportProposedIntent)
+
+# step 1
+?initialHandover 
+    a   vf:Intent ; #RecipeFlow -> intent
+    vf:action vf:transfer-custody ;
+    vf:resourceQuantity/om2:hasUnit ?resUnit ;
+    vf:resourceQuantity/om2:hasNumericalValue ?resQuantity ;
+    vf:resourceClassifiedAs ?resClass ;
+    vf:atLocation ?consignorLoc ;
+	.
+	OPTIONAL {
+		?initialHandover vf:finished ?initialHandoverFinished 
+    }
+    OPTIONAL {
+        ?initialHandover vf:provider ?consignor 
+    }
+    OPTIONAL {
+        ?initialHandover vf:receiver ?transporter 
+    }
+	FILTER (!BOUND(?initialHandoverFinished) || !?initialHandoverFinished)
+    FILTER (BOUND(?consignor) && BOUND(?consignee) && BOUND(?transporter))
+    
+
+# step 2
+?concludingHandover 
+    a   vf:Intent ;
+    vf:action vf:transfer-custody ;
+	#vf:resourceQuantity/om2:hasUnit ?resUnit ;
+    #vf:resourceQuantity/om2:hasNumericalValue ?resQuantity ;
+    vf:resourceClassifiedAs ?resClass ;
+    vf:atLocation ?consigneeLoc ;
+    .
+    OPTIONAL {
+    	?concludingHandover vf:finished ?concludingHandoverFinished 
+    }
+    OPTIONAL {
+        ?concludingHandover vf:provider ?transporter 
+    }
+    OPTIONAL {
+      ?concludingHandover vf:receiver ?consignee 
+    }
+	FILTER (!BOUND(?concludingHandoverFinished) || !?concludingHandoverFinished)
+  
+# result 3 (matches Alice's intent)
+?transport
+    a vf:Intent ;
+    vf:action vf:deliver-service ;
+    vf:resourceClassifiedAs wd:Q7590 ; #transport
+    vf:provider ?transporter ;
+    vf:resourceQuantity [
+        om2:hasUnit om2:one ;
+        om2:hasNumericalValue "1"^^xsd:int ;
+    ]
+    OPTIONAL {
+    	?transport vf:finished ?transportFinished   
+    }
+    FILTER (!BOUND(?transportFinished) || !?transportFinished)
+   
+} #GROUP BY ?transporter ?consignor ?consignee ?consignorLoc ?consigneeLoc ?resClass ?resUnit ?resQuantity
+#HAVING (COUNT(*) = 1)
+#order by ?consignor limit 1
+        """ .
+    
