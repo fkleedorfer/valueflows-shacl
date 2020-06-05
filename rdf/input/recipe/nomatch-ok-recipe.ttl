@@ -103,10 +103,12 @@ tr:initialHandover
     vf:action vf:transfer-custody ;
     vf:provider _:consignorSlot ;
     vf:receiver _:transporterSlot ;
+    vf:trackingIdentifier _:trackingIdentifierSlot ;
     vf:resourceQuantity _:resourceQuantitySlot ;
     vf:resourceClassifiedAs _:resourceClassSlot ;
     vf:atLocation _:consignorLocationSlot ;
     .
+    
 # step 2
 tr:concludingHandover 
     a   vf:RecipeFlow ;
@@ -114,6 +116,7 @@ tr:concludingHandover
     vf:action vf:transfer-custody ;
     vf:provider _:transporterSlot ;
     vf:receiver _:consigneeSlot ;
+    vf:trackingIdentifier _:trackingIdentifierSlot ;    
     vf:resourceQuantity _:resourceQuantitySlot ;
     vf:resourceClassifiedAs _:resourceClassSlot ;
     vf:atLocation _:consigneeLocationSlot ;

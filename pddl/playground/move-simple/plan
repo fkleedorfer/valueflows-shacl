@@ -1,0 +1,6 @@
+(transfer-all-rights alice bob apples)
+(goto claudia krems rossatz)
+(transfer-custody alice claudia apples rossatz)
+(move apples claudia rossatz wien)
+(transfer-custody claudia bob apples wien)
+; cost = 5 (unit cost)

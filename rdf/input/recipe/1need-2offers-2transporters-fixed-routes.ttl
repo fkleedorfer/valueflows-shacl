@@ -1,0 +1,183 @@
+@prefix ex: <http://example.org/ns#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix vf:    <https://w3id.org/valueflows#> .
+@prefix om2: <http://www.ontology-of-units-of-measure.org/resource/om-2/> .
+@prefix wd: <http://www.wikidata.org/entity/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+# no match because of different locations
+ex:Alice
+    a foaf:Agent .
+
+ex:Bob
+    a foaf:Agent .
+
+ex:Claudia
+    a foaf:Agent .
+
+ex:Rolf
+    a foaf:Agent .
+
+ex:Maria
+    a foaf:Agent .
+
+
+# Bob wants to receive apples in Vienna
+ex:wantApples
+    a vf:Intent ;
+    vf:action vf:transfer-custody ;
+    vf:receiver ex:Bob ;
+    vf:resourceClassifiedAs wd:Q3127261 ;
+    vf:atLocation wd:Q1741 ;
+    vf:resourceQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "100"^^xsd:int ;
+    ] ; 
+    .
+
+# Alice wants to hand over apples in Rossatz
+ex:offerApples
+    a vf:Intent ;
+    vf:action vf:transfer-custody ;
+    vf:provider ex:Alice ;
+    vf:resourceClassifiedAs wd:Q3127261 ;
+    vf:atLocation wd:Q676832 ;
+    vf:resourceQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "100"^^xsd:int ;
+    ] ; 
+    .    
+
+ex:offerApples2
+    a vf:Intent ;
+    vf:action vf:transfer-custody ;
+    vf:provider ex:Maria ;
+    vf:resourceClassifiedAs wd:Q3127261 ;
+    vf:atLocation wd:Q676832 ;
+    vf:resourceQuantity [
+        om2:hasUnit om2:kilogram ;
+        om2:hasNumericalValue "100"^^xsd:int ;
+    ] ; 
+    .        
+
+ex:pickupClaudia
+    a vf:Intent ;
+    vf:action vf:transfer-custody ;
+    vf:receiver ex:Claudia ;
+    vf:atLocation wd:Q676832 ; #Rossatz
+    .
+
+ex:dropoffClaudia
+    a vf:Intent ;
+    vf:action vf:transfer-custody ;
+    vf:provider ex:Claudia ;
+    vf:atLocation wd:Q131266 ; #Krems
+    .
+
+ex:pickupRolf
+    a vf:Intent ;
+    vf:action vf:transfer-custody ;
+    vf:receiver ex:Rolf ;
+    vf:atLocation wd:Q131266 ; #Krems
+    .
+
+ex:dropoffRolf
+    a vf:Intent ;
+    vf:action vf:transfer-custody ;
+    vf:provider ex:Rolf ;
+    vf:atLocation wd:Q1741 ; #Wien
+    .
+
+
+ex:offerTransport
+    a  vf:Intent ;
+    vf:action vf:deliver-service ;
+    vf:provider ex:Claudia ;
+    vf:resourceClassifiedAs wd:Q7590 ; #transport
+    vf:resourceQuantity [
+        om2:hasUnit om2:one ;
+        om2:hasNumericalValue "1"^^xsd:int ;
+    ]
+    .
+
+ex:offerTransport2
+    a  vf:Intent ;
+    vf:action vf:deliver-service ;
+    vf:provider ex:Rolf ;
+    vf:resourceClassifiedAs wd:Q7590 ; #transport
+    vf:resourceQuantity [
+        om2:hasUnit om2:one ;
+        om2:hasNumericalValue "1"^^xsd:int ;
+    ]
+    .    
+
+
+###############################################################################
+#                        The transport recipe
+###############################################################################
+@prefix tr: <https://example.org/recipe/transport#> .
+_:consignorSlot a vf:AgentSlot, vf:Slot ;
+    vf:slotOf tr:transportRecipe ;
+    vf:name "consignor".
+_:consigneeSlot a vf:AgentSlot, vf:Slot ;
+    vf:slotOf tr:transportRecipe;
+    vf:name "consignee" .    
+_:transporterSlot a vf:AgentSlot, vf:Slot ;
+    vf:slotOf tr:transportRecipe;
+    vf:name "transporter" .
+_:resourceClassSlot a vf:ResourceClassSlot, vf:Slot ;
+    vf:slotOf tr:transportRecipe;
+    vf:name "resourceClass" .
+_:resourceQuantitySlot a vf:ResourceQuantitySlot, vf:Slot ;
+    vf:slotOf tr:transportRecipe;
+    vf:name "quantity" .
+_:consignorLocationSlot a vf:LocationSlot, vf:Slot ;
+    vf:slotOf tr:transportRecipe;
+    vf:name "consignorLocation" .
+_:consigneeLocationSlot a vf:LocationSlot, vf:Slot ;
+    vf:slotOf tr:transportRecipe;
+    vf:name "consigneeLocation" .
+
+tr:transportRecipe
+    a   vf:RecipeExchange ;
+    vf:name "Transport Recipe" ;
+    .
+# step 1
+tr:initialHandover 
+    a   vf:RecipeFlow ;
+    vf:clauseOf tr:transportRecipe ;
+    vf:action vf:transfer-custody ;
+    vf:provider _:consignorSlot ;
+    vf:receiver _:transporterSlot ;
+    vf:resourceQuantity _:resourceQuantitySlot ;
+    vf:resourceClassifiedAs _:resourceClassSlot ;
+    vf:atLocation _:consignorLocationSlot ;
+    .
+# step 2
+tr:concludingHandover 
+    a   vf:RecipeFlow ;
+    vf:clauseOf tr:transportRecipe ;
+    vf:action vf:transfer-custody ;
+    vf:provider _:transporterSlot ;
+    vf:receiver _:consigneeSlot ;
+    vf:resourceQuantity _:resourceQuantitySlot ;
+    vf:resourceClassifiedAs _:resourceClassSlot ;
+    vf:atLocation _:consigneeLocationSlot ;
+    .
+
+# result 3 (matches Alice's intent)
+tr:resultForTransporter 
+    a vf:RecipeFlow ;
+    vf:recipeResultOf tr:transportRecipe ;
+    vf:action vf:deliver-service ;
+    vf:resourceClassifiedAs wd:Q7590 ; #transport
+    vf:provider _:transporterSlot ;
+    vf:resourceQuantity [
+        om2:hasUnit om2:one ;
+        om2:hasNumericalValue "1"^^xsd:int ;
+    ]
+    .
