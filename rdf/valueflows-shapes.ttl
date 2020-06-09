@@ -5391,49 +5391,54 @@ fn:findMatches
         sh:construct """
         CONSTRUCT {
             ?result ?slot ?val
-        } WHERE {
-            #BIND(fn:newNodeURI(?result) as ?newNode)
-            ?this a vf:RecipeExchange .
-            ?result vf:recipeResultOf ?this .
-            ?result ?prop ?slot .
-            ?slot ?slotOf ?this .
-            ?slot a vf:Slot .
-            ?intent a vf:Intent .
-            ?intent ?prop ?val .
-            {   
+            } WHERE {
+                {
+                # find matchable slot/flow pairs 
+                # that allow us to filter out slot values
+                # that
                 SELECT ?flow ?slot
-                WHERE {
-                    ?flow a vf:RecipeFlow .
+                    ?this a vf:RecipeExchange .
                     ?flow vf:clauseOf ?this .
-                    ?flow ?flowSlotProp ?slot .
+                    ?flow ?prop ?slot .
+                    ?slot ?slotOf ?this .
+                    ?slot a vf:Slot .
                 }
-            }
-
-            
-            FILTER NOT EXISTS {
-                ?intent vf:finished true .
-            }            
-            {
-                # query that finds result/intent pairs that 
-                # match when only regarding non-slot properties
-                SELECT ?result ?intent
-                WHERE {
+                {
+                # find result/intent pairs that
+                # have matchable slot values    
+                SELECT ?result ?intent ?slot ?val
+                    ?this a vf:RecipeExchange .
                     ?result vf:recipeResultOf ?this .
-                    ?result ?nonSlotProp ?nonSlotVal .
-                    FILTER(?nonSlotProp != rdf:type)
-                    FILTER NOT EXISTS {
-                        ?nonSlotVal a vf:Slot ;
-                    }
-                    ?intent ?nonSlotProp ?nonSlotVal .
+                    ?result ?prop ?slot .
+                    ?slot ?slotOf ?this .
+                    ?slot a vf:Slot .
                     ?intent a vf:Intent .
+                    ?intent ?prop ?val .
                     FILTER NOT EXISTS {
                         ?intent vf:finished true .
+                    }            
+                }
+                {
+                    # query that finds result/intent pairs that 
+                    # match when only regarding non-slot properties
+                    SELECT ?result ?intent
+                    WHERE {
+                        ?result vf:recipeResultOf ?this .
+                        ?result ?nonSlotProp ?nonSlotVal .
+                        FILTER(?nonSlotProp != rdf:type)
+                        FILTER NOT EXISTS {
+                            ?nonSlotVal a vf:Slot ;
+                        }
+                        ?intent ?nonSlotProp ?nonSlotVal .
+                        ?intent a vf:Intent .
+                        FILTER NOT EXISTS {
+                            ?intent vf:finished true .
+                        } 
                     } 
-                } 
+                }
+
+
+
             }
-
-
-
-        }
         """ ;
     ] .
