@@ -6,9 +6,6 @@
     Claudia Alice Bob - actor
     Apples - resource
     Truck1 - truck
-    transport transport2 - recipe2roles2resources
-    fpickup fuse-truck fmove fdropoff - recipeFlow
-
 )
 
 (:init
@@ -16,21 +13,31 @@
     (currentLocation Alice Rossatz)
     (custodian Apples Alice)
     (primaryAccountable Apples Alice)    
-   
+    (intent send-and-transfer Alice null Apples Rossatz)
+
     (currentLocation Claudia Rossatz)
     (currentLocation Truck1 Rossatz)
     (isVehicle Truck1)
     (mayContainResources Truck1)
     (custodian Truck1 Claudia)
+    (intent deliver-transport-service Claudia null null null)
 
     (currentLocation Bob Wien)
-
+    (intent send-and-transfer null Bob Apples Wien)
 
 )
     
 (:goal 
     (and
         (custodian Apples Bob)
+        (not 
+            (exists (?action - action ?actor1 ?actor2 - actor ?resource - resource ?location - location)
+                (and 
+                    (commitment ?action ?actor1 ?actor2 ?resource ?location)
+                    (not (fulfillment ?action ?actor1 ?actor2 ?resource ?location))
+                )
+            )
+        )
     )
 
 )

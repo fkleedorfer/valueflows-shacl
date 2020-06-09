@@ -6,3 +6,12 @@
 - PDDL4j - authors may keep more powerful planners for commercial add-on. Basic search algorithms are present
 - Option: convert pddl to ASP, then solve with clingo: https://github.com/potassco/plasp
 
+## running
+```
+docker run --rm -v "c:\DATA\DEV\workspace\valueflows-shacl\pddl\playground":/benchmarks aibasel/downward --plan-file /benchmarks/plan /benchmarks/domain.pddl /benchmarks/move-recipe/problem-taxi.pddl --search "eager_wastar([hmax()])"
+```
+
+Good results for problem-transport-complex.pddl
+```
+docker run --rm -v "c:\DATA\DEV\workspace\valueflows-shacl\pddl\playground":/benchmarks aibasel/downward --sas-file /benchmarks/sas --plan-file /benchmarks/plan /benchmarks/domain.pddl /benchmarks/move-recipe/problem-transport-complex.pddl --search "eager_greedy([ff(),hmax(),add()])"
+```
