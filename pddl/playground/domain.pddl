@@ -7,7 +7,6 @@
 
 (:types 
     thing
-    role
     resource - thing 
     actor - thing 
     recipeResource - thing
@@ -17,6 +16,14 @@
     resourceClass
     location
     action
+    
+    recipe
+    recipeRole
+    recipe1role1resource - recipe
+    recipe2roles1resource - recipe
+    recipe2roles2resources - recipe
+    recipe3roles1resource - recipe
+    recipe3roles2resources - recipe
     recipeFlow
     recipeProcess
     recipeLocation 
@@ -26,27 +33,9 @@
 (:constants 
     transfer move goto transfer-all-rights transfer-custody mount dismount put-into take-out-of begin-use end-use use - action
     null - thing
-
-
-    ; wikidataTransport - resourceClass
-    ; rConsignment - recipeResource
-    ; rVehicle - recipeResource
-    ; rTransporter - role
-    ; rContractee - role
-    ; rMoveConsignment - recipeFlow
-    ; rUseVehicle - recipeFlow
-    ; rFromLocation - recipeLocation
-    ; rToLocation - recipeLocation 
-    ; (recipeFlow rMoveConsignment move rTransporter rContractee rConsignment rFromLocation rTolocation)
-    ; (recipeFlow rMoveVehicle move rTransporter rContractee rVehicle rFromLocation rTolocation)
-    ; (recipeFlow rUseVehicleAtFromLocation use rTransporter rTransporter rVehicle rFromLocation)
-    ; (recipeFlow rUseVehicleAtToLocation use rTransporter rTransporter rVehicle rToLocation)
-    ; (recipeFlow rDeliverTransportService deliver-service rTransporter rContractee wikidataTransport)
-    ; (recipeInputOf rTransport rMoveVehicle )
-    ; (recipeInputOf rTransport rUseVehicleAtFromLocation )
-    ; (recipeOutputOf rTransport rUseVehicleAtToLocation )
-    ; (recipeOutputOf rTransport rMoveConsignment )
-    ; (recipeResultOf rTransport rDeliverTransportService)
+    role1 role2 role3 - recipeRole
+    resource1 resource2 - recipeResource
+    locationOfRole1 locationOfRole2 locationOfRole3 locationOfResource1 locationOfResource2 otherLocation - recipeLocation
 )
 
 (:predicates 
@@ -63,7 +52,13 @@
     (mayContainResources ?r - resource) ; a truck, for example
     (mayContainActors ?a - actor) ; a means of person transport
     (containedIn ?rinside - thing ?rcontainer - resource) ; rinside is inside rcontainer
-   ; (recipeFlow ?action - action ?provider - actor ?receiver - actor ?r - recipeResource)
+    
+    (recipeClauseOf ?flow - recipeFlow ?recipe - recipe )
+    (flowAction ?flow - recipeFlow ?action - action)
+    (flowProvider ?flow - recipeFlow ?provider - recipeRole)
+    (flowReceiver ?flow - recipeFlow ?receiver - recipeRole)
+    (flowResource ?flow - recipeFlow ?resource - recipeResource)
+    (flowLocation ?flow - recipeFlow ?location - recipeLocation)
 )
 
 
@@ -74,55 +69,94 @@
     :precondition 
         (or 
             (intent ?action ?provider ?receiver ?resource ?location)
-            (intent ?action ?provider ?receiver ?resource null)
-            (and
-                (intent ?action ?provider null ?resource ?location)
-                (intent ?action null ?receiver ?resource ?location)
-            )
-            (and
-                (intent ?action ?provider ?receiver ?resource null)
-                (intent ?action ?provider ?receiver ?resource null)
-            )
-            (and
-                (intent ?action ?provider ?receiver null ?location)
-                (intent ?action ?provider ?receiver null ?location)
-            )
-            (and
-                (intent ?action ?provider null ?resource ?location)
-                (intent ?action null ?receiver ?resource ?location)
-            )
-            (and
-                (intent ?action ?provider null ?resource null)
-                (intent ?action null ?receiver null ?location)
-            )
-            (and
-                (intent ?action ?provider null null ?location)
-                (intent ?action null ?receiver ?resource null)
-            )
-            (and
-                (intent ?action ?provider null ?resource null)
-                (intent ?action null ?receiver null null)
-            )
-            (and
-                (intent ?action ?provider null ?resource ?location)
-                (intent ?action null ?receiver ?resource null)
-            )
-            (and
-                (intent ?action ?provider null ?resource null)
-                (intent ?action null ?receiver ?resource ?location)
-            )
-            (and
-                (intent ?action ?provider null null null)
-                (intent ?action null ?receiver ?resource ?location)
-            )
-            (and
-                (intent ?action null ?receiver null null)
-                (intent ?action ?provider null ?resource ?location)
-            )
+            ; (intent ?action ?provider ?receiver ?resource null)
+            ; (and
+            ;     (intent ?action ?provider null ?resource ?location)
+            ;     (intent ?action null ?receiver ?resource ?location)
+            ; )
+            ; (and
+            ;     (intent ?action ?provider ?receiver ?resource null)
+            ;     (intent ?action ?provider ?receiver ?resource null)
+            ; )
+            ; (and
+            ;     (intent ?action ?provider ?receiver null ?location)
+            ;     (intent ?action ?provider ?receiver null ?location)
+            ; )
+            ; (and
+            ;     (intent ?action ?provider null ?resource ?location)
+            ;     (intent ?action null ?receiver ?resource ?location)
+            ; )
+            ; (and
+            ;     (intent ?action ?provider null ?resource null)
+            ;     (intent ?action null ?receiver null ?location)
+            ; )
+            ; (and
+            ;     (intent ?action ?provider null null ?location)
+            ;     (intent ?action null ?receiver ?resource null)
+            ; )
+            ; (and
+            ;     (intent ?action ?provider null ?resource null)
+            ;     (intent ?action null ?receiver null null)
+            ; )
+            ; (and
+            ;     (intent ?action ?provider null ?resource ?location)
+            ;     (intent ?action null ?receiver ?resource null)
+            ; )
+            ; (and
+            ;     (intent ?action ?provider null ?resource null)
+            ;     (intent ?action null ?receiver ?resource ?location)
+            ; )
+            ; (and
+            ;     (intent ?action ?provider null null null)
+            ;     (intent ?action null ?receiver ?resource ?location)
+            ; )
+            ; (and
+            ;     (intent ?action null ?receiver null null)
+            ;     (intent ?action ?provider null ?resource ?location)
+            ; )
         )
     :effect 
         (commitment ?action ?provider ?receiver ?resource ?location)
 )
+
+
+(:action drive-recipe
+    :parameters (?role1 - actor ?car - resource ?fromLocation ?toLocation - location)
+    :precondition (and 
+        (currentLocation ?role1 ?fromLocation)
+    )
+    :effect (and 
+        (intent use ?role1 ?role1 ?car ?fromLocation)
+        (intent move ?role1 ?role1 ?car ?toLocation)
+    )
+)
+
+(:action taxi-recipe
+    :parameters (?driver ?passenger - actor  ?car - resource ?fromLocation ?toLocation - location)
+    :precondition (and 
+        (currentLocation ?driver ?fromLocation)
+    )
+    :effect (and 
+        (intent use ?driver ?driver ?car ?fromLocation)
+        (intent mount ?driver ?passenger ?car ?fromLocation)
+        (intent move ?driver ?driver ?car ?toLocation)
+        (intent dismount ?driver ?passenger ?car ?toLocation)
+    )
+)
+
+(:action transport-recipe
+    :parameters (?transporter ?consignor ?consignee - actor  ?truck ?consignment - resource ?fromLocation ?toLocation - location)
+    :precondition (and 
+        (currentLocation ?transporter ?fromLocation)
+    )
+    :effect (and 
+        (intent transfer-custody ?consignor ?transporter ?consignment ?fromLocation)
+        (intent use ?transporter ?transporter ?truck ?fromLocation)
+        (intent move ?transporter ?transporter ?truck ?toLocation)
+        (intent transfer-custody ?transporter ?consignee ?consignment ?toLocation)
+    )
+)
+
 
 (:action move 
     :parameters (?a - actor ?r - resource ?fromLocation ?toLocation - location)
@@ -227,6 +261,9 @@
         (not (isPassive ?driver))
         (custodian ?vehicle ?driver)
         (containedIn ?passenger ?vehicle)
+        (currentLocation ?driver ?l)
+        (currentLocation ?vehicle ?l)
+        (currentLocation ?passenger ?l)
         (commitment dismount ?driver ?passenger ?vehicle ?l)
     )
     :effect 
