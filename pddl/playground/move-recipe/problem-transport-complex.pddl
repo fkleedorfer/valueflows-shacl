@@ -5,7 +5,7 @@
     Apples - resource
     Rossatz Krems Wien Gedersdorf - location
     Rolf Alice Bob Claudia Maria - actor
-    GrannySmith - resourceClass
+    GrannySmith - resourceClassType
     Truck1 - truck
     Car1 - car 
 )
@@ -17,10 +17,10 @@
     (resourceClassification Apples GrannySmith)
     (custodian Apples Alice)
     (primaryAccountable Apples Alice)    
-    (intent-ap-rl- send-and-transfer Alice Apples Rossatz)
+    (intent-ap--lc send-and-transfer Alice Rossatz GrannySmith)
 
     (currentLocation Bob Wien)
-    (intent-a-rrl- send-and-transfer Bob Apples Wien)
+    (intent-a-r-lc send-and-transfer Bob Wien GrannySmith)
 
     (currentLocation Rolf Gedersdorf)
     (currentLocation Truck1 Gedersdorf)
@@ -36,17 +36,17 @@
     (isVehicle Car1)
     (mayContainActors Car1)
     
-    (intent-ap-r-- deliver-taxi-service Maria Car1)
+    (intent-ap-r-c deliver-service Maria Car1 TaxiServiceClass)
 
     (currentlocation Claudia Krems)    
-    (intent-ap---- deliver-transport-service Claudia)
+    (intent-ap---c deliver-service Claudia TransportServiceClass)
     
 )
 
 (:goal 
     (and
         (not 
-            (exists (?a - action ?p ?r - actor ?s - resource ?l - location ?c - resourceClass)
+            (exists (?a - action ?p ?r - actor ?s - resource ?l - location ?c - resourceClassType)
                 (and
                     (or
                         (commitment-r- ?a ?p ?r ?s ?l)
@@ -54,12 +54,13 @@
 
             
                         (intent ?a ?p ?r ?s ?l ?c)
-                        (intent-aprr-c ?a ?p ?r ?s ?c)
-                        (intent-apr-lc ?a ?p ?r ?l ?c)
-                        (intent-ap-rlc ?a ?p ?s ?l ?c)
-                        (intent-a-rrlc ?a ?r ?s ?l ?c)
                         (intent-apr--c ?a ?p ?r ?c)
                         (intent-ap-r-c ?a ?p ?s ?c)
+                        (intent-apr-lc ?a ?p ?r ?l ?c)
+                        (intent-ap--lc ?a ?p ?l ?c)
+                        (intent-a-r-lc ?a ?r ?l ?c)
+                        (intent-apr--c ?a ?p ?r ?c)
+                        (intent-ap---c ?a ?p ?c)
                         (intent-ap---c ?a ?p ?c)
 
                         (intent-aprrl- ?a ?p ?r ?s ?l)

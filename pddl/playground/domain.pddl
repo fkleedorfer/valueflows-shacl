@@ -3,7 +3,7 @@
 (define (domain valueflows)
 
 
-(:requirements :adl )
+(:requirements :adl :action-costs)
 
 (:types 
     thing
@@ -12,34 +12,38 @@
     vehicle - resource
     truck - vehicle
     car - vehicle
-    resourceClass
+    resourceClassType
     location
     action
-    vehicleClass - resourceClass
-    truckClass - resourceClass
-    carClass - resourceClass
+    vehicleClassType - resourceClassType
+    serviceClassType - resourceClassType
 )
 
 (:constants 
-    transfer move goto transfer-all-rights transfer-custody mount dismount put-into take-out-of begin-use end-use use send-and-transfer deliver-taxi-service deliver-transport-service lend leave arrive drive travel - action
+    transfer move goto transfer-all-rights transfer-custody mount dismount put-into take-out-of begin-use end-use use send-and-transfer deliver-service lend leave arrive drive travel - action
+    TransportServiceClass - serviceClassType
+    TaxiServiceClass - serviceClassType
+    TruckClass - vehicleClassType
+    CarClass - vehicleClassType
 )
 
 (:functions (total-cost - numeric))
 
 (:predicates 
     (currentLocation ?t - thing ?l - location) ; t is at location l
-    (resourceClassification ?r - resource ?c - resourceClass )
+    (resourceClassification ?r - resource ?c - resourceClassType )
     (custodian ?r - resource ?a - actor ) ; a is currently in custody of r
     (primaryAccountable ?r - resource ?a - actor) ; a is the owner of r
 
-    (intent ?action - action ?provider ?receiver - actor ?r - resource ?l - location ?c - resourceClass)
-    (intent-aprr-c ?action - action ?provider ?receiver - actor ?r - resource ?c - resourceClass)
-    (intent-apr-lc ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClass)    
-    (intent-ap-rlc ?action - action ?provider - actor ?r - resource ?l - location ?c - resourceClass)
-    (intent-a-rrlc ?action - action ?receiver - actor ?r - resource ?l - location ?c - resourceClass)
-    (intent-apr--c ?action - action ?provider ?receiver - actor  ?c - resourceClass)
-    (intent-ap-r-c ?action - action ?provider - actor ?r - resource ?c - resourceClass)
-    (intent-ap---c ?action - action ?provider - actor ?c - resourceClass)
+    (intent ?action - action ?provider ?receiver - actor ?r - resource ?l - location ?c - resourceClassType)
+    (intent-apr--c ?action - action ?provider ?receiver - actor ?c - resourceClassType)
+    (intent-ap-r-c ?action - action ?provider - actor ?r - resource ?c - resourceClassType)
+    (intent-apr-lc ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClassType)    
+    (intent-ap--lc ?action - action ?provider - actor ?l - location ?c - resourceClassType)
+    (intent-a-r-lc ?action - action ?receiver - actor ?l - location ?c - resourceClassType)
+    (intent-apr--c ?action - action ?provider ?receiver - actor  ?c - resourceClassType)
+    (intent-ap---c ?action - action ?provider - actor ?c - resourceClassType)
+    (intent-ap---c ?action - action ?provider - actor ?c - resourceClassType)
     (intent-aprrl- ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
     (intent-aprr-- ?action - action ?provider ?receiver - actor ?r - resource)
     (intent-apr-l- ?action - action ?provider ?receiver - actor ?l - location)    
@@ -50,14 +54,16 @@
     (intent-ap---- ?action - action ?provider - actor)
 
 
-    (persistent-intent ?action - action ?provider ?receiver - actor ?r - resource ?l - location ?c - resourceClass)
-    (persistent-intent-aprr-c ?action - action ?provider ?receiver - actor ?r - resource ?c - resourceClass)
-    (persistent-intent-apr-lc ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClass)    
-    (persistent-intent-ap-rlc ?action - action ?provider - actor ?r - resource ?l - location ?c - resourceClass)
-    (persistent-intent-a-rrlc ?action - action ?receiver - actor ?r - resource ?l - location ?c - resourceClass)
-    (persistent-intent-apr--c ?action - action ?provider ?receiver - actor ?c - resourceClass)
-    (persistent-intent-ap-r-c ?action - action ?provider - actor ?r - resource ?c - resourceClass)
-    (persistent-intent-ap---c ?action - action ?provider - actor ?c - resourceClass)
+
+    (persistent-intent ?action - action ?provider ?receiver - actor ?r - resource ?l - location ?c - resourceClassType)
+    (persistent-intent-apr--c ?action - action ?provider ?receiver - actor ?c - resourceClassType)
+    (persistent-intent-ap-r-c ?action - action ?provider - actor ?r - resource ?c - resourceClassType)
+    (persistent-intent-apr-lc ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClassType)    
+    (persistent-intent-ap--lc ?action - action ?provider - actor ?l - location ?c - resourceClassType)
+    (persistent-intent-a-r-lc ?action - action ?receiver - actor ?l - location ?c - resourceClassType)
+    (persistent-intent-apr--c ?action - action ?provider ?receiver - actor ?c - resourceClassType)
+    (persistent-intent-ap---c ?action - action ?provider - actor ?c - resourceClassType)
+    (persistent-intent-ap---c ?action - action ?provider - actor ?c - resourceClassType)
     (persistent-intent-aprrl- ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
     (persistent-intent-aprr-- ?action - action ?provider ?receiver - actor ?r - resource )
     (persistent-intent-apr-l- ?action - action ?provider ?receiver - actor ?l - location )    
@@ -70,9 +76,9 @@
 
     
     (commitment-r- ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
-    (commitment--c ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClass)
+    (commitment--c ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClassType)
     (fulfillment-r- ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
-    (fulfillment--c ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClass)
+    (fulfillment--c ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClassType)
     (using ?a - actor ?r - resource) ; a is using r
     (isCarryable ?r - resource) ; an actor can move the resource
     (isVehicle ?r - resource) ; r is a vehicle
@@ -82,11 +88,10 @@
     (containedIn ?rinside - thing ?rcontainer - resource) ; rinside is inside rcontainer
 )
 
-
-;(:functions (total-cost))
+; commit: turn an intent into a commitment
 
 (:action commit--c 
-    :parameters (?action - action ?provider ?receiver - actor ?location - location ?c - resourceClass)
+    :parameters (?action - action ?provider ?receiver - actor ?location - location ?c - resourceClassType)
     :precondition 
         (intent-apr-lc ?action ?provider ?receiver ?location ?c)
     :effect (and
@@ -106,8 +111,10 @@
 )
 
 
+; create an intent from an persistent-intent
+
 (:action instantiate-intent
-    :parameters (?action - action ?provider ?receiver - actor ?r - resource ?l - location ?c - resourceClass)
+    :parameters (?action - action ?provider ?receiver - actor ?r - resource ?l - location ?c - resourceClassType)
     :precondition
         (persistent-intent ?action ?provider ?receiver ?r ?l ?c)
     :effect         
@@ -116,18 +123,28 @@
             (increase (total-cost) 1)
         )
 )
-(:action instantiate-intent-aprr-c
-    :parameters ( ?action - action ?provider ?receiver - actor ?r - resource ?c - resourceClass )
+(:action instantiate-intent-apr--c
+    :parameters ( ?action - action ?provider ?receiver - actor ?c - resourceClassType )
     :precondition
-        (persistent-intent-aprr-c ?action ?provider ?receiver ?r ?c )
+        (persistent-intent-apr--c ?action ?provider ?receiver ?c )
     :effect         
         (and
-            (intent-aprr-c ?action ?provider ?receiver ?r ?c )
+            (intent-apr--c ?action ?provider ?receiver ?c )
             (increase (total-cost) 1)
         )
-    )
+)
+(:action instantiate-intent-ap-r-c
+    :parameters (?action - action ?provider - actor ?r - resource ?c - resourceClassType)
+    :precondition
+        (persistent-intent-ap-r-c ?action ?provider ?r ?c)
+    :effect         
+        (and
+            (intent-ap-r-c ?action ?provider ?r ?c)
+            (increase (total-cost) 1)
+        )
+)
 (:action instantiate-intent-apr-lc
-    :parameters ( ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClass )    
+    :parameters ( ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClassType )    
     :precondition
         (persistent-intent-apr-lc ?action ?provider ?receiver ?l ?c )
     :effect         
@@ -136,29 +153,28 @@
             (increase (total-cost) 1)
         )
     )
-(:action instantiate-intent-ap-rlc
-    :parameters ( ?action - action ?provider - actor ?r - resource ?l - location ?c - resourceClass )
+(:action instantiate-intent-ap--lc
+    :parameters ( ?action - action ?provider - actor ?l - location ?c - resourceClassType )
     :precondition
-        (persistent-intent-ap-rlc ?action ?provider ?r ?l ?c )
+        (persistent-intent-ap--lc ?action ?provider ?l ?c )
         :effect         
         (and
-            (intent-ap-rlc ?action ?provider ?r ?l ?c )
+            (intent-ap--lc ?action ?provider ?l ?c )
             (increase (total-cost) 1)
         )
     )
-(:action instantiate-intent-a-rrlc
-    :parameters ( ?action - action ?receiver - actor ?r - resource ?l - location ?c - resourceClass )
+(:action instantiate-intent-a-r-lc
+    :parameters ( ?action - action ?receiver - actor ?l - location ?c - resourceClassType )
     :precondition
-        (persistent-intent-a-rrlc ?action ?receiver ?r ?l ?c )
+        (persistent-intent-a-r-lc ?action ?receiver ?l ?c )
     :effect         
         (and
-            (intent-a-rrlc ?action ?receiver ?r ?l ?c )
+            (intent-a-r-lc ?action ?receiver ?l ?c )
             (increase (total-cost) 1)
         )
-    )
-
+)
 (:action instantiate-intent-apr--c
-    :parameters ( ?action - action ?provider ?receiver - actor ?c - resourceClass )
+    :parameters ( ?action - action ?provider ?receiver - actor ?c - resourceClassType )
     :precondition
         (persistent-intent-apr--c ?action ?provider ?receiver ?c )
         :effect         
@@ -167,19 +183,19 @@
             (increase (total-cost) 1)
         )
 )
-(:action instantiate-intent-ap-r-c
-    :parameters ( ?action - action ?provider - actor ?r - resource ?c - resourceClass )
+(:action instantiate-intent-ap---c
+    :parameters ( ?action - action ?provider - actor ?c - resourceClassType )
     :precondition
-        (persistent-intent-ap-r-c ?action ?provider ?r ?c )
+        (persistent-intent-ap---c ?action ?provider ?c )
         :effect         
         (and
-            (intent-ap-r-c ?action ?provider ?r ?c )
+            (intent-ap---c ?action ?provider ?c )
             (increase (total-cost) 1)
         )
 )
 
 (:action instantiate-intent-ap---c
-    :parameters ( ?action - action ?provider - actor ?c - resourceClass )
+    :parameters ( ?action - action ?provider - actor ?c - resourceClassType )
     :precondition
         (persistent-intent-ap---c ?action ?provider ?c )
         :effect         
@@ -277,6 +293,67 @@
 )
 
 
+; match-resource: turn an intent with a resourceClassifiedAs into an intent with a resource of that class
+(:action match-resource-a-r-lc
+    :parameters (?action - action ?receiver - actor ?resource - resource ?l - location ?c - resourceClassType)
+    :precondition (and 
+        (resourceClassification ?resource ?c)
+        (intent-a-r-lc ?action ?receiver ?l ?c)
+    )
+    :effect (and
+        (intent-a-rrl- ?action ?receiver ?resource ?l)
+        (not (intent-a-r-lc ?action ?receiver ?l ?c))
+    )
+)
+
+(:action match-resource-ap--lc
+    :parameters (?action - action ?provider - actor ?resource - resource ?l - location ?c - resourceClassType)
+    :precondition (and 
+        (resourceClassification ?resource ?c)
+        (intent-ap--lc ?action ?provider ?l ?c )
+    )
+    :effect (and
+        (intent-ap-rl- ?action ?provider ?resource ?l)
+        (not (intent-ap--lc ?action ?provider ?l ?c ))
+    )
+)
+
+(:action match-resource-apr-lc
+    :parameters (?action - action ?provider ?receiver - actor ?resource - resource ?l - location ?c - resourceClassType)
+    :precondition (and 
+        (resourceClassification ?resource ?c)
+        (intent-apr-lc ?action ?provider ?receiver ?l ?c)    
+    )
+    :effect (and
+        (intent-aprrl- ?action ?provider ?receiver ?resource ?l)    
+        (not (intent-apr-lc ?action ?provider ?receiver ?l ?c))
+    )
+)
+
+(:action match-resource-apr--c
+    :parameters (?action - action ?provider ?receiver - actor ?resource - resource ?c - resourceClassType)
+    :precondition (and 
+        (resourceClassification ?resource ?c)
+        (intent-apr--c ?action ?provider ?receiver ?c)
+    )
+    :effect (and
+        (intent-aprr-- ?action ?provider ?receiver ?resource)    
+        (not (intent-apr--c ?action ?provider ?receiver ?c))
+    )
+)
+
+(:action match-resource-ap---c
+    :parameters (?action - action ?provider - actor ?resource - resource ?c - resourceClassType)
+    :precondition (and 
+        (resourceClassification ?resource ?c)
+        (intent-ap---c ?action ?provider ?c)
+    )
+    :effect (and
+        (intent-ap-r-- ?action ?provider ?resource)
+        (not (intent-ap---c ?action ?provider ?c))
+    )
+)
+
 ; careful: - incurs high complexity
 ; To limit the problem, the travel intent is deleted as a result of the action
 (:action recipe-travel-to-location
@@ -358,7 +435,10 @@
     :precondition (and 
         (not (= ?fromLocation ?toLocation))
         (not (= ?driver ?passenger))
-        (intent-ap-r-- deliver-taxi-service ?driver ?car) 
+        (or 
+            (intent-ap---c deliver-service ?driver TaxiServiceClass)   
+            (intent-ap-r-c deliver-service ?driver ?car TaxiServiceClass) 
+        )
         (intent-apr-l- leave ?passenger ?passenger ?fromLocation)
         (intent-apr-l- arrive ?passenger ?passenger ?toLocation)
     )
@@ -374,7 +454,8 @@
         (intent-aprrl- mount ?driver ?passenger ?car ?fromLocation)
         (intent-aprrl- move ?driver ?driver ?car ?toLocation)
         (intent-aprrl- dismount ?driver ?passenger ?car ?toLocation)
-        (not (intent-ap-r-- deliver-taxi-service ?driver ?car) )
+        (not (intent-ap-r-c deliver-service ?driver ?car TaxiServiceClass) )
+        (not (intent-ap---c deliver-service ?driver TaxiServiceClass) )
         (not (intent-apr-l- leave ?passenger ?passenger ?fromLocation))
         (not (intent-apr-l- arrive ?passenger ?passenger ?toLocation))
         (increase (total-cost) 1)
@@ -388,11 +469,13 @@
         (not (= ?consignor ?consignee))
         (not (= ?consignor ?transporter))
         (not (= ?transporter ?consignee))
+        ; no need to check for another transporter instantiating 
+        ; the same recipe: the intents are removed, so it cannot happen
         (isVehicle ?truck)
         (mayContainResources ?truck)
         (or 
-            (intent-ap-r-- deliver-transport-service ?transporter ?truck)
-            (intent-ap---- deliver-transport-service ?transporter)
+            (intent-ap-r-c deliver-service ?transporter ?truck TransportServiceClass)
+            (intent-ap---c deliver-service ?transporter TransportServiceClass)
         )
         (intent-ap-rl- transfer-custody ?consignor ?consignment ?fromLocation )
         (intent-a-rrl- transfer-custody ?consignee ?consignment ?toLocation )
@@ -409,8 +492,8 @@
         (intent-aprrl- use ?transporter ?transporter ?truck ?fromLocation)
         (intent-aprrl- move ?transporter ?transporter ?truck ?toLocation)
         (intent-aprrl- transfer-custody ?transporter ?consignee ?consignment ?toLocation)
-        (not (intent-ap-r-- deliver-transport-service ?transporter ?truck))
-        (not (intent-ap---- deliver-transport-service ?transporter))
+        (not (intent-ap-r-c deliver-service ?transporter ?truck TransportServiceClass))
+        (not (intent-ap---c deliver-service ?transporter TransportServiceClass))
         (not (intent-ap-rl- transfer-custody ?consignor ?consignment ?fromLocation ))
         (not (intent-a-rrl- transfer-custody ?consignee ?consignment ?toLocation ))
         (increase (total-cost) 1)

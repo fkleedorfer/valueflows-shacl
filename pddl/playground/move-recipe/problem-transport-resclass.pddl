@@ -6,14 +6,16 @@
     Claudia Alice Bob - actor
     Apples - resource
     Truck1 - truck
+    GrannySmith - resourceClassType
 )
 
 (:init
     (currentLocation Apples Rossatz)
     (currentLocation Alice Rossatz)
+    (resourceClassification Apples GrannySmith)
     (custodian Apples Alice)
     (primaryAccountable Apples Alice)    
-    (intent-ap-rl- send-and-transfer Alice Apples Rossatz)
+    (intent-ap--lc send-and-transfer Alice Rossatz GrannySmith)
 
     (currentLocation Claudia Rossatz)
     (currentLocation Truck1 Rossatz)
@@ -24,11 +26,14 @@
     (persistent-intent-apr--- travel Claudia Claudia)
 
     (currentLocation Bob Wien)
-    (intent-a-rrl- send-and-transfer Bob Apples Wien)
+    (intent-a-r-lc send-and-transfer Bob Wien GrannySmith)
 
 )
     
-(:goal 
+(:goal
+    ; (exists (?resource - resource ?location - location ?actor - actor )
+    ;     (intent-ap-rl- send-and-transfer ?actor ?resource ?location)
+    ; )
     (and
         ;(custodian Apples Bob)
         ;(currentLocation Claudia Rossatz)
@@ -58,6 +63,7 @@
                         (intent-apr--- ?a ?p ?r)
                         (intent-ap-r-- ?a ?p ?s)
                         (intent-ap---- ?a ?p)
+
                     )
                 )
             )
