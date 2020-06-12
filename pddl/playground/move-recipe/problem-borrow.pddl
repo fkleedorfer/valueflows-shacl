@@ -8,21 +8,19 @@
 )
 
 (:init
-    ;todo: put the initial state's facts and numeric values here
     (currentLocation Car Rossatz)
     (currentLocation Alice Rossatz)
     (custodian Car Alice)
     (primaryAccountable Car Alice)
-    (intent lend Alice null Car null)
+    (persistent-intent-ap-r- lend Alice Car)
 
     (currentLocation Bob Rossatz)
-    (intent use Bob Bob Car null)
+    (intent-aprr- use Bob Bob Car)
 )
 
 (:goal 
     (and
-       ; (intent transfer Alice Bob null Rossatz) 
-       (custodian Car Bob)
+        (custodian Car Bob)
     )
 )
 

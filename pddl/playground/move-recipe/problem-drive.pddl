@@ -5,8 +5,6 @@
     Wien Krems - location
     Claudia Maria - actor
     Car1 - car 
-    drive - recipe1role1resource
-    fuse fmove - recipeFlow
 )
 
 (:init
@@ -16,22 +14,9 @@
     (mayContainActors Car1)
     (currentLocation Car1 Krems)
 
-    (recipeClauseOf fuse drive)
-    (flowAction fuse use)
-    (flowProvider fuse role1)
-    (flowReceiver fuse role1)
-    (flowResource fuse resource1)
-    (flowLocation fuse locationOfRole1)
-
-    (recipeClauseOf fmove drive )
-    (flowAction fmove move)
-    (flowProvider fmove role1)
-    (flowReceiver fmove role1)
-    (flowResource fmove resource1)
-    (flowLocation fmove otherLocation)
-
+    (intent-apr-l travel Maria Maria Wien)
 )
-    
+  
 (:goal 
         (currentLocation Maria Wien)
 )

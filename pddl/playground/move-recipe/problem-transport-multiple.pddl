@@ -2,21 +2,40 @@
     (problem simple-move) 
     (:domain valueflows)
 (:objects 
-    Wien Krems - location
-    Claudia Maria - actor
-    Car1 - car 
+    Wien Rossatz Stein - location
+    Claudia Alice Bob Albert - actor
+    Apples Wine - resource
+    Truck1 - truck
 )
 
 (:init
-    (currentLocation Maria Krems)
-    (currentLocation Car1 Krems)
-    (custodian Car1 Maria)
-    (isVehicle Car1)
-    (mayContainActors Car1)
-    (persistent-intent-ap-r- deliver-taxi-service Maria Car1)
+    (currentLocation Apples Rossatz)
+    (currentLocation Alice Rossatz)
+    (custodian Apples Alice)
+    (primaryAccountable Apples Alice)    
+    (intent-ap-rl send-and-transfer Alice Apples Rossatz)
 
-    (currentlocation Claudia Krems)
-    (intent-apr-l travel Claudia Claudia Wien)
+    (currentLocation Wine Stein)
+    (currentLocation Albert Stein)
+    (custodian Wine Albert)
+    (primaryAccountable Wine Albert)    
+    (intent-ap-rl send-and-transfer Albert Wine Stein )
+
+
+    (currentLocation Claudia Rossatz)
+    (currentLocation Truck1 Rossatz)
+    (isVehicle Truck1)
+    (mayContainResources Truck1)
+    (custodian Truck1 Claudia)
+    (persistent-intent-ap--- deliver-transport-service Claudia)
+    ;(persistent-intent-apr-- travel Claudia Claudia)
+
+    (currentLocation Bob Wien)
+    (intent-a-rrl send-and-transfer Bob Apples Wien)
+
+    (currentLocation Bob Wien)
+    (intent-a-rrl send-and-transfer Bob Wine Wien)
+
 )
     
 (:goal 
@@ -83,6 +102,7 @@
             )
         )
     )
+
 )
 
 ;un-comment the following line if metric is needed
