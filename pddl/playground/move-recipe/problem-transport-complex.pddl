@@ -35,7 +35,6 @@
     (custodian Car1 Maria)
     (isVehicle Car1)
     (mayContainActors Car1)
-    
     (intent-ap-r-c deliver-service Maria Car1 TaxiServiceClass)
 
     (currentlocation Claudia Krems)    

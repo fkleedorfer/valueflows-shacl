@@ -354,8 +354,12 @@
     )
 )
 
-; careful: - incurs high complexity
-; To limit the problem, the travel intent is deleted as a result of the action
+;------------------------------------------------------------------------------
+;
+;                    RECIPES
+;
+;------------------------------------------------------------------------------
+
 (:action recipe-travel-to-location
     :parameters (?traveller - actor ?fromLocation ?toLocation - location)
     :precondition (and 
@@ -392,26 +396,6 @@
         (increase (total-cost) 1)
     )
 )
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-; (:action recipe-get-vehicle
-;     :parameters (?driver - actor  ?vehicle - vehicle ?location - location)
-;     :precondition (and 
-;         (isVehicle ?vehicle)
-;         (currentLocation ?driver ?location)
-;         (custodian ?vehicle ?driver)
-;     )
-;     :effect (and 
-;         (intent use ?driver ?driver ?vehicle ?location)
-;         (increase (total-cost) 1)
-;     )
-; )
 
 (:action recipe-drive
     :parameters (?driver - actor ?car - vehicle ?fromLocation ?toLocation - location)
@@ -549,17 +533,52 @@
         (not (= ?sender ?receiver))
         (primaryAccountable ?resource ?sender)
         (intent-ap-rl- send-and-transfer ?sender ?resource ?fromLocation)
-        (intent-a-rrl- send-and-transfer ?receiver ?resource ?toLocation)
+        (intent-a-rrl- transfer-custody ?receiver ?resource ?toLocation)
     )    
     :effect (and
         (intent-aprrl- transfer-all-rights ?sender ?receiver ?resource ?fromLocation)
         (intent-ap-rl- transfer-custody ?sender ?resource ?fromLocation)
         (intent-a-rrl- transfer-custody ?receiver ?resource ?toLocation)
         (not(intent-ap-rl- send-and-transfer ?sender ?resource ?fromLocation))
-        (not(intent-a-rrl- send-and-transfer ?receiver ?resource ?toLocation))
         (increase (total-cost) 1)
     )
 )   
+
+
+(:action recipe-need-resource-at-location-for-use
+    :parameters (?a - actor ?l - location ?c - resourceClassType)
+    :precondition (and
+        (or 
+            (and 
+                (intent-apr--c use ?a ?a ?c)
+                (or 
+                    (currentLocation ?a ?l)
+                    (intent-apr-l- arrive ?a ?a ?l)
+                )
+            )
+            (intent-apr-lc use ?a ?a ?l ?c)
+        )
+        (not 
+            (exists (?r - resource) 
+                (and
+                    (custodian ?r ?a ) ;TODO: even if I have such a resource, I may not have enough of it.
+                    (resourceClassification ?r ?c) 
+                )
+            )
+        )
+    )
+    :effect (and
+        (intent-a-r-lc transfer-custody ?a ?l ?c)
+    )
+)
+
+
+;------------------------------------------------------------------------------
+;
+;                    Events
+;
+;------------------------------------------------------------------------------
+
 
 
 (:action move 
