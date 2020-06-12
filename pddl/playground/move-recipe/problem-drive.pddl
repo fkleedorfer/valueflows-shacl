@@ -14,7 +14,8 @@
     (mayContainActors Car1)
     (currentLocation Car1 Krems)
 
-    (intent-apr-l travel Maria Maria Wien)
+    (intent-aprrl- use Maria Maria Car1 Krems)
+    (intent-apr-l- travel Maria Maria Wien)
 )
   
 (:goal 

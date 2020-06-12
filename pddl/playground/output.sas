@@ -23,197 +23,197 @@ begin_variable
 var2
 -1
 2
-Atom commitment(transfer-all-rights, alice, bob, apples, rossatz)
-NegatedAtom commitment(transfer-all-rights, alice, bob, apples, rossatz)
+Atom commitment-r-(transfer-all-rights, alice, bob, apples, rossatz)
+NegatedAtom commitment-r-(transfer-all-rights, alice, bob, apples, rossatz)
 end_variable
 begin_variable
 var3
 -1
 2
-Atom intent-a-rrl(send-and-transfer, bob, apples, wien)
-NegatedAtom intent-a-rrl(send-and-transfer, bob, apples, wien)
+Atom intent-a-rrl-(send-and-transfer, bob, apples, wien)
+NegatedAtom intent-a-rrl-(send-and-transfer, bob, apples, wien)
 end_variable
 begin_variable
 var4
 -1
 2
-Atom intent-ap-rl(send-and-transfer, alice, apples, rossatz)
-NegatedAtom intent-ap-rl(send-and-transfer, alice, apples, rossatz)
+Atom intent-ap-rl-(send-and-transfer, alice, apples, rossatz)
+NegatedAtom intent-ap-rl-(send-and-transfer, alice, apples, rossatz)
 end_variable
 begin_variable
 var5
 -1
 2
-Atom intent(transfer-all-rights, alice, bob, apples, rossatz)
-NegatedAtom intent(transfer-all-rights, alice, bob, apples, rossatz)
+Atom intent-aprrl-(transfer-all-rights, alice, bob, apples, rossatz)
+NegatedAtom intent-aprrl-(transfer-all-rights, alice, bob, apples, rossatz)
 end_variable
 begin_variable
 var6
 -1
 2
-Atom intent-a-rrl(transfer-custody, bob, apples, wien)
-NegatedAtom intent-a-rrl(transfer-custody, bob, apples, wien)
+Atom intent-a-rrl-(transfer-custody, bob, apples, wien)
+NegatedAtom intent-a-rrl-(transfer-custody, bob, apples, wien)
 end_variable
 begin_variable
 var7
 -1
 2
-Atom intent-ap---(deliver-transport-service, claudia)
-NegatedAtom intent-ap---(deliver-transport-service, claudia)
+Atom intent-ap----(deliver-transport-service, claudia)
+NegatedAtom intent-ap----(deliver-transport-service, claudia)
 end_variable
 begin_variable
 var8
 -1
 2
-Atom intent-ap-rl(transfer-custody, alice, apples, rossatz)
-NegatedAtom intent-ap-rl(transfer-custody, alice, apples, rossatz)
+Atom intent-ap-rl-(transfer-custody, alice, apples, rossatz)
+NegatedAtom intent-ap-rl-(transfer-custody, alice, apples, rossatz)
 end_variable
 begin_variable
 var9
 -1
 2
-Atom intent(use, claudia, claudia, truck1, rossatz)
-NegatedAtom intent(use, claudia, claudia, truck1, rossatz)
+Atom intent-aprrl-(use, claudia, claudia, truck1, rossatz)
+NegatedAtom intent-aprrl-(use, claudia, claudia, truck1, rossatz)
 end_variable
 begin_variable
 var10
 -1
 2
-Atom intent(transfer-custody, claudia, bob, apples, wien)
-NegatedAtom intent(transfer-custody, claudia, bob, apples, wien)
+Atom intent-ap-rl-(lend, rolf, truck1, gedersdorf)
+NegatedAtom intent-ap-rl-(lend, rolf, truck1, gedersdorf)
 end_variable
 begin_variable
 var11
 -1
 2
-Atom intent(transfer-custody, alice, claudia, apples, rossatz)
-NegatedAtom intent(transfer-custody, alice, claudia, apples, rossatz)
+Atom intent-aprrl-(use, claudia, claudia, truck1, gedersdorf)
+NegatedAtom intent-aprrl-(use, claudia, claudia, truck1, gedersdorf)
 end_variable
 begin_variable
 var12
+-1
+2
+Atom intent-aprrl-(transfer-custody, rolf, claudia, truck1, gedersdorf)
+NegatedAtom intent-aprrl-(transfer-custody, rolf, claudia, truck1, gedersdorf)
+end_variable
+begin_variable
+var13
+-1
+2
+Atom intent-aprrl-(transfer-custody, claudia, rolf, truck1, gedersdorf)
+NegatedAtom intent-aprrl-(transfer-custody, claudia, rolf, truck1, gedersdorf)
+end_variable
+begin_variable
+var14
+-1
+2
+Atom intent-aprrl-(transfer-custody, claudia, bob, apples, wien)
+NegatedAtom intent-aprrl-(transfer-custody, claudia, bob, apples, wien)
+end_variable
+begin_variable
+var15
+-1
+2
+Atom intent-aprrl-(transfer-custody, alice, claudia, apples, rossatz)
+NegatedAtom intent-aprrl-(transfer-custody, alice, claudia, apples, rossatz)
+end_variable
+begin_variable
+var16
 0
 2
 Atom new-axiom@0(apples, truck1)
 NegatedAtom new-axiom@0(apples, truck1)
 end_variable
 begin_variable
-var13
+var17
 0
 2
 Atom new-axiom@4(apples)
 NegatedAtom new-axiom@4(apples)
 end_variable
 begin_variable
-var14
+var18
 0
 2
 Atom new-axiom@0(truck1, truck1)
 NegatedAtom new-axiom@0(truck1, truck1)
 end_variable
 begin_variable
-var15
+var19
 0
 2
 Atom new-axiom@4(truck1)
 NegatedAtom new-axiom@4(truck1)
 end_variable
 begin_variable
-var16
+var20
 0
 2
 Atom new-axiom@3(car1)
 NegatedAtom new-axiom@3(car1)
 end_variable
 begin_variable
-var17
+var21
 0
 2
 Atom new-axiom@1(maria, car1)
 NegatedAtom new-axiom@1(maria, car1)
 end_variable
 begin_variable
-var18
+var22
 0
 2
 Atom new-axiom@3(truck1)
 NegatedAtom new-axiom@3(truck1)
 end_variable
 begin_variable
-var19
+var23
 0
 2
 Atom new-axiom@1(claudia, car1)
 NegatedAtom new-axiom@1(claudia, car1)
 end_variable
 begin_variable
-var20
--1
-2
-Atom intent-ap-rl(lend, rolf, truck1, gedersdorf)
-NegatedAtom intent-ap-rl(lend, rolf, truck1, gedersdorf)
-end_variable
-begin_variable
-var21
--1
-2
-Atom commitment(use, claudia, claudia, truck1, rossatz)
-NegatedAtom commitment(use, claudia, claudia, truck1, rossatz)
-end_variable
-begin_variable
-var22
--1
-2
-Atom intent(transfer-custody, claudia, rolf, truck1, gedersdorf)
-NegatedAtom intent(transfer-custody, claudia, rolf, truck1, gedersdorf)
-end_variable
-begin_variable
-var23
--1
-2
-Atom intent(transfer-custody, rolf, claudia, truck1, gedersdorf)
-NegatedAtom intent(transfer-custody, rolf, claudia, truck1, gedersdorf)
-end_variable
-begin_variable
 var24
 -1
 2
-Atom intent(use, claudia, claudia, truck1, gedersdorf)
-NegatedAtom intent(use, claudia, claudia, truck1, gedersdorf)
+Atom commitment-r-(use, claudia, claudia, truck1, gedersdorf)
+NegatedAtom commitment-r-(use, claudia, claudia, truck1, gedersdorf)
 end_variable
 begin_variable
 var25
 -1
 2
-Atom commitment(use, claudia, claudia, truck1, gedersdorf)
-NegatedAtom commitment(use, claudia, claudia, truck1, gedersdorf)
+Atom commitment-r-(use, claudia, claudia, truck1, rossatz)
+NegatedAtom commitment-r-(use, claudia, claudia, truck1, rossatz)
 end_variable
 begin_variable
 var26
 -1
 2
-Atom commitment(use, maria, maria, car1, gedersdorf)
-NegatedAtom commitment(use, maria, maria, car1, gedersdorf)
+Atom commitment-r-(use, maria, maria, car1, gedersdorf)
+NegatedAtom commitment-r-(use, maria, maria, car1, gedersdorf)
 end_variable
 begin_variable
 var27
 -1
 2
-Atom commitment(use, maria, maria, car1, krems)
-NegatedAtom commitment(use, maria, maria, car1, krems)
+Atom commitment-r-(use, maria, maria, car1, krems)
+NegatedAtom commitment-r-(use, maria, maria, car1, krems)
 end_variable
 begin_variable
 var28
 -1
 2
-Atom commitment(use, maria, maria, car1, rossatz)
-NegatedAtom commitment(use, maria, maria, car1, rossatz)
+Atom commitment-r-(use, maria, maria, car1, rossatz)
+NegatedAtom commitment-r-(use, maria, maria, car1, rossatz)
 end_variable
 begin_variable
 var29
 -1
 2
-Atom commitment(use, maria, maria, car1, wien)
-NegatedAtom commitment(use, maria, maria, car1, wien)
+Atom commitment-r-(use, maria, maria, car1, wien)
+NegatedAtom commitment-r-(use, maria, maria, car1, wien)
 end_variable
 begin_variable
 var30
@@ -226,113 +226,113 @@ begin_variable
 var31
 -1
 2
-Atom commitment(dismount, maria, maria, car1, gedersdorf)
-NegatedAtom commitment(dismount, maria, maria, car1, gedersdorf)
+Atom commitment-r-(dismount, maria, maria, car1, gedersdorf)
+NegatedAtom commitment-r-(dismount, maria, maria, car1, gedersdorf)
 end_variable
 begin_variable
 var32
 -1
 2
-Atom commitment(dismount, maria, maria, car1, krems)
-NegatedAtom commitment(dismount, maria, maria, car1, krems)
+Atom commitment-r-(dismount, maria, maria, car1, krems)
+NegatedAtom commitment-r-(dismount, maria, maria, car1, krems)
 end_variable
 begin_variable
 var33
 -1
 2
-Atom commitment(dismount, maria, maria, car1, rossatz)
-NegatedAtom commitment(dismount, maria, maria, car1, rossatz)
+Atom commitment-r-(dismount, maria, maria, car1, rossatz)
+NegatedAtom commitment-r-(dismount, maria, maria, car1, rossatz)
 end_variable
 begin_variable
 var34
 -1
 2
-Atom commitment(dismount, maria, maria, car1, wien)
-NegatedAtom commitment(dismount, maria, maria, car1, wien)
+Atom commitment-r-(dismount, maria, maria, car1, wien)
+NegatedAtom commitment-r-(dismount, maria, maria, car1, wien)
 end_variable
 begin_variable
 var35
 -1
 2
-Atom commitment(transfer-custody, alice, claudia, apples, rossatz)
-NegatedAtom commitment(transfer-custody, alice, claudia, apples, rossatz)
+Atom commitment-r-(transfer-custody, alice, claudia, apples, rossatz)
+NegatedAtom commitment-r-(transfer-custody, alice, claudia, apples, rossatz)
 end_variable
 begin_variable
 var36
 -1
 2
-Atom commitment(transfer-custody, claudia, bob, apples, wien)
-NegatedAtom commitment(transfer-custody, claudia, bob, apples, wien)
+Atom commitment-r-(transfer-custody, claudia, bob, apples, wien)
+NegatedAtom commitment-r-(transfer-custody, claudia, bob, apples, wien)
 end_variable
 begin_variable
 var37
 -1
 2
-Atom commitment(mount, maria, maria, car1, gedersdorf)
-NegatedAtom commitment(mount, maria, maria, car1, gedersdorf)
+Atom commitment-r-(transfer-custody, claudia, rolf, truck1, gedersdorf)
+NegatedAtom commitment-r-(transfer-custody, claudia, rolf, truck1, gedersdorf)
 end_variable
 begin_variable
 var38
 -1
 2
-Atom commitment(mount, maria, maria, car1, krems)
-NegatedAtom commitment(mount, maria, maria, car1, krems)
+Atom commitment-r-(transfer-custody, rolf, claudia, truck1, gedersdorf)
+NegatedAtom commitment-r-(transfer-custody, rolf, claudia, truck1, gedersdorf)
 end_variable
 begin_variable
 var39
 -1
 2
-Atom commitment(mount, maria, maria, car1, rossatz)
-NegatedAtom commitment(mount, maria, maria, car1, rossatz)
+Atom commitment-r-(mount, maria, maria, car1, gedersdorf)
+NegatedAtom commitment-r-(mount, maria, maria, car1, gedersdorf)
 end_variable
 begin_variable
 var40
 -1
 2
-Atom commitment(mount, maria, maria, car1, wien)
-NegatedAtom commitment(mount, maria, maria, car1, wien)
+Atom commitment-r-(mount, maria, maria, car1, krems)
+NegatedAtom commitment-r-(mount, maria, maria, car1, krems)
 end_variable
 begin_variable
 var41
 -1
 2
-Atom commitment(transfer-custody, claudia, rolf, truck1, gedersdorf)
-NegatedAtom commitment(transfer-custody, claudia, rolf, truck1, gedersdorf)
+Atom commitment-r-(mount, maria, maria, car1, rossatz)
+NegatedAtom commitment-r-(mount, maria, maria, car1, rossatz)
 end_variable
 begin_variable
 var42
 -1
 2
-Atom commitment(transfer-custody, rolf, claudia, truck1, gedersdorf)
-NegatedAtom commitment(transfer-custody, rolf, claudia, truck1, gedersdorf)
+Atom commitment-r-(mount, maria, maria, car1, wien)
+NegatedAtom commitment-r-(mount, maria, maria, car1, wien)
 end_variable
 begin_variable
 var43
 -1
 2
-Atom commitment(dismount, maria, claudia, car1, gedersdorf)
-NegatedAtom commitment(dismount, maria, claudia, car1, gedersdorf)
+Atom commitment-r-(dismount, maria, claudia, car1, gedersdorf)
+NegatedAtom commitment-r-(dismount, maria, claudia, car1, gedersdorf)
 end_variable
 begin_variable
 var44
 -1
 2
-Atom commitment(dismount, maria, claudia, car1, krems)
-NegatedAtom commitment(dismount, maria, claudia, car1, krems)
+Atom commitment-r-(dismount, maria, claudia, car1, krems)
+NegatedAtom commitment-r-(dismount, maria, claudia, car1, krems)
 end_variable
 begin_variable
 var45
 -1
 2
-Atom commitment(dismount, maria, claudia, car1, rossatz)
-NegatedAtom commitment(dismount, maria, claudia, car1, rossatz)
+Atom commitment-r-(dismount, maria, claudia, car1, rossatz)
+NegatedAtom commitment-r-(dismount, maria, claudia, car1, rossatz)
 end_variable
 begin_variable
 var46
 -1
 2
-Atom commitment(dismount, maria, claudia, car1, wien)
-NegatedAtom commitment(dismount, maria, claudia, car1, wien)
+Atom commitment-r-(dismount, maria, claudia, car1, wien)
+NegatedAtom commitment-r-(dismount, maria, claudia, car1, wien)
 end_variable
 begin_variable
 var47
@@ -353,29 +353,29 @@ begin_variable
 var49
 -1
 2
-Atom commitment(mount, maria, claudia, car1, gedersdorf)
-NegatedAtom commitment(mount, maria, claudia, car1, gedersdorf)
+Atom commitment-r-(mount, maria, claudia, car1, gedersdorf)
+NegatedAtom commitment-r-(mount, maria, claudia, car1, gedersdorf)
 end_variable
 begin_variable
 var50
 -1
 2
-Atom commitment(mount, maria, claudia, car1, krems)
-NegatedAtom commitment(mount, maria, claudia, car1, krems)
+Atom commitment-r-(mount, maria, claudia, car1, krems)
+NegatedAtom commitment-r-(mount, maria, claudia, car1, krems)
 end_variable
 begin_variable
 var51
 -1
 2
-Atom commitment(mount, maria, claudia, car1, rossatz)
-NegatedAtom commitment(mount, maria, claudia, car1, rossatz)
+Atom commitment-r-(mount, maria, claudia, car1, rossatz)
+NegatedAtom commitment-r-(mount, maria, claudia, car1, rossatz)
 end_variable
 begin_variable
 var52
 -1
 2
-Atom commitment(mount, maria, claudia, car1, wien)
-NegatedAtom commitment(mount, maria, claudia, car1, wien)
+Atom commitment-r-(mount, maria, claudia, car1, wien)
+NegatedAtom commitment-r-(mount, maria, claudia, car1, wien)
 end_variable
 begin_variable
 var53
@@ -388,127 +388,127 @@ begin_variable
 var54
 -1
 2
-Atom intent(move, claudia, claudia, truck1, gedersdorf)
-NegatedAtom intent(move, claudia, claudia, truck1, gedersdorf)
+Atom intent-aprrl-(move, claudia, claudia, truck1, gedersdorf)
+NegatedAtom intent-aprrl-(move, claudia, claudia, truck1, gedersdorf)
 end_variable
 begin_variable
 var55
 -1
 2
-Atom intent(move, claudia, claudia, truck1, krems)
-NegatedAtom intent(move, claudia, claudia, truck1, krems)
+Atom intent-aprrl-(move, claudia, claudia, truck1, krems)
+NegatedAtom intent-aprrl-(move, claudia, claudia, truck1, krems)
 end_variable
 begin_variable
 var56
 -1
 2
-Atom intent(move, claudia, claudia, truck1, rossatz)
-NegatedAtom intent(move, claudia, claudia, truck1, rossatz)
+Atom intent-aprrl-(move, claudia, claudia, truck1, rossatz)
+NegatedAtom intent-aprrl-(move, claudia, claudia, truck1, rossatz)
 end_variable
 begin_variable
 var57
 -1
 2
-Atom intent(move, claudia, claudia, truck1, wien)
-NegatedAtom intent(move, claudia, claudia, truck1, wien)
+Atom intent-aprrl-(move, claudia, claudia, truck1, wien)
+NegatedAtom intent-aprrl-(move, claudia, claudia, truck1, wien)
 end_variable
 begin_variable
 var58
 -1
 2
-Atom intent(dismount, maria, claudia, car1, gedersdorf)
-NegatedAtom intent(dismount, maria, claudia, car1, gedersdorf)
+Atom intent-aprrl-(dismount, maria, claudia, car1, krems)
+NegatedAtom intent-aprrl-(dismount, maria, claudia, car1, krems)
 end_variable
 begin_variable
 var59
 -1
 2
-Atom intent(mount, maria, claudia, car1, krems)
-NegatedAtom intent(mount, maria, claudia, car1, krems)
+Atom intent-aprrl-(dismount, maria, claudia, car1, rossatz)
+NegatedAtom intent-aprrl-(dismount, maria, claudia, car1, rossatz)
 end_variable
 begin_variable
 var60
 -1
 2
-Atom intent(mount, maria, claudia, car1, rossatz)
-NegatedAtom intent(mount, maria, claudia, car1, rossatz)
+Atom intent-aprrl-(dismount, maria, claudia, car1, wien)
+NegatedAtom intent-aprrl-(dismount, maria, claudia, car1, wien)
 end_variable
 begin_variable
 var61
 -1
 2
-Atom intent(mount, maria, claudia, car1, wien)
-NegatedAtom intent(mount, maria, claudia, car1, wien)
+Atom intent-aprrl-(mount, maria, claudia, car1, gedersdorf)
+NegatedAtom intent-aprrl-(mount, maria, claudia, car1, gedersdorf)
 end_variable
 begin_variable
 var62
 -1
 2
-Atom intent(use, maria, maria, car1, krems)
-NegatedAtom intent(use, maria, maria, car1, krems)
+Atom intent-aprrl-(use, maria, maria, car1, gedersdorf)
+NegatedAtom intent-aprrl-(use, maria, maria, car1, gedersdorf)
 end_variable
 begin_variable
 var63
 -1
 2
-Atom intent(use, maria, maria, car1, rossatz)
-NegatedAtom intent(use, maria, maria, car1, rossatz)
+Atom intent-aprrl-(dismount, maria, claudia, car1, gedersdorf)
+NegatedAtom intent-aprrl-(dismount, maria, claudia, car1, gedersdorf)
 end_variable
 begin_variable
 var64
 -1
 2
-Atom intent(use, maria, maria, car1, wien)
-NegatedAtom intent(use, maria, maria, car1, wien)
+Atom intent-aprrl-(mount, maria, claudia, car1, krems)
+NegatedAtom intent-aprrl-(mount, maria, claudia, car1, krems)
 end_variable
 begin_variable
 var65
 -1
 2
-Atom intent(dismount, maria, claudia, car1, krems)
-NegatedAtom intent(dismount, maria, claudia, car1, krems)
+Atom intent-aprrl-(use, maria, maria, car1, krems)
+NegatedAtom intent-aprrl-(use, maria, maria, car1, krems)
 end_variable
 begin_variable
 var66
 -1
 2
-Atom intent(dismount, maria, claudia, car1, rossatz)
-NegatedAtom intent(dismount, maria, claudia, car1, rossatz)
+Atom intent-aprrl-(mount, maria, claudia, car1, rossatz)
+NegatedAtom intent-aprrl-(mount, maria, claudia, car1, rossatz)
 end_variable
 begin_variable
 var67
 -1
 2
-Atom intent(dismount, maria, claudia, car1, wien)
-NegatedAtom intent(dismount, maria, claudia, car1, wien)
+Atom intent-aprrl-(use, maria, maria, car1, rossatz)
+NegatedAtom intent-aprrl-(use, maria, maria, car1, rossatz)
 end_variable
 begin_variable
 var68
 -1
 2
-Atom intent(mount, maria, claudia, car1, gedersdorf)
-NegatedAtom intent(mount, maria, claudia, car1, gedersdorf)
+Atom intent-aprrl-(mount, maria, claudia, car1, wien)
+NegatedAtom intent-aprrl-(mount, maria, claudia, car1, wien)
 end_variable
 begin_variable
 var69
 -1
 2
-Atom intent(use, maria, maria, car1, gedersdorf)
-NegatedAtom intent(use, maria, maria, car1, gedersdorf)
+Atom intent-aprrl-(use, maria, maria, car1, wien)
+NegatedAtom intent-aprrl-(use, maria, maria, car1, wien)
 end_variable
 begin_variable
 var70
 -1
 2
-Atom intent-apr-l(travel, claudia, claudia, rossatz)
-NegatedAtom intent-apr-l(travel, claudia, claudia, rossatz)
+Atom intent-apr-l-(travel, claudia, claudia, rossatz)
+NegatedAtom intent-apr-l-(travel, claudia, claudia, rossatz)
 end_variable
 begin_variable
 var71
 -1
 2
-Atom intent-apr-l(travel, claudia, claudia, gedersdorf)
-NegatedAtom intent-apr-l(travel, claudia, claudia, gedersdorf)
+Atom intent-apr-l-(travel, claudia, claudia, gedersdorf)
+NegatedAtom intent-apr-l-(travel, claudia, claudia, gedersdorf)
 end_variable
 begin_variable
 var72
@@ -528,29 +528,29 @@ begin_variable
 var74
 -1
 2
-Atom commitment(move, maria, maria, car1, gedersdorf)
-NegatedAtom commitment(move, maria, maria, car1, gedersdorf)
+Atom commitment-r-(move, maria, maria, car1, gedersdorf)
+NegatedAtom commitment-r-(move, maria, maria, car1, gedersdorf)
 end_variable
 begin_variable
 var75
 -1
 2
-Atom commitment(move, maria, maria, car1, krems)
-NegatedAtom commitment(move, maria, maria, car1, krems)
+Atom commitment-r-(move, maria, maria, car1, krems)
+NegatedAtom commitment-r-(move, maria, maria, car1, krems)
 end_variable
 begin_variable
 var76
 -1
 2
-Atom commitment(move, maria, maria, car1, rossatz)
-NegatedAtom commitment(move, maria, maria, car1, rossatz)
+Atom commitment-r-(move, maria, maria, car1, rossatz)
+NegatedAtom commitment-r-(move, maria, maria, car1, rossatz)
 end_variable
 begin_variable
 var77
 -1
 2
-Atom commitment(move, maria, maria, car1, wien)
-NegatedAtom commitment(move, maria, maria, car1, wien)
+Atom commitment-r-(move, maria, maria, car1, wien)
+NegatedAtom commitment-r-(move, maria, maria, car1, wien)
 end_variable
 begin_variable
 var78
@@ -570,113 +570,113 @@ begin_variable
 var80
 -1
 2
-Atom commitment(move, claudia, claudia, truck1, gedersdorf)
-NegatedAtom commitment(move, claudia, claudia, truck1, gedersdorf)
+Atom commitment-r-(move, claudia, claudia, truck1, gedersdorf)
+NegatedAtom commitment-r-(move, claudia, claudia, truck1, gedersdorf)
 end_variable
 begin_variable
 var81
 -1
 2
-Atom commitment(move, claudia, claudia, truck1, krems)
-NegatedAtom commitment(move, claudia, claudia, truck1, krems)
+Atom commitment-r-(move, claudia, claudia, truck1, krems)
+NegatedAtom commitment-r-(move, claudia, claudia, truck1, krems)
 end_variable
 begin_variable
 var82
 -1
 2
-Atom commitment(move, claudia, claudia, truck1, rossatz)
-NegatedAtom commitment(move, claudia, claudia, truck1, rossatz)
+Atom commitment-r-(move, claudia, claudia, truck1, rossatz)
+NegatedAtom commitment-r-(move, claudia, claudia, truck1, rossatz)
 end_variable
 begin_variable
 var83
 -1
 2
-Atom commitment(move, claudia, claudia, truck1, wien)
-NegatedAtom commitment(move, claudia, claudia, truck1, wien)
+Atom commitment-r-(move, claudia, claudia, truck1, wien)
+NegatedAtom commitment-r-(move, claudia, claudia, truck1, wien)
 end_variable
 begin_variable
 var84
 -1
 2
-Atom intent(move, maria, maria, car1, gedersdorf)
-NegatedAtom intent(move, maria, maria, car1, gedersdorf)
+Atom intent-apr-l-(arrive, maria, maria, gedersdorf)
+NegatedAtom intent-apr-l-(arrive, maria, maria, gedersdorf)
 end_variable
 begin_variable
 var85
 -1
 2
-Atom intent(move, maria, maria, car1, krems)
-NegatedAtom intent(move, maria, maria, car1, krems)
+Atom intent-apr-l-(leave, maria, maria, gedersdorf)
+NegatedAtom intent-apr-l-(leave, maria, maria, gedersdorf)
 end_variable
 begin_variable
 var86
 -1
 2
-Atom intent(move, maria, maria, car1, rossatz)
-NegatedAtom intent(move, maria, maria, car1, rossatz)
+Atom intent-aprrl-(move, maria, maria, car1, gedersdorf)
+NegatedAtom intent-aprrl-(move, maria, maria, car1, gedersdorf)
 end_variable
 begin_variable
 var87
 -1
 2
-Atom intent(move, maria, maria, car1, wien)
-NegatedAtom intent(move, maria, maria, car1, wien)
+Atom intent-apr-l-(arrive, maria, maria, krems)
+NegatedAtom intent-apr-l-(arrive, maria, maria, krems)
 end_variable
 begin_variable
 var88
 -1
 2
-Atom intent-apr-l(arrive, maria, maria, gedersdorf)
-NegatedAtom intent-apr-l(arrive, maria, maria, gedersdorf)
+Atom intent-apr-l-(leave, maria, maria, krems)
+NegatedAtom intent-apr-l-(leave, maria, maria, krems)
 end_variable
 begin_variable
 var89
 -1
 2
-Atom intent-apr-l(leave, maria, maria, gedersdorf)
-NegatedAtom intent-apr-l(leave, maria, maria, gedersdorf)
+Atom intent-aprrl-(move, maria, maria, car1, krems)
+NegatedAtom intent-aprrl-(move, maria, maria, car1, krems)
 end_variable
 begin_variable
 var90
 -1
 2
-Atom intent-apr-l(arrive, maria, maria, krems)
-NegatedAtom intent-apr-l(arrive, maria, maria, krems)
+Atom intent-apr-l-(arrive, maria, maria, rossatz)
+NegatedAtom intent-apr-l-(arrive, maria, maria, rossatz)
 end_variable
 begin_variable
 var91
 -1
 2
-Atom intent-apr-l(leave, maria, maria, krems)
-NegatedAtom intent-apr-l(leave, maria, maria, krems)
+Atom intent-apr-l-(arrive, maria, maria, wien)
+NegatedAtom intent-apr-l-(arrive, maria, maria, wien)
 end_variable
 begin_variable
 var92
 -1
 2
-Atom intent-apr-l(arrive, maria, maria, rossatz)
-NegatedAtom intent-apr-l(arrive, maria, maria, rossatz)
+Atom intent-apr-l-(leave, maria, maria, rossatz)
+NegatedAtom intent-apr-l-(leave, maria, maria, rossatz)
 end_variable
 begin_variable
 var93
 -1
 2
-Atom intent-apr-l(arrive, maria, maria, wien)
-NegatedAtom intent-apr-l(arrive, maria, maria, wien)
+Atom intent-apr-l-(leave, maria, maria, wien)
+NegatedAtom intent-apr-l-(leave, maria, maria, wien)
 end_variable
 begin_variable
 var94
 -1
 2
-Atom intent-apr-l(leave, maria, maria, rossatz)
-NegatedAtom intent-apr-l(leave, maria, maria, rossatz)
+Atom intent-aprrl-(move, maria, maria, car1, wien)
+NegatedAtom intent-aprrl-(move, maria, maria, car1, wien)
 end_variable
 begin_variable
 var95
 -1
 2
-Atom intent-apr-l(leave, maria, maria, wien)
-NegatedAtom intent-apr-l(leave, maria, maria, wien)
+Atom intent-aprrl-(move, maria, maria, car1, rossatz)
+NegatedAtom intent-aprrl-(move, maria, maria, car1, rossatz)
 end_variable
 begin_variable
 var96
@@ -689,99 +689,99 @@ begin_variable
 var97
 -1
 2
-Atom intent-apr-l(arrive, claudia, claudia, krems)
-NegatedAtom intent-apr-l(arrive, claudia, claudia, krems)
+Atom intent-apr-l-(arrive, claudia, claudia, krems)
+NegatedAtom intent-apr-l-(arrive, claudia, claudia, krems)
 end_variable
 begin_variable
 var98
 -1
 2
-Atom intent-apr-l(arrive, claudia, claudia, wien)
-NegatedAtom intent-apr-l(arrive, claudia, claudia, wien)
+Atom intent-apr-l-(arrive, claudia, claudia, wien)
+NegatedAtom intent-apr-l-(arrive, claudia, claudia, wien)
 end_variable
 begin_variable
 var99
 -1
 2
-Atom intent-ap-r-(deliver-taxi-service, maria, car1)
-NegatedAtom intent-ap-r-(deliver-taxi-service, maria, car1)
+Atom intent-ap-r--(deliver-taxi-service, maria, car1)
+NegatedAtom intent-ap-r--(deliver-taxi-service, maria, car1)
 end_variable
 begin_variable
 var100
 -1
 2
-Atom intent-apr-l(leave, claudia, claudia, krems)
-NegatedAtom intent-apr-l(leave, claudia, claudia, krems)
+Atom intent-apr-l-(leave, claudia, claudia, krems)
+NegatedAtom intent-apr-l-(leave, claudia, claudia, krems)
 end_variable
 begin_variable
 var101
 -1
 2
-Atom intent-apr-l(leave, claudia, claudia, wien)
-NegatedAtom intent-apr-l(leave, claudia, claudia, wien)
+Atom intent-apr-l-(leave, claudia, claudia, wien)
+NegatedAtom intent-apr-l-(leave, claudia, claudia, wien)
 end_variable
 begin_variable
 var102
 -1
 2
-Atom intent-apr-l(leave, claudia, claudia, gedersdorf)
-NegatedAtom intent-apr-l(leave, claudia, claudia, gedersdorf)
+Atom intent-apr-l-(leave, claudia, claudia, gedersdorf)
+NegatedAtom intent-apr-l-(leave, claudia, claudia, gedersdorf)
 end_variable
 begin_variable
 var103
 -1
 2
-Atom intent-apr-l(arrive, claudia, claudia, rossatz)
-NegatedAtom intent-apr-l(arrive, claudia, claudia, rossatz)
+Atom intent-apr-l-(arrive, claudia, claudia, rossatz)
+NegatedAtom intent-apr-l-(arrive, claudia, claudia, rossatz)
 end_variable
 begin_variable
 var104
 -1
 2
-Atom intent-apr-l(leave, claudia, claudia, rossatz)
-NegatedAtom intent-apr-l(leave, claudia, claudia, rossatz)
+Atom intent-apr-l-(leave, claudia, claudia, rossatz)
+NegatedAtom intent-apr-l-(leave, claudia, claudia, rossatz)
 end_variable
 begin_variable
 var105
 -1
 2
-Atom intent-apr-l(travel, maria, maria, gedersdorf)
-NegatedAtom intent-apr-l(travel, maria, maria, gedersdorf)
+Atom intent-apr-l-(travel, maria, maria, gedersdorf)
+NegatedAtom intent-apr-l-(travel, maria, maria, gedersdorf)
 end_variable
 begin_variable
 var106
 -1
 2
-Atom intent-apr-l(arrive, claudia, claudia, gedersdorf)
-NegatedAtom intent-apr-l(arrive, claudia, claudia, gedersdorf)
+Atom intent-apr-l-(arrive, claudia, claudia, gedersdorf)
+NegatedAtom intent-apr-l-(arrive, claudia, claudia, gedersdorf)
 end_variable
 begin_variable
 var107
 -1
 2
-Atom intent-apr-l(travel, maria, maria, krems)
-NegatedAtom intent-apr-l(travel, maria, maria, krems)
+Atom intent-apr-l-(travel, maria, maria, krems)
+NegatedAtom intent-apr-l-(travel, maria, maria, krems)
 end_variable
 begin_variable
 var108
 -1
 2
-Atom intent-apr-l(travel, maria, maria, rossatz)
-NegatedAtom intent-apr-l(travel, maria, maria, rossatz)
+Atom intent-apr-l-(travel, maria, maria, rossatz)
+NegatedAtom intent-apr-l-(travel, maria, maria, rossatz)
 end_variable
 begin_variable
 var109
 -1
 2
-Atom intent-apr-l(travel, maria, maria, wien)
-NegatedAtom intent-apr-l(travel, maria, maria, wien)
+Atom intent-apr-l-(travel, maria, maria, wien)
+NegatedAtom intent-apr-l-(travel, maria, maria, wien)
 end_variable
 begin_variable
 var110
 -1
 2
-Atom intent-apr--(travel, claudia, claudia)
-NegatedAtom intent-apr--(travel, claudia, claudia)
+Atom intent-apr---(travel, claudia, claudia)
+NegatedAtom intent-apr---(travel, claudia, claudia)
 end_variable
 begin_variable
 var111
@@ -861,6 +861,10 @@ begin_state
 0
 1
 1
+0
+1
+1
+1
 1
 1
 0
@@ -871,10 +875,6 @@ begin_state
 0
 0
 0
-0
-1
-1
-1
 1
 1
 1
@@ -979,12 +979,12 @@ end_goal
 begin_operator
 begin-use claudia truck1
 6
-25 0
+24 0
 115 0
 116 0
 48 0
 114 1
-18 1
+22 1
 1
 0 53 -1 0
 1
@@ -992,12 +992,12 @@ end_operator
 begin_operator
 begin-use claudia truck1
 6
-21 0
+25 0
 115 2
 116 2
 48 0
 114 1
-18 1
+22 1
 1
 0 53 -1 0
 1
@@ -1009,7 +1009,7 @@ begin-use maria car1
 111 0
 112 0
 72 1
-16 1
+20 1
 1
 0 73 -1 0
 1
@@ -1021,7 +1021,7 @@ begin-use maria car1
 111 1
 112 1
 72 1
-16 1
+20 1
 1
 0 73 -1 0
 1
@@ -1033,7 +1033,7 @@ begin-use maria car1
 111 2
 112 2
 72 1
-16 1
+20 1
 1
 0 73 -1 0
 1
@@ -1045,77 +1045,77 @@ begin-use maria car1
 111 3
 112 3
 72 1
-16 1
+20 1
 1
 0 73 -1 0
 1
 end_operator
 begin_operator
-commit dismount maria claudia car1 gedersdorf
+commit-r- dismount maria claudia car1 gedersdorf
 0
 2
 0 43 -1 0
+0 63 0 1
+1
+end_operator
+begin_operator
+commit-r- dismount maria claudia car1 krems
+0
+2
+0 44 -1 0
 0 58 0 1
 1
 end_operator
 begin_operator
-commit dismount maria claudia car1 krems
-0
-2
-0 44 -1 0
-0 65 0 1
-1
-end_operator
-begin_operator
-commit dismount maria claudia car1 rossatz
+commit-r- dismount maria claudia car1 rossatz
 0
 2
 0 45 -1 0
-0 66 0 1
-1
-end_operator
-begin_operator
-commit dismount maria claudia car1 wien
-0
-2
-0 46 -1 0
-0 67 0 1
-1
-end_operator
-begin_operator
-commit mount maria claudia car1 gedersdorf
-0
-2
-0 49 -1 0
-0 68 0 1
-1
-end_operator
-begin_operator
-commit mount maria claudia car1 krems
-0
-2
-0 50 -1 0
 0 59 0 1
 1
 end_operator
 begin_operator
-commit mount maria claudia car1 rossatz
+commit-r- dismount maria claudia car1 wien
 0
 2
-0 51 -1 0
+0 46 -1 0
 0 60 0 1
 1
 end_operator
 begin_operator
-commit mount maria claudia car1 wien
+commit-r- mount maria claudia car1 gedersdorf
 0
 2
-0 52 -1 0
+0 49 -1 0
 0 61 0 1
 1
 end_operator
 begin_operator
-commit move claudia claudia truck1 gedersdorf
+commit-r- mount maria claudia car1 krems
+0
+2
+0 50 -1 0
+0 64 0 1
+1
+end_operator
+begin_operator
+commit-r- mount maria claudia car1 rossatz
+0
+2
+0 51 -1 0
+0 66 0 1
+1
+end_operator
+begin_operator
+commit-r- mount maria claudia car1 wien
+0
+2
+0 52 -1 0
+0 68 0 1
+1
+end_operator
+begin_operator
+commit-r- move claudia claudia truck1 gedersdorf
 0
 2
 0 80 -1 0
@@ -1123,7 +1123,7 @@ commit move claudia claudia truck1 gedersdorf
 1
 end_operator
 begin_operator
-commit move claudia claudia truck1 krems
+commit-r- move claudia claudia truck1 krems
 0
 2
 0 81 -1 0
@@ -1131,7 +1131,7 @@ commit move claudia claudia truck1 krems
 1
 end_operator
 begin_operator
-commit move claudia claudia truck1 rossatz
+commit-r- move claudia claudia truck1 rossatz
 0
 2
 0 82 -1 0
@@ -1139,7 +1139,7 @@ commit move claudia claudia truck1 rossatz
 1
 end_operator
 begin_operator
-commit move claudia claudia truck1 wien
+commit-r- move claudia claudia truck1 wien
 0
 2
 0 83 -1 0
@@ -1147,39 +1147,39 @@ commit move claudia claudia truck1 wien
 1
 end_operator
 begin_operator
-commit move maria maria car1 gedersdorf
+commit-r- move maria maria car1 gedersdorf
 0
 2
 0 74 -1 0
-0 84 0 1
-1
-end_operator
-begin_operator
-commit move maria maria car1 krems
-0
-2
-0 75 -1 0
-0 85 0 1
-1
-end_operator
-begin_operator
-commit move maria maria car1 rossatz
-0
-2
-0 76 -1 0
 0 86 0 1
 1
 end_operator
 begin_operator
-commit move maria maria car1 wien
+commit-r- move maria maria car1 krems
 0
 2
-0 77 -1 0
-0 87 0 1
+0 75 -1 0
+0 89 0 1
 1
 end_operator
 begin_operator
-commit transfer-all-rights alice bob apples rossatz
+commit-r- move maria maria car1 rossatz
+0
+2
+0 76 -1 0
+0 95 0 1
+1
+end_operator
+begin_operator
+commit-r- move maria maria car1 wien
+0
+2
+0 77 -1 0
+0 94 0 1
+1
+end_operator
+begin_operator
+commit-r- transfer-all-rights alice bob apples rossatz
 0
 2
 0 2 -1 0
@@ -1187,83 +1187,83 @@ commit transfer-all-rights alice bob apples rossatz
 1
 end_operator
 begin_operator
-commit transfer-custody alice claudia apples rossatz
+commit-r- transfer-custody alice claudia apples rossatz
 0
 2
 0 35 -1 0
+0 15 0 1
+1
+end_operator
+begin_operator
+commit-r- transfer-custody claudia bob apples wien
+0
+2
+0 36 -1 0
+0 14 0 1
+1
+end_operator
+begin_operator
+commit-r- transfer-custody claudia rolf truck1 gedersdorf
+0
+2
+0 37 -1 0
+0 13 0 1
+1
+end_operator
+begin_operator
+commit-r- transfer-custody rolf claudia truck1 gedersdorf
+0
+2
+0 38 -1 0
+0 12 0 1
+1
+end_operator
+begin_operator
+commit-r- use claudia claudia truck1 gedersdorf
+0
+2
+0 24 -1 0
 0 11 0 1
 1
 end_operator
 begin_operator
-commit transfer-custody claudia bob apples wien
-0
-2
-0 36 -1 0
-0 10 0 1
-1
-end_operator
-begin_operator
-commit transfer-custody claudia rolf truck1 gedersdorf
-0
-2
-0 41 -1 0
-0 22 0 1
-1
-end_operator
-begin_operator
-commit transfer-custody rolf claudia truck1 gedersdorf
-0
-2
-0 42 -1 0
-0 23 0 1
-1
-end_operator
-begin_operator
-commit use claudia claudia truck1 gedersdorf
+commit-r- use claudia claudia truck1 rossatz
 0
 2
 0 25 -1 0
-0 24 0 1
-1
-end_operator
-begin_operator
-commit use claudia claudia truck1 rossatz
-0
-2
-0 21 -1 0
 0 9 0 1
 1
 end_operator
 begin_operator
-commit use maria maria car1 gedersdorf
+commit-r- use maria maria car1 gedersdorf
 0
 2
 0 26 -1 0
-0 69 0 1
-1
-end_operator
-begin_operator
-commit use maria maria car1 krems
-0
-2
-0 27 -1 0
 0 62 0 1
 1
 end_operator
 begin_operator
-commit use maria maria car1 rossatz
+commit-r- use maria maria car1 krems
 0
 2
-0 28 -1 0
-0 63 0 1
+0 27 -1 0
+0 65 0 1
 1
 end_operator
 begin_operator
-commit use maria maria car1 wien
+commit-r- use maria maria car1 rossatz
+0
+2
+0 28 -1 0
+0 67 0 1
+1
+end_operator
+begin_operator
+commit-r- use maria maria car1 wien
 0
 2
 0 29 -1 0
-0 64 0 1
+0 69 0 1
 1
 end_operator
 begin_operator
@@ -1367,8 +1367,8 @@ end-use claudia truck1
 1
 114 1
 3
+0 24 -1 1
 0 25 -1 1
-0 21 -1 1
 0 53 0 1
 1
 end_operator
@@ -1391,7 +1391,7 @@ mount maria claudia car1 gedersdorf
 115 0
 112 0
 72 1
-19 1
+23 1
 30 1
 73 0
 3
@@ -1407,7 +1407,7 @@ mount maria claudia car1 krems
 115 1
 112 1
 72 1
-19 1
+23 1
 30 1
 73 0
 3
@@ -1423,7 +1423,7 @@ mount maria claudia car1 rossatz
 115 2
 112 2
 72 1
-19 1
+23 1
 30 1
 73 0
 3
@@ -1439,7 +1439,7 @@ mount maria claudia car1 wien
 115 3
 112 3
 72 1
-19 1
+23 1
 30 1
 73 0
 3
@@ -1453,35 +1453,7 @@ mount maria maria car1 gedersdorf
 5
 111 0
 112 0
-17 1
-0 1
-73 0
-3
-0 37 0 1
-0 96 -1 0
-0 72 1 0
-1
-end_operator
-begin_operator
-mount maria maria car1 krems
-5
-111 1
-112 1
-17 1
-0 1
-73 0
-3
-0 38 0 1
-0 96 -1 0
-0 72 1 0
-1
-end_operator
-begin_operator
-mount maria maria car1 rossatz
-5
-111 2
-112 2
-17 1
+21 1
 0 1
 73 0
 3
@@ -1491,15 +1463,43 @@ mount maria maria car1 rossatz
 1
 end_operator
 begin_operator
-mount maria maria car1 wien
+mount maria maria car1 krems
 5
-111 3
-112 3
-17 1
+111 1
+112 1
+21 1
 0 1
 73 0
 3
 0 40 0 1
+0 96 -1 0
+0 72 1 0
+1
+end_operator
+begin_operator
+mount maria maria car1 rossatz
+5
+111 2
+112 2
+21 1
+0 1
+73 0
+3
+0 41 0 1
+0 96 -1 0
+0 72 1 0
+1
+end_operator
+begin_operator
+mount maria maria car1 wien
+5
+111 3
+112 3
+21 1
+0 1
+73 0
+3
+0 42 0 1
 0 96 -1 0
 0 72 1 0
 1
@@ -1936,7 +1936,7 @@ put-into claudia apples truck1
 47 2
 48 0
 114 1
-12 1
+16 1
 1
 0 78 -1 0
 1
@@ -1949,7 +1949,7 @@ put-into claudia apples truck1
 47 2
 48 0
 114 1
-12 1
+16 1
 1
 0 78 -1 0
 1
@@ -1962,7 +1962,7 @@ put-into claudia apples truck1
 47 2
 48 0
 114 1
-12 1
+16 1
 1
 0 78 -1 0
 1
@@ -1975,7 +1975,7 @@ put-into claudia apples truck1
 47 2
 48 0
 114 1
-12 1
+16 1
 1
 0 78 -1 0
 1
@@ -1986,7 +1986,7 @@ put-into claudia truck1 truck1
 116 0
 48 0
 114 1
-14 1
+18 1
 1
 0 79 -1 0
 1
@@ -1997,7 +1997,7 @@ put-into claudia truck1 truck1
 116 1
 48 0
 114 1
-14 1
+18 1
 1
 0 79 -1 0
 1
@@ -2008,7 +2008,7 @@ put-into claudia truck1 truck1
 116 2
 48 0
 114 1
-14 1
+18 1
 1
 0 79 -1 0
 1
@@ -2019,7 +2019,7 @@ put-into claudia truck1 truck1
 116 3
 48 0
 114 1
-14 1
+18 1
 1
 0 79 -1 0
 1
@@ -2029,7 +2029,7 @@ put-into rolf truck1 truck1
 3
 116 0
 48 1
-14 1
+18 1
 1
 0 79 -1 0
 1
@@ -2039,7 +2039,7 @@ put-into rolf truck1 truck1
 3
 116 1
 48 1
-14 1
+18 1
 1
 0 79 -1 0
 1
@@ -2049,7 +2049,7 @@ put-into rolf truck1 truck1
 3
 116 2
 48 1
-14 1
+18 1
 1
 0 79 -1 0
 1
@@ -2059,7 +2059,7 @@ put-into rolf truck1 truck1
 3
 116 3
 48 1
-14 1
+18 1
 1
 0 79 -1 0
 1
@@ -2067,35 +2067,34 @@ end_operator
 begin_operator
 recipe-borrow rolf claudia truck1 gedersdorf
 1
-25 0
-10
-0 22 -1 0
-0 23 -1 0
-0 24 -1 0
-0 20 0 1
+11 0
+9
+0 10 0 1
 1 115 1 110 -1 0
 1 115 2 110 -1 0
 1 115 3 110 -1 0
 1 115 1 71 -1 0
 1 115 2 71 -1 0
 1 115 3 71 -1 0
+0 13 -1 0
+0 12 -1 0
 1
 end_operator
 begin_operator
 recipe-borrow rolf claudia truck1 gedersdorf
 1
-21 0
+9 0
 10
-0 22 -1 0
-0 23 -1 0
-0 24 -1 0
-0 20 0 1
+0 10 0 1
 1 115 1 110 -1 0
 1 115 2 110 -1 0
 1 115 3 110 -1 0
 1 115 1 71 -1 0
 1 115 2 71 -1 0
 1 115 3 71 -1 0
+0 13 -1 0
+0 12 -1 0
+0 11 -1 0
 1
 end_operator
 begin_operator
@@ -2103,9 +2102,9 @@ recipe-drive claudia truck1 gedersdorf krems
 1
 53 0
 3
-0 55 -1 0
 0 97 0 1
 0 102 0 1
+0 55 -1 0
 1
 end_operator
 begin_operator
@@ -2113,9 +2112,9 @@ recipe-drive claudia truck1 gedersdorf rossatz
 1
 53 0
 3
-0 56 -1 0
 0 103 0 1
 0 102 0 1
+0 56 -1 0
 1
 end_operator
 begin_operator
@@ -2123,9 +2122,9 @@ recipe-drive claudia truck1 gedersdorf wien
 1
 53 0
 3
-0 57 -1 0
 0 98 0 1
 0 102 0 1
+0 57 -1 0
 1
 end_operator
 begin_operator
@@ -2133,9 +2132,9 @@ recipe-drive claudia truck1 krems gedersdorf
 1
 53 0
 3
-0 54 -1 0
 0 106 0 1
 0 100 0 1
+0 54 -1 0
 1
 end_operator
 begin_operator
@@ -2143,9 +2142,9 @@ recipe-drive claudia truck1 krems rossatz
 1
 53 0
 3
-0 56 -1 0
 0 103 0 1
 0 100 0 1
+0 56 -1 0
 1
 end_operator
 begin_operator
@@ -2153,9 +2152,9 @@ recipe-drive claudia truck1 krems wien
 1
 53 0
 3
-0 57 -1 0
 0 98 0 1
 0 100 0 1
+0 57 -1 0
 1
 end_operator
 begin_operator
@@ -2163,9 +2162,9 @@ recipe-drive claudia truck1 rossatz gedersdorf
 1
 53 0
 3
-0 54 -1 0
 0 106 0 1
 0 104 0 1
+0 54 -1 0
 1
 end_operator
 begin_operator
@@ -2173,9 +2172,9 @@ recipe-drive claudia truck1 rossatz krems
 1
 53 0
 3
-0 55 -1 0
 0 97 0 1
 0 104 0 1
+0 55 -1 0
 1
 end_operator
 begin_operator
@@ -2183,9 +2182,9 @@ recipe-drive claudia truck1 rossatz wien
 1
 53 0
 3
-0 57 -1 0
 0 98 0 1
 0 104 0 1
+0 57 -1 0
 1
 end_operator
 begin_operator
@@ -2193,9 +2192,9 @@ recipe-drive claudia truck1 wien gedersdorf
 1
 53 0
 3
-0 54 -1 0
 0 106 0 1
 0 101 0 1
+0 54 -1 0
 1
 end_operator
 begin_operator
@@ -2203,9 +2202,9 @@ recipe-drive claudia truck1 wien krems
 1
 53 0
 3
-0 55 -1 0
 0 97 0 1
 0 101 0 1
+0 55 -1 0
 1
 end_operator
 begin_operator
@@ -2213,9 +2212,9 @@ recipe-drive claudia truck1 wien rossatz
 1
 53 0
 3
-0 56 -1 0
 0 103 0 1
 0 101 0 1
+0 56 -1 0
 1
 end_operator
 begin_operator
@@ -2223,9 +2222,9 @@ recipe-drive maria car1 gedersdorf krems
 1
 73 0
 3
-0 85 -1 0
-0 90 0 1
-0 89 0 1
+0 87 0 1
+0 85 0 1
+0 89 -1 0
 1
 end_operator
 begin_operator
@@ -2233,9 +2232,9 @@ recipe-drive maria car1 gedersdorf rossatz
 1
 73 0
 3
-0 86 -1 0
-0 92 0 1
-0 89 0 1
+0 90 0 1
+0 85 0 1
+0 95 -1 0
 1
 end_operator
 begin_operator
@@ -2243,9 +2242,9 @@ recipe-drive maria car1 gedersdorf wien
 1
 73 0
 3
-0 87 -1 0
-0 93 0 1
-0 89 0 1
+0 91 0 1
+0 85 0 1
+0 94 -1 0
 1
 end_operator
 begin_operator
@@ -2253,9 +2252,9 @@ recipe-drive maria car1 krems gedersdorf
 1
 73 0
 3
-0 84 -1 0
+0 84 0 1
 0 88 0 1
-0 91 0 1
+0 86 -1 0
 1
 end_operator
 begin_operator
@@ -2263,9 +2262,9 @@ recipe-drive maria car1 krems rossatz
 1
 73 0
 3
-0 86 -1 0
-0 92 0 1
-0 91 0 1
+0 90 0 1
+0 88 0 1
+0 95 -1 0
 1
 end_operator
 begin_operator
@@ -2273,9 +2272,9 @@ recipe-drive maria car1 krems wien
 1
 73 0
 3
-0 87 -1 0
-0 93 0 1
 0 91 0 1
+0 88 0 1
+0 94 -1 0
 1
 end_operator
 begin_operator
@@ -2283,9 +2282,9 @@ recipe-drive maria car1 rossatz gedersdorf
 1
 73 0
 3
-0 84 -1 0
-0 88 0 1
-0 94 0 1
+0 84 0 1
+0 92 0 1
+0 86 -1 0
 1
 end_operator
 begin_operator
@@ -2293,9 +2292,9 @@ recipe-drive maria car1 rossatz krems
 1
 73 0
 3
-0 85 -1 0
-0 90 0 1
-0 94 0 1
+0 87 0 1
+0 92 0 1
+0 89 -1 0
 1
 end_operator
 begin_operator
@@ -2303,9 +2302,9 @@ recipe-drive maria car1 rossatz wien
 1
 73 0
 3
-0 87 -1 0
-0 93 0 1
-0 94 0 1
+0 91 0 1
+0 92 0 1
+0 94 -1 0
 1
 end_operator
 begin_operator
@@ -2313,9 +2312,9 @@ recipe-drive maria car1 wien gedersdorf
 1
 73 0
 3
-0 84 -1 0
-0 88 0 1
-0 95 0 1
+0 84 0 1
+0 93 0 1
+0 86 -1 0
 1
 end_operator
 begin_operator
@@ -2323,9 +2322,9 @@ recipe-drive maria car1 wien krems
 1
 73 0
 3
-0 85 -1 0
-0 90 0 1
-0 95 0 1
+0 87 0 1
+0 93 0 1
+0 89 -1 0
 1
 end_operator
 begin_operator
@@ -2333,9 +2332,9 @@ recipe-drive maria car1 wien rossatz
 1
 73 0
 3
-0 86 -1 0
-0 92 0 1
-0 95 0 1
+0 90 0 1
+0 93 0 1
+0 95 -1 0
 1
 end_operator
 begin_operator
@@ -2343,219 +2342,219 @@ recipe-send-and-transfer alice bob apples rossatz wien
 1
 1 0
 5
-0 5 -1 0
 0 3 0 1
 0 6 -1 0
 0 4 0 1
 0 8 -1 0
+0 5 -1 0
 1
 end_operator
 begin_operator
 recipe-taxi maria claudia car1 gedersdorf krems
 0
 10
-0 65 -1 0
-0 68 -1 0
-0 85 -1 0
-0 69 -1 0
 0 99 0 1
 0 97 0 1
 0 102 0 1
 1 112 1 105 -1 0
 1 112 2 105 -1 0
 1 112 3 105 -1 0
+0 58 -1 0
+0 61 -1 0
+0 89 -1 0
+0 62 -1 0
 1
 end_operator
 begin_operator
 recipe-taxi maria claudia car1 gedersdorf rossatz
 0
 10
-0 66 -1 0
-0 68 -1 0
-0 86 -1 0
-0 69 -1 0
 0 99 0 1
 0 103 0 1
 0 102 0 1
 1 112 1 105 -1 0
 1 112 2 105 -1 0
 1 112 3 105 -1 0
+0 59 -1 0
+0 61 -1 0
+0 95 -1 0
+0 62 -1 0
 1
 end_operator
 begin_operator
 recipe-taxi maria claudia car1 gedersdorf wien
 0
 10
-0 67 -1 0
-0 68 -1 0
-0 87 -1 0
-0 69 -1 0
 0 99 0 1
 0 98 0 1
 0 102 0 1
 1 112 1 105 -1 0
 1 112 2 105 -1 0
 1 112 3 105 -1 0
+0 60 -1 0
+0 61 -1 0
+0 94 -1 0
+0 62 -1 0
 1
 end_operator
 begin_operator
 recipe-taxi maria claudia car1 krems gedersdorf
 0
 10
-0 58 -1 0
-0 59 -1 0
-0 84 -1 0
-0 62 -1 0
 0 99 0 1
 0 106 0 1
 0 100 0 1
 1 112 0 107 -1 0
 1 112 2 107 -1 0
 1 112 3 107 -1 0
+0 63 -1 0
+0 64 -1 0
+0 86 -1 0
+0 65 -1 0
 1
 end_operator
 begin_operator
 recipe-taxi maria claudia car1 krems rossatz
 0
 10
-0 66 -1 0
-0 59 -1 0
-0 86 -1 0
-0 62 -1 0
 0 99 0 1
 0 103 0 1
 0 100 0 1
 1 112 0 107 -1 0
 1 112 2 107 -1 0
 1 112 3 107 -1 0
+0 59 -1 0
+0 64 -1 0
+0 95 -1 0
+0 65 -1 0
 1
 end_operator
 begin_operator
 recipe-taxi maria claudia car1 krems wien
 0
 10
-0 67 -1 0
-0 59 -1 0
-0 87 -1 0
-0 62 -1 0
 0 99 0 1
 0 98 0 1
 0 100 0 1
 1 112 0 107 -1 0
 1 112 2 107 -1 0
 1 112 3 107 -1 0
+0 60 -1 0
+0 64 -1 0
+0 94 -1 0
+0 65 -1 0
 1
 end_operator
 begin_operator
 recipe-taxi maria claudia car1 rossatz gedersdorf
 0
 10
-0 58 -1 0
-0 60 -1 0
-0 84 -1 0
-0 63 -1 0
 0 99 0 1
 0 106 0 1
 0 104 0 1
 1 112 0 108 -1 0
 1 112 1 108 -1 0
 1 112 3 108 -1 0
+0 63 -1 0
+0 66 -1 0
+0 86 -1 0
+0 67 -1 0
 1
 end_operator
 begin_operator
 recipe-taxi maria claudia car1 rossatz krems
 0
 10
-0 65 -1 0
-0 60 -1 0
-0 85 -1 0
-0 63 -1 0
 0 99 0 1
 0 97 0 1
 0 104 0 1
 1 112 0 108 -1 0
 1 112 1 108 -1 0
 1 112 3 108 -1 0
+0 58 -1 0
+0 66 -1 0
+0 89 -1 0
+0 67 -1 0
 1
 end_operator
 begin_operator
 recipe-taxi maria claudia car1 rossatz wien
 0
 10
-0 67 -1 0
-0 60 -1 0
-0 87 -1 0
-0 63 -1 0
 0 99 0 1
 0 98 0 1
 0 104 0 1
 1 112 0 108 -1 0
 1 112 1 108 -1 0
 1 112 3 108 -1 0
+0 60 -1 0
+0 66 -1 0
+0 94 -1 0
+0 67 -1 0
 1
 end_operator
 begin_operator
 recipe-taxi maria claudia car1 wien gedersdorf
 0
 10
-0 58 -1 0
-0 61 -1 0
-0 84 -1 0
-0 64 -1 0
 0 99 0 1
 0 106 0 1
 0 101 0 1
 1 112 0 109 -1 0
 1 112 1 109 -1 0
 1 112 2 109 -1 0
+0 63 -1 0
+0 68 -1 0
+0 86 -1 0
+0 69 -1 0
 1
 end_operator
 begin_operator
 recipe-taxi maria claudia car1 wien krems
 0
 10
-0 65 -1 0
-0 61 -1 0
-0 85 -1 0
-0 64 -1 0
 0 99 0 1
 0 97 0 1
 0 101 0 1
 1 112 0 109 -1 0
 1 112 1 109 -1 0
 1 112 2 109 -1 0
+0 58 -1 0
+0 68 -1 0
+0 89 -1 0
+0 69 -1 0
 1
 end_operator
 begin_operator
 recipe-taxi maria claudia car1 wien rossatz
 0
 10
-0 66 -1 0
-0 61 -1 0
-0 86 -1 0
-0 64 -1 0
 0 99 0 1
 0 103 0 1
 0 101 0 1
 1 112 0 109 -1 0
 1 112 1 109 -1 0
 1 112 2 109 -1 0
+0 59 -1 0
+0 68 -1 0
+0 95 -1 0
+0 69 -1 0
 1
 end_operator
 begin_operator
 recipe-transport claudia alice bob truck1 apples rossatz wien
 0
 10
-0 57 -1 0
-0 11 -1 0
-0 10 -1 0
-0 9 -1 0
 0 6 0 1
 0 7 0 1
 0 8 0 1
 1 115 0 70 -1 0
 1 115 1 70 -1 0
 1 115 3 70 -1 0
+0 57 -1 0
+0 15 -1 0
+0 14 -1 0
+0 9 -1 0
 1
 end_operator
 begin_operator
@@ -2683,18 +2682,18 @@ recipe-travel-to-location maria gedersdorf krems
 1
 112 0
 3
-0 90 -1 0
-0 89 -1 0
+0 87 -1 0
+0 85 -1 0
 0 107 0 1
 1
 end_operator
 begin_operator
 recipe-travel-to-location maria gedersdorf krems
 1
-88 0
+84 0
 3
-0 90 -1 0
-0 89 -1 0
+0 87 -1 0
+0 85 -1 0
 0 107 0 1
 1
 end_operator
@@ -2703,18 +2702,18 @@ recipe-travel-to-location maria gedersdorf rossatz
 1
 112 0
 3
-0 92 -1 0
-0 89 -1 0
+0 90 -1 0
+0 85 -1 0
 0 108 0 1
 1
 end_operator
 begin_operator
 recipe-travel-to-location maria gedersdorf rossatz
 1
-88 0
+84 0
 3
-0 92 -1 0
-0 89 -1 0
+0 90 -1 0
+0 85 -1 0
 0 108 0 1
 1
 end_operator
@@ -2723,18 +2722,18 @@ recipe-travel-to-location maria gedersdorf wien
 1
 112 0
 3
-0 93 -1 0
-0 89 -1 0
+0 91 -1 0
+0 85 -1 0
 0 109 0 1
 1
 end_operator
 begin_operator
 recipe-travel-to-location maria gedersdorf wien
 1
-88 0
+84 0
 3
-0 93 -1 0
-0 89 -1 0
+0 91 -1 0
+0 85 -1 0
 0 109 0 1
 1
 end_operator
@@ -2743,18 +2742,18 @@ recipe-travel-to-location maria krems gedersdorf
 1
 112 1
 3
+0 84 -1 0
 0 88 -1 0
-0 91 -1 0
 0 105 0 1
 1
 end_operator
 begin_operator
 recipe-travel-to-location maria krems gedersdorf
 1
-90 0
+87 0
 3
+0 84 -1 0
 0 88 -1 0
-0 91 -1 0
 0 105 0 1
 1
 end_operator
@@ -2763,18 +2762,18 @@ recipe-travel-to-location maria krems rossatz
 1
 112 1
 3
-0 92 -1 0
-0 91 -1 0
+0 90 -1 0
+0 88 -1 0
 0 108 0 1
 1
 end_operator
 begin_operator
 recipe-travel-to-location maria krems rossatz
 1
-90 0
+87 0
 3
-0 92 -1 0
-0 91 -1 0
+0 90 -1 0
+0 88 -1 0
 0 108 0 1
 1
 end_operator
@@ -2783,78 +2782,78 @@ recipe-travel-to-location maria krems wien
 1
 112 1
 3
-0 93 -1 0
 0 91 -1 0
+0 88 -1 0
 0 109 0 1
 1
 end_operator
 begin_operator
 recipe-travel-to-location maria krems wien
 1
+87 0
+3
+0 91 -1 0
+0 88 -1 0
+0 109 0 1
+1
+end_operator
+begin_operator
+recipe-travel-to-location maria rossatz gedersdorf
+1
+112 2
+3
+0 84 -1 0
+0 92 -1 0
+0 105 0 1
+1
+end_operator
+begin_operator
+recipe-travel-to-location maria rossatz gedersdorf
+1
 90 0
 3
-0 93 -1 0
+0 84 -1 0
+0 92 -1 0
+0 105 0 1
+1
+end_operator
+begin_operator
+recipe-travel-to-location maria rossatz krems
+1
+112 2
+3
+0 87 -1 0
+0 92 -1 0
+0 107 0 1
+1
+end_operator
+begin_operator
+recipe-travel-to-location maria rossatz krems
+1
+90 0
+3
+0 87 -1 0
+0 92 -1 0
+0 107 0 1
+1
+end_operator
+begin_operator
+recipe-travel-to-location maria rossatz wien
+1
+112 2
+3
 0 91 -1 0
-0 109 0 1
-1
-end_operator
-begin_operator
-recipe-travel-to-location maria rossatz gedersdorf
-1
-112 2
-3
-0 88 -1 0
-0 94 -1 0
-0 105 0 1
-1
-end_operator
-begin_operator
-recipe-travel-to-location maria rossatz gedersdorf
-1
-92 0
-3
-0 88 -1 0
-0 94 -1 0
-0 105 0 1
-1
-end_operator
-begin_operator
-recipe-travel-to-location maria rossatz krems
-1
-112 2
-3
-0 90 -1 0
-0 94 -1 0
-0 107 0 1
-1
-end_operator
-begin_operator
-recipe-travel-to-location maria rossatz krems
-1
-92 0
-3
-0 90 -1 0
-0 94 -1 0
-0 107 0 1
-1
-end_operator
-begin_operator
-recipe-travel-to-location maria rossatz wien
-1
-112 2
-3
-0 93 -1 0
-0 94 -1 0
+0 92 -1 0
 0 109 0 1
 1
 end_operator
 begin_operator
 recipe-travel-to-location maria rossatz wien
 1
-92 0
+90 0
 3
-0 93 -1 0
-0 94 -1 0
+0 91 -1 0
+0 92 -1 0
 0 109 0 1
 1
 end_operator
@@ -2863,18 +2862,18 @@ recipe-travel-to-location maria wien gedersdorf
 1
 112 3
 3
-0 88 -1 0
-0 95 -1 0
+0 84 -1 0
+0 93 -1 0
 0 105 0 1
 1
 end_operator
 begin_operator
 recipe-travel-to-location maria wien gedersdorf
 1
-93 0
+91 0
 3
-0 88 -1 0
-0 95 -1 0
+0 84 -1 0
+0 93 -1 0
 0 105 0 1
 1
 end_operator
@@ -2883,18 +2882,18 @@ recipe-travel-to-location maria wien krems
 1
 112 3
 3
-0 90 -1 0
-0 95 -1 0
+0 87 -1 0
+0 93 -1 0
 0 107 0 1
 1
 end_operator
 begin_operator
 recipe-travel-to-location maria wien krems
 1
-93 0
+91 0
 3
-0 90 -1 0
-0 95 -1 0
+0 87 -1 0
+0 93 -1 0
 0 107 0 1
 1
 end_operator
@@ -2903,18 +2902,18 @@ recipe-travel-to-location maria wien rossatz
 1
 112 3
 3
-0 92 -1 0
-0 95 -1 0
+0 90 -1 0
+0 93 -1 0
 0 108 0 1
 1
 end_operator
 begin_operator
 recipe-travel-to-location maria wien rossatz
 1
-93 0
+91 0
 3
-0 92 -1 0
-0 95 -1 0
+0 90 -1 0
+0 93 -1 0
 0 108 0 1
 1
 end_operator
@@ -3206,7 +3205,7 @@ transfer-custody alice claudia apples rossatz
 117 2
 115 2
 114 1
-13 1
+17 1
 2
 0 35 0 1
 0 47 0 2
@@ -3218,7 +3217,7 @@ transfer-custody claudia bob apples wien
 117 3
 115 3
 114 1
-13 1
+17 1
 2
 0 36 0 1
 0 47 2 1
@@ -3230,9 +3229,9 @@ transfer-custody claudia rolf truck1 gedersdorf
 115 0
 116 0
 114 1
-15 1
+19 1
 2
-0 41 0 1
+0 37 0 1
 0 48 0 1
 1
 end_operator
@@ -3242,15 +3241,15 @@ transfer-custody rolf claudia truck1 gedersdorf
 115 0
 116 0
 114 1
-15 1
+19 1
 2
-0 42 0 1
+0 38 0 1
 0 48 1 0
 1
 end_operator
 11
 begin_rule
-83
+92
 43 1
 44 1
 45 1
@@ -3263,52 +3262,34 @@ begin_rule
 50 1
 51 1
 52 1
-37 1
-38 1
 39 1
 40 1
-35 1
-36 1
 41 1
 42 1
+80 1
+81 1
+82 1
+83 1
+74 1
+75 1
+76 1
+77 1
+2 1
+35 1
+36 1
+37 1
+38 1
+24 1
 25 1
-21 1
 26 1
 27 1
 28 1
 29 1
-58 1
-65 1
-66 1
-67 1
-68 1
-59 1
-60 1
-61 1
-54 1
-55 1
-56 1
-57 1
-84 1
-85 1
-86 1
-87 1
-5 1
-11 1
-10 1
-22 1
-23 1
-24 1
-9 1
-69 1
-62 1
-63 1
-64 1
 3 1
 6 1
 7 1
 99 1
-20 1
+10 1
 4 1
 8 1
 110 1
@@ -3316,55 +3297,82 @@ begin_rule
 97 1
 103 1
 98 1
-88 1
+84 1
+87 1
 90 1
-92 1
-93 1
+91 1
 102 1
 100 1
 104 1
 101 1
-89 1
-91 1
-94 1
-95 1
+85 1
+88 1
+92 1
+93 1
 71 1
 70 1
 105 1
 107 1
 108 1
 109 1
+63 1
+58 1
+59 1
+60 1
+61 1
+64 1
+66 1
+68 1
+54 1
+55 1
+56 1
+57 1
+86 1
+89 1
+95 1
+94 1
+5 1
+15 1
+14 1
+13 1
+12 1
+11 1
+9 1
+62 1
+65 1
+67 1
+69 1
 118 0 1
 end_rule
 begin_rule
 1
 78 1
-12 0 1
+16 0 1
 end_rule
 begin_rule
 1
 78 1
-13 0 1
-end_rule
-begin_rule
-1
-113 1
-19 0 1
-end_rule
-begin_rule
-1
-96 1
 17 0 1
 end_rule
 begin_rule
 1
-79 1
-14 0 1
+113 1
+23 0 1
+end_rule
+begin_rule
+1
+96 1
+21 0 1
 end_rule
 begin_rule
 1
 79 1
-15 0 1
+18 0 1
+end_rule
+begin_rule
+1
+79 1
+19 0 1
 end_rule
 begin_rule
 2
@@ -3381,10 +3389,10 @@ end_rule
 begin_rule
 1
 53 1
-18 0 1
+22 0 1
 end_rule
 begin_rule
 1
 73 1
-16 0 1
+20 0 1
 end_rule

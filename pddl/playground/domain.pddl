@@ -15,6 +15,9 @@
     resourceClass
     location
     action
+    vehicleClass - resourceClass
+    truckClass - resourceClass
+    carClass - resourceClass
 )
 
 (:constants 
@@ -28,76 +31,48 @@
     (resourceClassification ?r - resource ?c - resourceClass )
     (custodian ?r - resource ?a - actor ) ; a is currently in custody of r
     (primaryAccountable ?r - resource ?a - actor) ; a is the owner of r
-    (intent ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
 
-    (intent ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
-    (intent-aprr- ?action - action ?provider ?receiver - actor ?r - resource)
-    (intent-apr-l ?action - action ?provider ?receiver - actor ?l - location)    
-    (intent-ap-rl ?action - action ?provider - actor ?r - resource ?l - location)
-    (intent-a-rrl ?action - action ?receiver - actor ?r - resource ?l - location)
-    ;(intent--prrl ?provider ?receiver - actor ?r - resource ?l - location)
-    (intent-apr-- ?action - action ?provider ?receiver - actor )
-    (intent-ap-r- ?action - action ?provider - actor ?r - resource)
-    ; (intent-a-rr- ?action - action ?receiver - actor ?r - resource)
-    ; (intent--prr- ?provider ?receiver - actor ?r - resource)
-    ; (intent-ap--l ?action - action ?provider - actor ?l - location)
-    ; (intent-a-r-l ?action - action ?receiver - actor ?l - location)
-    ; (intent--pr-l ?provider ?receiver - actor ?l - location)
-    ; (intent-a--rl ?action - action ?r - resource ?l - location)
-    ; (intent--p-rl ?provider - actor ?r - resource ?l - location)
-    ; (intent---rrl ?receiver - actor ?r - resource ?l - location)
-    (intent-ap--- ?action - action ?provider - actor)
-    ; (intent-a-r-- ?action - action ?receiver - actor)
-    ; (intent--pr-- ?provider ?receiver - actor)
-    ; (intent-a--r- ?action - action ?r - resource)
-    ; (intent--p-r- ?provider - actor ?r - resource)
-    ; (intent---rr- ?receiver - actor ?r - resource)
-    ; (intent-a---l ?action - action ?l - location)
-    ; (intent--p--l ?provider - actor ?l - location)
-    ; (intent---r-l ?receiver - actor ?l - location)
-    ; (intent----rl ?r - resource ?l - location)
-    ; (intent-a---- ?action - action)
-    ; (intent--p--- ?provider - actor)
-    ; (intent---r-- ?receiver - actor)
-    ; (intent----r- ?r - resource)
-    ; (intent-----l ?l - location)
-    
-    (persistent-intent ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
-    (persistent-intent-aprr- ?action - action ?provider ?receiver - actor ?r - resource)
-    (persistent-intent-apr-l ?action - action ?provider ?receiver - actor ?l - location)    
-    (persistent-intent-ap-rl ?action - action ?provider - actor ?r - resource ?l - location)
-    (persistent-intent-a-rrl ?action - action ?receiver - actor ?r - resource ?l - location)
-    ;(persistent-intent--prrl ?provider ?receiver - actor ?r - resource ?l - location)
-    (persistent-intent-apr-- ?action - action ?provider ?receiver - actor )
-    (persistent-intent-ap-r- ?action - action ?provider - actor ?r - resource)
-    ; (persistent-intent-a-rr- ?action - action ?receiver - actor ?r - resource)
-    ; (persistent-intent--prr- ?provider ?receiver - actor ?r - resource)
-    ; (persistent-intent-ap--l ?action - action ?provider - actor ?l - location)
-    ; (persistent-intent-a-r-l ?action - action ?receiver - actor ?l - location)
-    ; (persistent-intent--pr-l ?provider ?receiver - actor ?l - location)
-    ; (persistent-intent-a--rl ?action - action ?r - resource ?l - location)
-    ; (persistent-intent--p-rl ?provider - actor ?r - resource ?l - location)
-    ; (persistent-intent---rrl ?receiver - actor ?r - resource ?l - location)
-    (persistent-intent-ap--- ?action - action ?provider - actor)
-    ; (persistent-intent-a-r-- ?action - action ?receiver - actor)
-    ; (persistent-intent--pr-- ?provider ?receiver - actor)
-    ; (persistent-intent-a--r- ?action - action ?r - resource)
-    ; (persistent-intent--p-r- ?provider - actor ?r - resource)
-    ; (persistent-intent---rr- ?receiver - actor ?r - resource)
-    ; (persistent-intent-a---l ?action - action ?l - location)
-    ; (persistent-intent--p--l ?provider - actor ?l - location)
-    ; (persistent-intent---r-l ?receiver - actor ?l - location)
-    ; (persistent-intent----rl ?r - resource ?l - location)    
-    ; (persistent-intent-a---- ?action - action)
-    ; (persistent-intent--p--- ?provider - actor)
-    ; (persistent-intent---r-- ?receiver - actor)
-    ; (persistent-intent----r- ?r - resource)
-    ; (persistent-intent-----l ?l - location)
+    (intent ?action - action ?provider ?receiver - actor ?r - resource ?l - location ?c - resourceClass)
+    (intent-aprr-c ?action - action ?provider ?receiver - actor ?r - resource ?c - resourceClass)
+    (intent-apr-lc ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClass)    
+    (intent-ap-rlc ?action - action ?provider - actor ?r - resource ?l - location ?c - resourceClass)
+    (intent-a-rrlc ?action - action ?receiver - actor ?r - resource ?l - location ?c - resourceClass)
+    (intent-apr--c ?action - action ?provider ?receiver - actor  ?c - resourceClass)
+    (intent-ap-r-c ?action - action ?provider - actor ?r - resource ?c - resourceClass)
+    (intent-ap---c ?action - action ?provider - actor ?c - resourceClass)
+    (intent-aprrl- ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
+    (intent-aprr-- ?action - action ?provider ?receiver - actor ?r - resource)
+    (intent-apr-l- ?action - action ?provider ?receiver - actor ?l - location)    
+    (intent-ap-rl- ?action - action ?provider - actor ?r - resource ?l - location)
+    (intent-a-rrl- ?action - action ?receiver - actor ?r - resource ?l - location)
+    (intent-apr--- ?action - action ?provider ?receiver - actor )
+    (intent-ap-r-- ?action - action ?provider - actor ?r - resource)
+    (intent-ap---- ?action - action ?provider - actor)
+
+
+    (persistent-intent ?action - action ?provider ?receiver - actor ?r - resource ?l - location ?c - resourceClass)
+    (persistent-intent-aprr-c ?action - action ?provider ?receiver - actor ?r - resource ?c - resourceClass)
+    (persistent-intent-apr-lc ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClass)    
+    (persistent-intent-ap-rlc ?action - action ?provider - actor ?r - resource ?l - location ?c - resourceClass)
+    (persistent-intent-a-rrlc ?action - action ?receiver - actor ?r - resource ?l - location ?c - resourceClass)
+    (persistent-intent-apr--c ?action - action ?provider ?receiver - actor ?c - resourceClass)
+    (persistent-intent-ap-r-c ?action - action ?provider - actor ?r - resource ?c - resourceClass)
+    (persistent-intent-ap---c ?action - action ?provider - actor ?c - resourceClass)
+    (persistent-intent-aprrl- ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
+    (persistent-intent-aprr-- ?action - action ?provider ?receiver - actor ?r - resource )
+    (persistent-intent-apr-l- ?action - action ?provider ?receiver - actor ?l - location )    
+    (persistent-intent-ap-rl- ?action - action ?provider - actor ?r - resource ?l - location )
+    (persistent-intent-a-rrl- ?action - action ?receiver - actor ?r - resource ?l - location )
+    (persistent-intent-apr--- ?action - action ?provider ?receiver - actor )
+    (persistent-intent-ap-r-- ?action - action ?provider - actor ?r - resource )
+    (persistent-intent-ap---- ?action - action ?provider - actor )
 
 
     
-    (commitment ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
-    (fulfillment ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
+    (commitment-r- ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
+    (commitment--c ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClass)
+    (fulfillment-r- ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
+    (fulfillment--c ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClass)
     (using ?a - actor ?r - resource) ; a is using r
     (isCarryable ?r - resource) ; an actor can move the resource
     (isVehicle ?r - resource) ; r is a vehicle
@@ -110,275 +85,196 @@
 
 ;(:functions (total-cost))
 
-(:action commit 
+(:action commit--c 
+    :parameters (?action - action ?provider ?receiver - actor ?location - location ?c - resourceClass)
+    :precondition 
+        (intent-apr-lc ?action ?provider ?receiver ?location ?c)
+    :effect (and
+        (commitment--c ?action ?provider ?receiver ?location ?c)
+        (not (intent-apr-lc ?action ?provider ?receiver ?location ?c))
+    )
+)
+
+(:action commit-r- 
     :parameters (?action - action ?provider ?receiver - actor ?resource - resource ?location - location)
     :precondition 
-        (intent ?action ?provider ?receiver ?resource ?location)
+        (intent-aprrl- ?action ?provider ?receiver ?resource ?location)
     :effect (and
-        (commitment ?action ?provider ?receiver ?resource ?location)
-        (not (intent ?action ?provider ?receiver ?resource ?location))
+        (commitment-r- ?action ?provider ?receiver ?resource ?location)
+        (not (intent-aprrl- ?action ?provider ?receiver ?resource ?location))
     )
 )
 
 
 (:action instantiate-intent
+    :parameters (?action - action ?provider ?receiver - actor ?r - resource ?l - location ?c - resourceClass)
+    :precondition
+        (persistent-intent ?action ?provider ?receiver ?r ?l ?c)
+    :effect         
+        (and
+            (intent ?action ?provider ?receiver ?r ?l ?c)
+            (increase (total-cost) 1)
+        )
+)
+(:action instantiate-intent-aprr-c
+    :parameters ( ?action - action ?provider ?receiver - actor ?r - resource ?c - resourceClass )
+    :precondition
+        (persistent-intent-aprr-c ?action ?provider ?receiver ?r ?c )
+    :effect         
+        (and
+            (intent-aprr-c ?action ?provider ?receiver ?r ?c )
+            (increase (total-cost) 1)
+        )
+    )
+(:action instantiate-intent-apr-lc
+    :parameters ( ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClass )    
+    :precondition
+        (persistent-intent-apr-lc ?action ?provider ?receiver ?l ?c )
+    :effect         
+        (and
+            (intent-apr-lc ?action ?provider ?receiver ?l ?c )
+            (increase (total-cost) 1)
+        )
+    )
+(:action instantiate-intent-ap-rlc
+    :parameters ( ?action - action ?provider - actor ?r - resource ?l - location ?c - resourceClass )
+    :precondition
+        (persistent-intent-ap-rlc ?action ?provider ?r ?l ?c )
+        :effect         
+        (and
+            (intent-ap-rlc ?action ?provider ?r ?l ?c )
+            (increase (total-cost) 1)
+        )
+    )
+(:action instantiate-intent-a-rrlc
+    :parameters ( ?action - action ?receiver - actor ?r - resource ?l - location ?c - resourceClass )
+    :precondition
+        (persistent-intent-a-rrlc ?action ?receiver ?r ?l ?c )
+    :effect         
+        (and
+            (intent-a-rrlc ?action ?receiver ?r ?l ?c )
+            (increase (total-cost) 1)
+        )
+    )
+
+(:action instantiate-intent-apr--c
+    :parameters ( ?action - action ?provider ?receiver - actor ?c - resourceClass )
+    :precondition
+        (persistent-intent-apr--c ?action ?provider ?receiver ?c )
+        :effect         
+        (and
+            (intent-apr--c ?action ?provider ?receiver ?c )
+            (increase (total-cost) 1)
+        )
+)
+(:action instantiate-intent-ap-r-c
+    :parameters ( ?action - action ?provider - actor ?r - resource ?c - resourceClass )
+    :precondition
+        (persistent-intent-ap-r-c ?action ?provider ?r ?c )
+        :effect         
+        (and
+            (intent-ap-r-c ?action ?provider ?r ?c )
+            (increase (total-cost) 1)
+        )
+)
+
+(:action instantiate-intent-ap---c
+    :parameters ( ?action - action ?provider - actor ?c - resourceClass )
+    :precondition
+        (persistent-intent-ap---c ?action ?provider ?c )
+        :effect         
+        (and
+            (intent-ap---c ?action ?provider ?c )
+            (increase (total-cost) 1)
+        )
+)
+
+
+; no class
+
+(:action instantiate-intent-aprrl-
     :parameters (?action - action ?provider ?receiver - actor ?r - resource ?l - location)
     :precondition
-        (persistent-intent ?action ?provider ?receiver ?r ?l )
+        (persistent-intent-aprrl- ?action ?provider ?receiver ?r ?l)
     :effect         
         (and
-            (intent ?action ?provider ?receiver ?r ?l )
+            (intent-aprrl- ?action ?provider ?receiver ?r ?l)
             (increase (total-cost) 1)
         )
 )
-(:action instantiate-intent-aprr-
+
+(:action instantiate-intent-aprr--
     :parameters ( ?action - action ?provider ?receiver - actor ?r - resource)
     :precondition
-        (persistent-intent-aprr- ?action ?provider ?receiver ?r )
+        (persistent-intent-aprr-- ?action ?provider ?receiver ?r )
     :effect         
         (and
-            (intent-aprr- ?action ?provider ?receiver ?r )
+            (intent-aprr-- ?action ?provider ?receiver ?r )
             (increase (total-cost) 1)
         )
     )
-(:action instantiate-intent-apr-l
+(:action instantiate-intent-apr-l-
     :parameters ( ?action - action ?provider ?receiver - actor ?l - location)    
     :precondition
-        (persistent-intent-apr-l ?action ?provider ?receiver ?l )
+        (persistent-intent-apr-l- ?action ?provider ?receiver ?l )
     :effect         
         (and
-            (intent-apr-l ?action ?provider ?receiver ?l )
+            (intent-apr-l- ?action ?provider ?receiver ?l )
             (increase (total-cost) 1)
         )
     )
-(:action instantiate-intent-ap-rl
+(:action instantiate-intent-ap-rl-
     :parameters ( ?action - action ?provider - actor ?r - resource ?l - location)
     :precondition
-        (persistent-intent-ap-rl ?action ?provider ?r ?l )
+        (persistent-intent-ap-rl- ?action ?provider ?r ?l )
         :effect         
         (and
-            (intent-ap-rl ?action ?provider ?r ?l )
+            (intent-ap-rl- ?action ?provider ?r ?l )
             (increase (total-cost) 1)
         )
     )
-(:action instantiate-intent-a-rrl
+(:action instantiate-intent-a-rrl-
     :parameters ( ?action - action ?receiver - actor ?r - resource ?l - location)
     :precondition
-        (persistent-intent-a-rrl ?action ?receiver ?r ?l )
+        (persistent-intent-a-rrl- ?action ?receiver ?r ?l )
     :effect         
         (and
-            (intent-a-rrl ?action ?receiver ?r ?l )
+            (intent-a-rrl- ?action ?receiver ?r ?l )
             (increase (total-cost) 1)
         )
     )
-; (:action instantiate-intent--prrl
-;     :parameters ( ?provider ?receiver - actor ?r - resource ?l - location)
-;     :precondition
-;         (persistent-intent--prrl ?provider ?receiver ?r ?l )
-;     :effect         
-;         (intent--prrl ?provider ?receiver ?r ?l )
-    
-;     )
-(:action instantiate-intent-apr--
+
+(:action instantiate-intent-apr---
     :parameters ( ?action - action ?provider ?receiver - actor)
     :precondition
-        (persistent-intent-apr-- ?action ?provider ?receiver)
+        (persistent-intent-apr--- ?action ?provider ?receiver)
         :effect         
         (and
-            (intent-apr-- ?action ?provider ?receiver)
+            (intent-apr--- ?action ?provider ?receiver)
             (increase (total-cost) 1)
         )
 )
-(:action instantiate-intent-ap-r-
+(:action instantiate-intent-ap-r--
     :parameters ( ?action - action ?provider - actor ?r - resource)
     :precondition
-        (persistent-intent-ap-r- ?action ?provider ?r )
+        (persistent-intent-ap-r-- ?action ?provider ?r )
         :effect         
         (and
-            (intent-ap-r- ?action ?provider ?r )
+            (intent-ap-r-- ?action ?provider ?r )
             (increase (total-cost) 1)
         )
 )
-; (:action instantiate-intent-a-rr- 
-;     :parameters (?action - action ?receiver - actor ?r - resource)
-;     :precondition
-;         (persistent-intent-a-rr- ?action ?receiver ?r)
-;         :effect         
-;         (intent-a-rr- ?action ?receiver ?r)
-    
-;     )
-; (:action instantiate-intent--prr-
-;     :parameters ( ?provider ?receiver - actor ?r - resource)
-;     :precondition
-;         (persistent-intent--prr- ?provider ?receiver ?r )
-;         :effect         
-;         (intent--prr- ?provider ?receiver ?r )
-    
-;     )
-; (:action instantiate-intent-ap--l
-;     :parameters ( ?action - action ?provider - actor ?l - location)
-;     :precondition
-;         (persistent-intent-ap--l ?action ?provider ?l )
-;         :effect         
-;         (intent-ap--l ?action ?provider ?l )
-    
-;     )
-; (:action instantiate-intent-a-r-l 
-;     :parameters (?action - action ?receiver - actor ?l - location)
-;     :precondition
-;         (persistent-intent-a-r-l ?action ?receiver ?l )
-;         :effect         
-;         (intent-a-r-l ?action ?receiver ?l )
-    
-;     )
-; (:action instantiate-intent--pr-l
-;     :parameters ( ?provider ?receiver - actor ?l - location)
-;     :precondition
-;         (persistent-intent--pr-l ?provider ?receiver ?l )
-;         :effect         
-;         (intent--pr-l ?provider ?receiver ?l )
-    
-;     )
-; (:action instantiate-intent-a--rl
-;     :parameters ( ?action - action ?r - resource ?l - location)
-;     :precondition
-;         (persistent-intent-a--rl ?action ?r ?l )
-;         :effect         
-;         (intent-a--rl ?action ?r ?l )
-    
-;     )
-; (:action instantiate-intent--p-rl
-;     :parameters ( ?provider - actor ?r - resource ?l - location)
-;     :precondition
-;         (persistent-intent--p-rl ?provider ?r ?l )
-;         :effect         
-;         (intent--p-rl ?provider ?r ?l )
-    
-;     )
-; (:action instantiate-intent---rrl
-;     :parameters ( ?receiver - actor ?r - resource ?l - location)
-;     :precondition
-;         (persistent-intent---rrl ?receiver ?r ?l )
-;         :effect         
-;         (intent---rrl ?receiver ?r ?l )
-    
-;     )
-(:action instantiate-intent-ap---
+
+(:action instantiate-intent-ap----
     :parameters ( ?action - action ?provider - actor)
     :precondition
-        (persistent-intent-ap--- ?action ?provider )
+        (persistent-intent-ap---- ?action ?provider )
         :effect         
         (and
-            (intent-ap--- ?action ?provider )
+            (intent-ap---- ?action ?provider )
             (increase (total-cost) 1)
         )
 )
-; (:action instantiate-intent-a-r--
-;     :parameters ( ?action - action ?receiver - actor)
-;     :precondition
-;         (persistent-intent-a-r-- ?action ?receiver )
-;         :effect         
-;         (intent-a-r-- ?action ?receiver )
-    
-;     )
-; (:action instantiate-intent--pr--
-;     :parameters ( ?provider ?receiver - actor)
-;     :precondition
-;         (persistent-intent--pr-- ?provider ?receiver )
-;         :effect         
-;         (intent--pr-- ?provider ?receiver )
-    
-;     )
-; (:action instantiate-intent-a--r-
-;     :parameters ( ?action - action ?r - resource)
-;     :precondition
-;         (persistent-intent-a--r- ?action ?r )
-;         :effect         
-;         (intent-a--r- ?action ?r )
-    
-;     )
-; (:action instantiate-intent--p-r-
-;     :parameters ( ?provider - actor ?r - resource)
-;     :precondition
-;         (persistent-intent--p-r- ?provider ?r )
-;         :effect         
-;         (intent--p-r- ?provider ?r )
-    
-;     )
-; (:action instantiate-intent---rr-
-;     :parameters ( ?receiver - actor ?r - resource)
-;     :precondition
-;         (persistent-intent---rr- ?receiver ?r )
-;         :effect         
-;         (intent---rr- ?receiver ?r )
-    
-;     )
-; (:action instantiate-intent-a---l
-;     :parameters ( ?action - action ?l - location)
-;     :precondition
-;         (persistent-intent-a---l ?action ?l )
-;         :effect         
-;         (intent-a---l ?action ?l )
-; )
-; (:action instantiate-intent--p--l
-;     :parameters ( ?p - actor ?l - location)
-;     :precondition
-;         (persistent-intent--p--l ?p ?l )
-;         :effect         
-;         (intent--p--l ?p ?l )
-; )
-; (:action instantiate-intent---r-l
-;     :parameters ( ?r - actor ?l - location)
-;     :precondition
-;         (persistent-intent---r-l ?r ?l )
-;         :effect         
-;         (intent---r-l ?r ?l )
-; )
-; (:action instantiate-intent----rl
-;     :parameters ( ?r - resource ?l - location)
-;     :precondition
-;         (persistent-intent----rl ?r ?l )
-;         :effect         
-;         (intent----rl ?r ?l )
-; )
-; (:action instantiate-intent-a----
-;     :parameters ( ?action - action)
-;     :precondition
-;         (persistent-intent-a---- ?action )
-;         :effect         
-;         (intent-a---- ?action )
-    
-;     )
-; (:action instantiate-intent--p--- 
-;     :parameters (?provider - actor)
-;     :precondition
-;         (persistent-intent--p--- ?provider )
-;         :effect         
-;         (intent--p--- ?provider )
-;     )
-; (:action instantiate-intent---r-- 
-;     :parameters (?receiver - actor)
-;     :precondition
-;         (persistent-intent---r-- ?receiver )
-;         :effect         
-;         (intent---r-- ?receiver )
-    
-;     )
-; (:action instantiate-intent----r-
-;     :parameters ( ?r - resource)
-;     :precondition
-;         (persistent-intent----r- ?r )
-;         :effect         
-;         (intent----r- ?r)
-    
-;     )
-; (:action instantiate-intent-----l 
-;     :parameters (?l - location)
-;     :precondition
-;         (persistent-intent-----l ?l)
-;     :effect         
-;         (intent-----l ?l)
-; )
 
 
 ; careful: - incurs high complexity
@@ -387,16 +283,16 @@
     :parameters (?traveller - actor ?fromLocation ?toLocation - location)
     :precondition (and 
         (not (= ?fromLocation ?toLocation))
-        (intent-apr-l travel ?traveller ?traveller ?toLocation)
+        (intent-apr-l- travel ?traveller ?traveller ?toLocation)
         (or 
             (currentLocation ?traveller ?fromLocation)
-            (intent-apr-l arrive ?traveller ?traveller ?fromLocation)
+            (intent-apr-l- arrive ?traveller ?traveller ?fromLocation)
         )
     )
     :effect (and 
-        (intent-apr-l leave ?traveller ?traveller ?fromLocation)
-        (intent-apr-l arrive ?traveller ?traveller ?toLocation)
-        (not(intent-apr-l travel ?traveller ?traveller ?toLocation))
+        (intent-apr-l- leave ?traveller ?traveller ?fromLocation)
+        (intent-apr-l- arrive ?traveller ?traveller ?toLocation)
+        (not(intent-apr-l- travel ?traveller ?traveller ?toLocation))
         (increase (total-cost) 1)
     )
 )
@@ -406,19 +302,20 @@
     :parameters (?traveller - actor ?fromLocation ?toLocation - location)
     :precondition (and 
         (not (= ?fromLocation ?toLocation))
-        (intent-apr-- travel ?traveller ?traveller)
+        (intent-apr--- travel ?traveller ?traveller)
         (or 
             (currentLocation ?traveller ?fromLocation)
-            (intent-apr-l arrive ?traveller ?traveller ?fromLocation)
+            (intent-apr-l- arrive ?traveller ?traveller ?fromLocation)
         )        
     )
     :effect (and 
-        (intent-apr-l leave ?traveller ?traveller ?fromLocation)
-        (intent-apr-l arrive ?traveller ?traveller ?toLocation)
-        (not (intent-apr-- travel ?traveller ?traveller))
+        (intent-apr-l- leave ?traveller ?traveller ?fromLocation)
+        (intent-apr-l- arrive ?traveller ?traveller ?toLocation)
+        (not (intent-apr--- travel ?traveller ?traveller))
         (increase (total-cost) 1)
     )
 )
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -445,13 +342,13 @@
         (not (= ?fromLocation ?toLocation))
         (isVehicle ?car)
         (using ?driver ?car)
-        (intent-apr-l leave ?driver ?driver ?fromLocation)
-        (intent-apr-l arrive ?driver ?driver ?toLocation)
+        (intent-apr-l- leave ?driver ?driver ?fromLocation)
+        (intent-apr-l- arrive ?driver ?driver ?toLocation)
     )
     :effect (and 
-        (intent move ?driver ?driver ?car ?toLocation)
-        (not (intent-apr-l leave ?driver ?driver ?fromLocation))
-        (not (intent-apr-l arrive ?driver ?driver ?toLocation))
+        (intent-aprrl- move ?driver ?driver ?car ?toLocation)
+        (not (intent-apr-l- leave ?driver ?driver ?fromLocation))
+        (not (intent-apr-l- arrive ?driver ?driver ?toLocation))
         (increase (total-cost) 1)
     )
 )
@@ -461,25 +358,25 @@
     :precondition (and 
         (not (= ?fromLocation ?toLocation))
         (not (= ?driver ?passenger))
-        (intent-ap-r- deliver-taxi-service ?driver ?car) 
-        (intent-apr-l leave ?passenger ?passenger ?fromLocation)
-        (intent-apr-l arrive ?passenger ?passenger ?toLocation)
+        (intent-ap-r-- deliver-taxi-service ?driver ?car) 
+        (intent-apr-l- leave ?passenger ?passenger ?fromLocation)
+        (intent-apr-l- arrive ?passenger ?passenger ?toLocation)
     )
     :effect (and 
         (when (not(currentLocation ?driver ?fromLocation))
             (forall (?dl - location)
                 (when (currentLocation ?driver ?dl)
-                    (intent-apr-l travel ?driver ?driver ?fromLocation)
+                    (intent-apr-l- travel ?driver ?driver ?fromLocation)
                 )
             )
         )
-        (intent use ?driver ?driver ?car ?fromLocation)
-        (intent mount ?driver ?passenger ?car ?fromLocation)
-        (intent move ?driver ?driver ?car ?toLocation)
-        (intent dismount ?driver ?passenger ?car ?toLocation)
-        (not (intent-ap-r- deliver-taxi-service ?driver ?car) )
-        (not (intent-apr-l leave ?passenger ?passenger ?fromLocation))
-        (not (intent-apr-l arrive ?passenger ?passenger ?toLocation))
+        (intent-aprrl- use ?driver ?driver ?car ?fromLocation)
+        (intent-aprrl- mount ?driver ?passenger ?car ?fromLocation)
+        (intent-aprrl- move ?driver ?driver ?car ?toLocation)
+        (intent-aprrl- dismount ?driver ?passenger ?car ?toLocation)
+        (not (intent-ap-r-- deliver-taxi-service ?driver ?car) )
+        (not (intent-apr-l- leave ?passenger ?passenger ?fromLocation))
+        (not (intent-apr-l- arrive ?passenger ?passenger ?toLocation))
         (increase (total-cost) 1)
     )
 )
@@ -494,28 +391,28 @@
         (isVehicle ?truck)
         (mayContainResources ?truck)
         (or 
-            (intent-ap-r- deliver-transport-service ?transporter ?truck)
-            (intent-ap--- deliver-transport-service ?transporter)
+            (intent-ap-r-- deliver-transport-service ?transporter ?truck)
+            (intent-ap---- deliver-transport-service ?transporter)
         )
-        (intent-ap-rl transfer-custody ?consignor ?consignment ?fromLocation )
-        (intent-a-rrl transfer-custody ?consignee ?consignment ?toLocation )
+        (intent-ap-rl- transfer-custody ?consignor ?consignment ?fromLocation )
+        (intent-a-rrl- transfer-custody ?consignee ?consignment ?toLocation )
     )
     :effect (and 
         (when (not(currentLocation ?transporter ?fromLocation))
             (forall (?dl - location)
                 (when (currentLocation ?transporter ?dl)
-                    (intent-apr-l travel ?transporter ?transporter ?fromLocation)
+                    (intent-apr-l- travel ?transporter ?transporter ?fromLocation)
                 )
             )
         )
-        (intent transfer-custody ?consignor ?transporter ?consignment ?fromLocation)
-        (intent use ?transporter ?transporter ?truck ?fromLocation)
-        (intent move ?transporter ?transporter ?truck ?toLocation)
-        (intent transfer-custody ?transporter ?consignee ?consignment ?toLocation)
-        (not (intent-ap-r- deliver-transport-service ?transporter ?truck))
-        (not (intent-ap--- deliver-transport-service ?transporter))
-        (not (intent-ap-rl transfer-custody ?consignor ?consignment ?fromLocation ))
-        (not (intent-a-rrl transfer-custody ?consignee ?consignment ?toLocation ))
+        (intent-aprrl- transfer-custody ?consignor ?transporter ?consignment ?fromLocation)
+        (intent-aprrl- use ?transporter ?transporter ?truck ?fromLocation)
+        (intent-aprrl- move ?transporter ?transporter ?truck ?toLocation)
+        (intent-aprrl- transfer-custody ?transporter ?consignee ?consignment ?toLocation)
+        (not (intent-ap-r-- deliver-transport-service ?transporter ?truck))
+        (not (intent-ap---- deliver-transport-service ?transporter))
+        (not (intent-ap-rl- transfer-custody ?consignor ?consignment ?fromLocation ))
+        (not (intent-a-rrl- transfer-custody ?consignee ?consignment ?toLocation ))
         (increase (total-cost) 1)
     )
 )
@@ -526,38 +423,38 @@
         (primaryAccountable ?resource ?lender)
         (not (= ?lender ?borrower))
         (or
-            (intent-ap-r- lend ?lender ?resource)
-            (intent-ap-rl lend ?lender ?resource ?location)
-            (intent lend ?lender ?borrower ?resource ?location)
+            (intent-ap-r-- lend ?lender ?resource)
+            (intent-ap-rl- lend ?lender ?resource ?location)
+            (intent-aprrl- lend ?lender ?borrower ?resource ?location)
         )
         (or
             (exists (?useLocation - location )
-                (intent use ?borrower ?borrower ?resource ?useLocation) ;todo: match via resource class, not resource
+                (intent-aprrl- use ?borrower ?borrower ?resource ?useLocation) ;todo: match via resource class, not resource
             )
-            (intent-aprr- use ?borrower ?borrower ?resource)
+            (intent-aprr-- use ?borrower ?borrower ?resource)
         )
     )
     :effect (and
         (when (not(currentLocation ?borrower ?location))
             (forall (?dl - location)
                 (when (currentLocation ?borrower ?dl)
-                    (intent-apr-l travel ?borrower ?borrower ?location)
+                    (intent-apr-l- travel ?borrower ?borrower ?location)
                 )
             )
         )
         (when (not(currentLocation ?borrower ?location))
             (forall (?dl - location)
                 (when (currentLocation ?borrower ?dl)
-                    (intent-apr-- travel ?borrower ?borrower )
+                    (intent-apr--- travel ?borrower ?borrower )
                 )
             )
         )
-        (intent transfer-custody ?lender ?borrower ?resource ?location)
-        (intent use ?borrower ?borrower ?resource ?location )
-        (intent transfer-custody ?borrower ?lender ?resource ?location)
-        (not(intent-ap-r- lend ?lender ?resource))
-        (not(intent-ap-rl lend ?lender ?resource ?location))
-        (not(intent lend ?lender ?borrower ?resource ?location))
+        (intent-aprrl- transfer-custody ?lender ?borrower ?resource ?location)
+        (intent-aprrl- use ?borrower ?borrower ?resource ?location )
+        (intent-aprrl- transfer-custody ?borrower ?lender ?resource ?location)
+        (not(intent-ap-r-- lend ?lender ?resource))
+        (not(intent-ap-rl- lend ?lender ?resource ?location))
+        (not(intent-aprrl- lend ?lender ?borrower ?resource ?location))
         (increase (total-cost) 1)
     )
 )
@@ -568,15 +465,15 @@
         (not (= ?fromLocation ?toLocation))
         (not (= ?sender ?receiver))
         (primaryAccountable ?resource ?sender)
-        (intent-ap-rl send-and-transfer ?sender ?resource ?fromLocation)
-        (intent-a-rrl send-and-transfer ?receiver ?resource ?toLocation)
+        (intent-ap-rl- send-and-transfer ?sender ?resource ?fromLocation)
+        (intent-a-rrl- send-and-transfer ?receiver ?resource ?toLocation)
     )    
     :effect (and
-        (intent transfer-all-rights ?sender ?receiver ?resource ?fromLocation)
-        (intent-ap-rl transfer-custody ?sender ?resource ?fromLocation)
-        (intent-a-rrl transfer-custody ?receiver ?resource ?toLocation)
-        (not(intent-ap-rl send-and-transfer ?sender ?resource ?fromLocation))
-        (not(intent-a-rrl send-and-transfer ?receiver ?resource ?toLocation))
+        (intent-aprrl- transfer-all-rights ?sender ?receiver ?resource ?fromLocation)
+        (intent-ap-rl- transfer-custody ?sender ?resource ?fromLocation)
+        (intent-a-rrl- transfer-custody ?receiver ?resource ?toLocation)
+        (not(intent-ap-rl- send-and-transfer ?sender ?resource ?fromLocation))
+        (not(intent-a-rrl- send-and-transfer ?receiver ?resource ?toLocation))
         (increase (total-cost) 1)
     )
 )   
@@ -589,7 +486,7 @@
         (currentLocation ?r ?fromLocation)
         (currentLocation ?a ?fromLocation)
         (custodian ?r ?a)
-        (commitment move ?a ?a ?r ?toLocation)
+        (commitment-r- move ?a ?a ?r ?toLocation)
         (or
             (isCarryable ?r) ; actor carries it
             (and 
@@ -603,8 +500,8 @@
         (not (currentLocation ?a ?fromLocation))
         (currentLocation ?r ?toLocation)
         (currentLocation ?a ?toLocation)
-        (fulfillment move ?a ?a ?r ?toLocation)
-        (not (commitment move ?a ?a ?r ?toLocation))
+        (fulfillment-r- move ?a ?a ?r ?toLocation)
+        (not (commitment-r- move ?a ?a ?r ?toLocation))
         (forall (?t - thing )
             (when 
                 (containedIn ?t ?r)
@@ -660,7 +557,7 @@
         (not (isPassive ?passenger))
         (using ?driver ?vehicle)
         (mayContainActors ?vehicle)
-        (commitment mount ?driver ?passenger ?vehicle ?l)            
+        (commitment-r- mount ?driver ?passenger ?vehicle ?l)            
         (currentLocation ?driver ?l)
         (currentLocation ?vehicle ?l)
         (currentLocation ?passenger ?l)
@@ -677,8 +574,8 @@
     :effect (and 
         (containedIn ?passenger ?vehicle)
         (isPassive ?passenger)
-        (fulfillment mount ?driver ?passenger ?vehicle ?l)           
-        (not (commitment mount ?driver ?passenger ?vehicle ?l)) 
+        (fulfillment-r- mount ?driver ?passenger ?vehicle ?l)           
+        (not (commitment-r- mount ?driver ?passenger ?vehicle ?l)) 
     )
 )
 
@@ -692,14 +589,14 @@
         (currentLocation ?driver ?l)
         (currentLocation ?vehicle ?l)
         (currentLocation ?passenger ?l)
-        (commitment dismount ?driver ?passenger ?vehicle ?l)
+        (commitment-r- dismount ?driver ?passenger ?vehicle ?l)
     )
     :effect 
         (and
             (not (containedIn ?passenger ?vehicle))
             (not (isPassive ?passenger))
-            (fulfillment dismount ?driver ?passenger ?vehicle ?l)
-            (not (commitment dismount ?driver ?passenger ?vehicle ?l))
+            (fulfillment-r- dismount ?driver ?passenger ?vehicle ?l)
+            (not (commitment-r- dismount ?driver ?passenger ?vehicle ?l))
         )
 )
 
@@ -710,7 +607,7 @@
             (and
                 (currentLocation ?r ?l)
                 (currentLocation ?a ?l)
-                (commitment use ?a ?a ?r ?l)
+                (commitment-r- use ?a ?a ?r ?l)
             )
         )
         (not (isPassive ?a))
@@ -719,7 +616,7 @@
     )
     :effect (and
         (using ?a ?r)
-        (fulfillment use ?a ?a ?r ?l)
+        (fulfillment-r- use ?a ?a ?r ?l)
     )
 )
 
@@ -736,8 +633,8 @@
             (not(using ?a ?r))
             (forall (?l - location)
                 (when 
-                    (commitment use ?a ?a ?r ?l)
-                    (not(commitment use ?a ?a ?r ?l))
+                    (commitment-r- use ?a ?a ?r ?l)
+                    (not(commitment-r- use ?a ?a ?r ?l))
                 )
             )
         )
@@ -753,14 +650,14 @@
         (currentLocation ?provider ?l) 
         (currentLocation ?receiver ?l)
         (currentLocation ?r ?l)
-        (commitment transfer-custody ?provider ?receiver ?r ?l) 
+        (commitment-r- transfer-custody ?provider ?receiver ?r ?l) 
         (not (exists (?container - resource) (containedIn ?r ?container)))
     )
     :effect(and
         (not (custodian ?r ?provider))
         (custodian ?r ?receiver)
-        (fulfillment transfer-custody ?provider ?receiver ?r ?l) 
-        (not (commitment transfer-custody ?provider ?receiver ?r ?l) )
+        (fulfillment-r- transfer-custody ?provider ?receiver ?r ?l) 
+        (not (commitment-r- transfer-custody ?provider ?receiver ?r ?l) )
     )
 )
 
@@ -772,14 +669,14 @@
             (not (isPassive ?provider))
             (not (isPassive ?receiver)) ;questionable
             (currentLocation ?provider ?l)
-            (commitment transfer-all-rights ?provider ?receiver ?r ?l) 
+            (commitment-r- transfer-all-rights ?provider ?receiver ?r ?l) 
         )
     :effect 
         ( and
             (not(primaryAccountable ?r ?provider))
             (primaryAccountable ?r ?receiver)
-            (fulfillment transfer-all-rights ?provider ?receiver ?r ?l) 
-            (not (commitment transfer-all-rights ?provider ?receiver ?r ?l) )
+            (fulfillment-r- transfer-all-rights ?provider ?receiver ?r ?l) 
+            (not (commitment-r- transfer-all-rights ?provider ?receiver ?r ?l) )
         )
 )
 
@@ -794,7 +691,7 @@
             (currentLocation ?provider ?l) 
             (currentLocation ?receiver ?l)
             (currentLocation ?r ?l)
-            (commitment transfer ?provider ?receiver ?r ?l) 
+            (commitment-r- transfer ?provider ?receiver ?r ?l) 
             (not (exists (?container - resource) (containedIn ?r ?container)))
         )
     :effect 
@@ -803,8 +700,8 @@
             (not (custodian ?r ?provider))
             (primaryAccountable ?r ?receiver)
             (custodian ?r ?receiver)            
-            (fulfillment transfer ?provider ?receiver ?r ?l) 
-            (not (commitment transfer ?provider ?receiver ?r ?l) )
+            (fulfillment-r- transfer ?provider ?receiver ?r ?l) 
+            (not (commitment-r- transfer ?provider ?receiver ?r ?l) )
         )
 )
 
