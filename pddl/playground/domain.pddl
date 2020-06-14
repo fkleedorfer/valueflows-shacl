@@ -18,6 +18,7 @@
     vehicleClassType - resourceClassType
     serviceClassType - resourceClassType
     recipeProcess
+    recipeFlow
 )
 
 (:constants 
@@ -36,9 +37,12 @@
     (custodian ?r - resource ?a - actor ) ; a is currently in custody of r
     (primaryAccountable ?r - resource ?a - actor) ; a is the owner of r
     (potentialResource ?r - resource)
+    (reservedForProduce ?r - resource)
     (requiresIngredient ?product ?ingredient - resourceClassType)
-    (recipeInputOf ?process - recipeProcess ?input - resourceClassType)
-    (recipeOutputOf ?process - recipeProcess ?input - resourceClassType)
+    (recipeInputOf ?process - recipeProcess ?flow - recipeFlow)
+    (recipeOutputOf ?process - recipeProcess ?flow - recipeFlow)
+    (recipeFlowDef ?flow ?action ?resourceClassType)
+
 
     (intent ?action - action ?provider ?receiver - actor ?r - resource ?l - location ?c - resourceClassType)
     (intent-apr--c ?action - action ?provider ?receiver - actor ?c - resourceClassType)
@@ -658,17 +662,25 @@
 
 
 ; simple version: one process that combines all ingredients/constituents
-(:action process-inputs 
-    :parameters (?a - actor ?r - resource ?l - location ?c - resourceClassType)
+(:action recipe-process-inputs 
+    :parameters (?process - recipeProcess ?a - actor ?r - resource ?l - location ?c - resourceClassType)
     :precondition (and 
         (potentialResource ?r)
+        (not (reservedForProduce ?r))
+        (exists (?f - recipeFlow)
+            (and
+                ;don't enable processes unless they produce something that's needed
+                (recipeOutputOf ?process ?f)
+                (recipeFlowDef ?f produce ?c)         
+            )
+        )
         (or
             ; a produces for themselves
             (intent-apr-lc consume ?a ?a ?l ?c)
             (intent-apr--c consume ?a ?a ?c)
             (intent-apr-lc use ?a ?a ?l ?c)
             (intent-apr--c use ?a ?a ?c)
-            (exists (?otherActor - actor)
+            (exists (?o - actor)
                 (or
                     (intent-apr-lc consume ?o ?o ?l ?c)
                     (intent-apr--c consume ?o ?o ?c)
@@ -677,45 +689,59 @@
                 )
             )
         )
-        (exists (?process - recipeProcess ?input ?output - resourceClassType) 
-            (and 
-                (recipeOutputOf ?process ?c)
-                (recipeInputOf ?process ?input)
-            )
-        )
     )
     :effect (and 
-        (forall (?process - recipeProcess ?input ?output - resourceClassType)
+        (forall (?f - recipeFlow ?action - action ?input - resourceClassType) 
             (when
-                (and 
-                    (recipeOutputOf ?process ?c)
-                    (recipeInputOf ?process ?input)
+                (and
+                    (recipeInputOf ?process ?f)
+                    (recipeFlowDef ?f ?action ?input) 
                 )
-                (intent-apr-lc consume ?a ?a ?l ?input)
+                (intent-apr-lc ?action ?a ?a ?l ?input)
             )
         )
     )
 )
 
-(:action process-outputs
-    :parameters (?a - actor ?r - resource ?l - location ?c - resourceClassType)
+(:action recipe-process-outputs
+    :parameters (?process - recipeProcess ?a - actor ?r - resource ?l - location)
     :precondition (and 
         (potentialResource ?r)
-        (exists (?process - recipeProcess ?input ?output - resourceClassType) 
-            (and 
-                (recipeOutputOf ?process ?c)
-                (recipeInputOf ?process ?input)
-                (exists (?res - resource)
-                    (and 
-                        (resourceClassification ?res ?input)
-                        (fulfillment-r- consume ?a ?a ?res ?l)
+        (not (reservedForProduce ?r))
+        (forall (?f - recipeFlow ?action - action ?input - resourceClassType) 
+            (or
+                (not
+                    (and
+                        (recipeInputOf ?process ?f)
+                        (recipeFlowDef ?f ?action ?input) 
+                    )
+                )
+                (and 
+                    (recipeInputOf ?process ?f)
+                    (recipeFlowDef ?f ?action ?input) 
+                    (exists (?res - resource)
+                        (and 
+                            (resourceClassification ?res ?input)
+                            (fulfillment-r- ?action ?a ?a ?res ?l)
+                        )
                     )
                 )
             )
         )
     )
     :effect (and 
-        (intent produce ?a ?a ?r ?l ?c)
+        (forall (?f - recipeFlow ?action - action ?output - resourceClassType) 
+            (when
+                (and
+                    (recipeOutputOf ?process ?f)
+                    (recipeFlowDef ?f ?action ?output) 
+                )
+                (and
+                    (intent ?action ?a ?a ?r ?l ?output)
+                    (reservedForProduce ?r)
+                )
+            )
+        )
     )
 )
 
