@@ -3,7 +3,7 @@
 (define (domain valueflows)
 
 
-(:requirements :adl :action-costs)
+(:requirements :adl :action-costs :typing)
 
 (:types 
     thing
@@ -17,10 +17,11 @@
     action
     vehicleClassType - resourceClassType
     serviceClassType - resourceClassType
+    recipeProcess
 )
 
 (:constants 
-    transfer move goto transfer-all-rights transfer-custody mount dismount put-into take-out-of begin-use end-use use send-and-transfer deliver-service lend leave arrive drive travel - action
+    produce consume transfer  transfer-all-rights transfer-custody move mount dismount put-into take-out-of begin-use end-use use send-and-transfer deliver-service lend leave arrive drive travel - action
     TransportServiceClass - serviceClassType
     TaxiServiceClass - serviceClassType
     TruckClass - vehicleClassType
@@ -34,6 +35,10 @@
     (resourceClassification ?r - resource ?c - resourceClassType )
     (custodian ?r - resource ?a - actor ) ; a is currently in custody of r
     (primaryAccountable ?r - resource ?a - actor) ; a is the owner of r
+    (potentialResource ?r - resource)
+    (requiresIngredient ?product ?ingredient - resourceClassType)
+    (recipeInputOf ?process - recipeProcess ?input - resourceClassType)
+    (recipeOutputOf ?process - recipeProcess ?input - resourceClassType)
 
     (intent ?action - action ?provider ?receiver - actor ?r - resource ?l - location ?c - resourceClassType)
     (intent-apr--c ?action - action ?provider ?receiver - actor ?c - resourceClassType)
@@ -41,7 +46,7 @@
     (intent-apr-lc ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClassType)    
     (intent-ap--lc ?action - action ?provider - actor ?l - location ?c - resourceClassType)
     (intent-a-r-lc ?action - action ?receiver - actor ?l - location ?c - resourceClassType)
-    (intent-apr--c ?action - action ?provider ?receiver - actor  ?c - resourceClassType)
+    (intent-a-r--c ?action - action ?receiver - actor ?c - resourceClassType)
     (intent-ap---c ?action - action ?provider - actor ?c - resourceClassType)
     (intent-ap---c ?action - action ?provider - actor ?c - resourceClassType)
     (intent-aprrl- ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
@@ -49,6 +54,7 @@
     (intent-apr-l- ?action - action ?provider ?receiver - actor ?l - location)    
     (intent-ap-rl- ?action - action ?provider - actor ?r - resource ?l - location)
     (intent-a-rrl- ?action - action ?receiver - actor ?r - resource ?l - location)
+    (intent-a-rr-- ?action - action ?receiver - actor ?r - resource)
     (intent-apr--- ?action - action ?provider ?receiver - actor )
     (intent-ap-r-- ?action - action ?provider - actor ?r - resource)
     (intent-ap---- ?action - action ?provider - actor)
@@ -61,11 +67,11 @@
     (persistent-intent-apr-lc ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClassType)    
     (persistent-intent-ap--lc ?action - action ?provider - actor ?l - location ?c - resourceClassType)
     (persistent-intent-a-r-lc ?action - action ?receiver - actor ?l - location ?c - resourceClassType)
-    (persistent-intent-apr--c ?action - action ?provider ?receiver - actor ?c - resourceClassType)
-    (persistent-intent-ap---c ?action - action ?provider - actor ?c - resourceClassType)
+    (persistent-intent-a-r--c ?action - action ?receiver - actor ?c - resourceClassType)
     (persistent-intent-ap---c ?action - action ?provider - actor ?c - resourceClassType)
     (persistent-intent-aprrl- ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
     (persistent-intent-aprr-- ?action - action ?provider ?receiver - actor ?r - resource )
+    (persistent-intent-a-rr-- ?action - action ?receiver - actor ?r - resource)
     (persistent-intent-apr-l- ?action - action ?provider ?receiver - actor ?l - location )    
     (persistent-intent-ap-rl- ?action - action ?provider - actor ?r - resource ?l - location )
     (persistent-intent-a-rrl- ?action - action ?receiver - actor ?r - resource ?l - location )
@@ -74,11 +80,12 @@
     (persistent-intent-ap---- ?action - action ?provider - actor )
 
 
-    
+    (commitment ?action - action ?provider ?receiver - actor ?s - resource ?l - location ?c - resourceClassType)
     (commitment-r- ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
-    (commitment--c ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClassType)
+    ;(commitment--c ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClassType)
+    (fulfillment ?action - action ?provider ?receiver - actor ?r - resource ?l - location ?c - resourceClassType)
     (fulfillment-r- ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
-    (fulfillment--c ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClassType)
+    ;(fulfillment--c ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClassType)
     (using ?a - actor ?r - resource) ; a is using r
     (isCarryable ?r - resource) ; an actor can move the resource
     (isVehicle ?r - resource) ; r is a vehicle
@@ -90,23 +97,63 @@
 
 ; commit: turn an intent into a commitment
 
-(:action commit--c 
-    :parameters (?action - action ?provider ?receiver - actor ?location - location ?c - resourceClassType)
-    :precondition 
-        (intent-apr-lc ?action ?provider ?receiver ?location ?c)
-    :effect (and
-        (commitment--c ?action ?provider ?receiver ?location ?c)
-        (not (intent-apr-lc ?action ?provider ?receiver ?location ?c))
-    )
-)
+; ; Turns out this is not needed (yet), as intents for deliver-service are not
+; ; directly committed to.
+; ; 
+; ; special case: commit without matching a resource to the class. Allowed so we can 
+; ; deliver-service .. TransportServiceClass. If we did not allow this, we would have
+; ; to 'produce' an resource of type TransportService each time. (which is another way of doing it)
+; (:action commit--c 
+;     :parameters (?action - action ?provider ?receiver - actor ?location - location ?c - resourceClassType)
+;     :precondition 
+;         (intent-apr-lc ?action ?provider ?receiver ?location ?c)
+;     :effect (and
+;         (commitment--c ?action ?provider ?receiver ?location ?c)
+;         (not (intent-apr-lc ?action ?provider ?receiver ?location ?c))
+;     )
+; )
 
 (:action commit-r- 
     :parameters (?action - action ?provider ?receiver - actor ?resource - resource ?location - location)
-    :precondition 
+    :precondition (or
         (intent-aprrl- ?action ?provider ?receiver ?resource ?location)
+        (and 
+            (intent-ap-rl- ?action ?provider ?resource ?location)
+            (intent-a-rrl- ?action ?receiver ?resource ?location)
+        )
+        (and
+            (= ?action transfer-all-rights)
+            (or
+                (and
+                    (intent-ap-rl- ?action ?provider ?resource ?location)
+                    (intent-a-rr-- ?action ?receiver ?resource)
+                )
+                (and
+                    (intent-ap-r-- ?action ?provider ?resource)
+                    (intent-a-rrl- ?action ?receiver ?resource ?location)
+                )
+            )
+        )
+    )
     :effect (and
         (commitment-r- ?action ?provider ?receiver ?resource ?location)
         (not (intent-aprrl- ?action ?provider ?receiver ?resource ?location))
+        (not (intent-ap-rl- ?action ?provider ?resource ?location))
+        (not (intent-a-rrl- ?action ?receiver ?resource ?location))
+        (not (intent-ap-rl- ?action ?provider ?resource ?location))
+        (not (intent-a-rr-- ?action ?receiver ?resource))
+        (not (intent-ap-r-- ?action ?provider ?resource))
+        (not (intent-a-rrl- ?action ?receiver ?resource ?location))
+    )
+)
+
+(:action commit
+    :parameters (?action - action ?provider ?receiver - actor ?resource - resource ?location - location ?c - resourceClassType)
+    :precondition 
+        (intent ?action ?provider ?receiver ?resource ?location ?c)
+    :effect (and
+        (commitment ?action ?provider ?receiver ?resource ?location ?c)
+        (not (intent ?action ?provider ?receiver ?resource ?location ?c))
     )
 )
 
@@ -173,6 +220,17 @@
             (increase (total-cost) 1)
         )
 )
+(:action instantiate-intent-a-r--c
+    :parameters ( ?action - action ?receiver - actor ?c - resourceClassType )
+    :precondition
+        (persistent-intent-a-r--c ?action ?receiver ?c )
+    :effect         
+        (and
+            (intent-a-r--c ?action ?receiver ?c )
+            (increase (total-cost) 1)
+        )
+)
+
 (:action instantiate-intent-apr--c
     :parameters ( ?action - action ?provider ?receiver - actor ?c - resourceClassType )
     :precondition
@@ -259,6 +317,16 @@
             (increase (total-cost) 1)
         )
     )
+(:action instantiate-intent-a-rr--
+    :parameters ( ?action - action ?receiver - actor ?r - resource)
+    :precondition
+        (persistent-intent-a-rr-- ?action ?receiver ?r)
+    :effect         
+        (and
+            (intent-a-rr-- ?action ?receiver ?r)
+            (increase (total-cost) 1)
+        )
+    )
 
 (:action instantiate-intent-apr---
     :parameters ( ?action - action ?provider ?receiver - actor)
@@ -293,6 +361,13 @@
 )
 
 
+;------------------------------------------------------------------------------
+;
+;                    Match with resources
+;
+;------------------------------------------------------------------------------
+
+
 ; match-resource: turn an intent with a resourceClassifiedAs into an intent with a resource of that class
 (:action match-resource-a-r-lc
     :parameters (?action - action ?receiver - actor ?resource - resource ?l - location ?c - resourceClassType)
@@ -303,6 +378,18 @@
     :effect (and
         (intent-a-rrl- ?action ?receiver ?resource ?l)
         (not (intent-a-r-lc ?action ?receiver ?l ?c))
+    )
+)
+
+(:action match-resource-a-r--c
+    :parameters (?action - action ?receiver - actor ?resource - resource ?c - resourceClassType)
+    :precondition (and 
+        (resourceClassification ?resource ?c)
+        (intent-a-r--c ?action ?receiver ?c)
+    )
+    :effect (and
+        (intent-a-rr-- ?action ?receiver ?resource)
+        (not (intent-a-r--c ?action ?receiver ?c))
     )
 )
 
@@ -526,35 +613,14 @@
     )
 )
 
-(:action recipe-send-and-transfer
-    :parameters (?sender ?receiver - actor ?resource - resource ?fromLocation ?toLocation - location)
-    :precondition (and 
-        (not (= ?fromLocation ?toLocation))
-        (not (= ?sender ?receiver))
-        (primaryAccountable ?resource ?sender)
-        (intent-ap-rl- send-and-transfer ?sender ?resource ?fromLocation)
-        (intent-a-rrl- transfer-custody ?receiver ?resource ?toLocation)
-    )    
-    :effect (and
-        (intent-aprrl- transfer-all-rights ?sender ?receiver ?resource ?fromLocation)
-        (intent-ap-rl- transfer-custody ?sender ?resource ?fromLocation)
-        (intent-a-rrl- transfer-custody ?receiver ?resource ?toLocation)
-        (not(intent-ap-rl- send-and-transfer ?sender ?resource ?fromLocation))
-        (increase (total-cost) 1)
-    )
-)   
 
-
-(:action recipe-need-resource-at-location-for-use
+(:action recipe-request-resource-for-use
     :parameters (?a - actor ?l - location ?c - resourceClassType)
     :precondition (and
         (or 
             (and 
                 (intent-apr--c use ?a ?a ?c)
-                (or 
-                    (currentLocation ?a ?l)
-                    (intent-apr-l- arrive ?a ?a ?l)
-                )
+                (currentLocation ?a ?l)
             )
             (intent-apr-lc use ?a ?a ?l ?c)
         )
@@ -573,13 +639,146 @@
 )
 
 
+(:action recipe-request-resource
+    :parameters (?a - actor ?l - location ?c - resourceClassType)
+    :precondition (and
+        (or 
+            (and 
+                (intent-apr--c consume ?a ?a ?c)
+                (currentLocation ?a ?l)
+            )
+            (intent-apr-lc consume ?a ?a ?l ?c)
+        )
+    )
+    :effect (and
+            (intent-a-r-lc transfer-custody ?a ?l ?c)
+            (intent-a-r--c transfer-all-rights ?a ?c)
+    )
+)
+
+
+; simple version: one process that combines all ingredients/constituents
+(:action process-inputs 
+    :parameters (?a - actor ?r - resource ?l - location ?c - resourceClassType)
+    :precondition (and 
+        (potentialResource ?r)
+        (or
+            ; a produces for themselves
+            (intent-apr-lc consume ?a ?a ?l ?c)
+            (intent-apr--c consume ?a ?a ?c)
+            (intent-apr-lc use ?a ?a ?l ?c)
+            (intent-apr--c use ?a ?a ?c)
+            (exists (?otherActor - actor)
+                (or
+                    (intent-apr-lc consume ?o ?o ?l ?c)
+                    (intent-apr--c consume ?o ?o ?c)
+                    (intent-apr-lc use ?o ?o ?l ?c)
+                    (intent-apr--c use ?o ?o ?c)
+                )
+            )
+        )
+        (exists (?process - recipeProcess ?input ?output - resourceClassType) 
+            (and 
+                (recipeOutputOf ?process ?c)
+                (recipeInputOf ?process ?input)
+            )
+        )
+    )
+    :effect (and 
+        (forall (?process - recipeProcess ?input ?output - resourceClassType)
+            (when
+                (and 
+                    (recipeOutputOf ?process ?c)
+                    (recipeInputOf ?process ?input)
+                )
+                (intent-apr-lc consume ?a ?a ?l ?input)
+            )
+        )
+    )
+)
+
+(:action process-outputs
+    :parameters (?a - actor ?r - resource ?l - location ?c - resourceClassType)
+    :precondition (and 
+        (potentialResource ?r)
+        (exists (?process - recipeProcess ?input ?output - resourceClassType) 
+            (and 
+                (recipeOutputOf ?process ?c)
+                (recipeInputOf ?process ?input)
+                (exists (?res - resource)
+                    (and 
+                        (resourceClassification ?res ?input)
+                        (fulfillment-r- consume ?a ?a ?res ?l)
+                    )
+                )
+            )
+        )
+    )
+    :effect (and 
+        (intent produce ?a ?a ?r ?l ?c)
+    )
+)
+
+(:action recipe-consume-at-location
+    :parameters (?a - actor ?r - resource ?l - location )
+    :precondition (and
+        (intent-aprr-- consume ?a ?a ?r)
+        (custodian ?r ?a )
+        (primaryAccountable ?r ?a)
+        (currentLocation ?a ?l)
+        (currentLocation ?r ?l)
+    )
+    :effect (and
+        (not (intent-aprr-- consume ?a ?a ?r))
+        (intent-aprrl- consume ?a ?a ?r ?l)
+    )
+)
+
 ;------------------------------------------------------------------------------
 ;
 ;                    Events
 ;
 ;------------------------------------------------------------------------------
 
+(:action produce 
+    :parameters (?p ?r - actor ?s - resource ?l - location ?c - resourceClassType)
+    :precondition (and 
+        (commitment produce ?p ?r ?s ?l ?c)
+        (potentialResource ?s)
+        (currentLocation ?p ?l)
+    )
+    :effect (and 
+        (not (potentialResource ?s))
+        (resourceClassification ?s ?c)
+        (currentLocation ?s ?l)
+        (custodian ?s ?p )
+        (primaryAccountable ?s ?r)   
+        (not (commitment produce ?p ?r ?s ?l ?c))
+        (fulfillment produce ?p ?r ?s ?l ?c)
+    )
+)
 
+(:action consume
+    :parameters (?p ?r - actor ?s - resource ?l - location)
+    :precondition (and 
+        (commitment-r- consume ?p ?r ?s ?l)
+        (currentLocation ?p ?l)
+        (currentLocation ?s ?l)
+        (custodian ?s ?p )
+        (or 
+            (primaryAccountable ?s ?p)
+            (primaryAccountable ?s ?r)
+        )
+    )
+    :effect (and 
+        (not(custodian ?s ?p ))
+        (not (primaryAccountable ?s ?p))
+        (not (primaryAccountable ?s ?r))
+        (not (currentLocation ?s ?l))
+        (not (commitment-r- consume ?p ?r ?s ?l))
+        (fulfillment-r- consume ?p ?r ?s ?l)
+    )
+)
 
 (:action move 
     :parameters (?a - actor ?r - resource ?fromLocation ?toLocation - location)
