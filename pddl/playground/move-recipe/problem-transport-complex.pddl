@@ -17,10 +17,10 @@
     (resourceClassification Apples GrannySmith)
     (custodian Apples Alice)
     (primaryAccountable Apples Alice)    
-    (intent-ap--lc send-and-transfer Alice Rossatz GrannySmith)
+    (intent-ap--lc transfer-custody Alice Rossatz GrannySmith)
 
     (currentLocation Bob Wien)
-    (intent-a-r-lc send-and-transfer Bob Wien GrannySmith)
+    (intent-a-r-lc transfer-custody Bob Wien GrannySmith)
 
     (currentLocation Rolf Gedersdorf)
     (currentLocation Truck1 Gedersdorf)
@@ -28,53 +28,22 @@
     (primaryAccountable Truck1 Rolf)
     (isVehicle Truck1)
     (mayContainResources Truck1)
-    (intent-ap-rl- lend Rolf Truck1 Gedersdorf)
+    (persistent-intent-ap-rl- lend Rolf Truck1 Gedersdorf)
 
     (currentLocation Maria Krems)
     (currentLocation Car1 Krems)
     (custodian Car1 Maria)
     (isVehicle Car1)
     (mayContainActors Car1)
-    (intent-ap-r-c deliver-service Maria Car1 TaxiServiceClass)
+    (persistent-intent-ap-r-c deliver-service Maria Car1 TaxiServiceClass)
 
     (currentlocation Claudia Krems)    
-    (intent-ap---c deliver-service Claudia TransportServiceClass)
+    (persistent-intent-ap---c deliver-service Claudia TransportServiceClass)
     
 )
 
 (:goal 
-    (and
-        (not 
-            (exists (?a - action ?p ?r - actor ?s - resource ?l - location ?c - resourceClassType)
-                (and
-                    (or
-                        (commitment-r- ?a ?p ?r ?s ?l)
-                        (commitment--c ?a ?p ?r ?s ?c)
-
-            
-                        (intent ?a ?p ?r ?s ?l ?c)
-                        (intent-apr--c ?a ?p ?r ?c)
-                        (intent-ap-r-c ?a ?p ?s ?c)
-                        (intent-apr-lc ?a ?p ?r ?l ?c)
-                        (intent-ap--lc ?a ?p ?l ?c)
-                        (intent-a-r-lc ?a ?r ?l ?c)
-                        (intent-apr--c ?a ?p ?r ?c)
-                        (intent-ap---c ?a ?p ?c)
-                        (intent-ap---c ?a ?p ?c)
-
-                        (intent-aprrl- ?a ?p ?r ?s ?l)
-                        (intent-aprr-- ?a ?p ?r ?s) 
-                        (intent-apr-l- ?a ?p ?r ?l)
-                        (intent-ap-rl- ?a ?p ?s ?l)
-                        (intent-a-rrl- ?a ?r ?s ?l)
-                        (intent-apr--- ?a ?p ?r)
-                        (intent-ap-r-- ?a ?p ?s)
-                        (intent-ap---- ?a ?p)
-                    )
-                )
-            )
-        )
-    )
+    (problemSolved)
 )
 
 ;un-comment the following line if metric is needed

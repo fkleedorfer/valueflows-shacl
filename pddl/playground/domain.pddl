@@ -22,7 +22,7 @@
 )
 
 (:constants 
-    produce consume transfer  transfer-all-rights transfer-custody move mount dismount put-into take-out-of begin-use end-use use send-and-transfer deliver-service lend leave arrive drive travel - action
+    produce consume transfer  transfer-all-rights transfer-custody move mount dismount put-into take-out-of begin-use end-use use deliver-service lend leave arrive drive travel - action
     TransportServiceClass - serviceClassType
     TaxiServiceClass - serviceClassType
     TruckClass - vehicleClassType
@@ -41,8 +41,8 @@
     (requiresIngredient ?product ?ingredient - resourceClassType)
     (recipeInputOf ?process - recipeProcess ?flow - recipeFlow)
     (recipeOutputOf ?process - recipeProcess ?flow - recipeFlow)
-    (recipeFlowDef ?flow ?action ?resourceClassType)
-
+    (recipeFlowDef ?flow - recipeFlow ?action - action ?resourceClassType - resourceClassType)
+    (problemSolved) ; set if problem is solved
 
     (intent ?action - action ?provider ?receiver - actor ?r - resource ?l - location ?c - resourceClassType)
     (intent-apr--c ?action - action ?provider ?receiver - actor ?c - resourceClassType)
@@ -148,6 +148,7 @@
         (not (intent-a-rr-- ?action ?receiver ?resource))
         (not (intent-ap-r-- ?action ?provider ?resource))
         (not (intent-a-rrl- ?action ?receiver ?resource ?location))
+        (increase (total-cost) 1)
     )
 )
 
@@ -158,6 +159,7 @@
     :effect (and
         (commitment ?action ?provider ?receiver ?resource ?location ?c)
         (not (intent ?action ?provider ?receiver ?resource ?location ?c))
+        (increase (total-cost) 1)
     )
 )
 
@@ -451,6 +453,19 @@
 ;
 ;------------------------------------------------------------------------------
 
+(:action recipe-travel-to-intent-location
+    :parameters (?actor - actor ?action - action ?location - location)
+    :precondition (and 
+        (exists (?otherActor - actor ?resource - resource ) 
+            (intent-aprrl- ?action ?actor ?otherActor ?resource ?location)
+        )
+    )
+    :effect (and 
+        (intent-apr-l- travel ?actor ?actor ?location)
+        (increase (total-cost) 1)
+    )
+)
+
 (:action recipe-travel-to-location
     :parameters (?traveller - actor ?fromLocation ?toLocation - location)
     :precondition (and 
@@ -493,11 +508,14 @@
     :precondition (and 
         (not (= ?fromLocation ?toLocation))
         (isVehicle ?car)
-        (using ?driver ?car)
+        (custodian ?car ?driver)
+        (currentLocation ?car ?fromLocation)
+        (currentLocation ?driver ?fromLocation)
         (intent-apr-l- leave ?driver ?driver ?fromLocation)
         (intent-apr-l- arrive ?driver ?driver ?toLocation)
     )
     :effect (and 
+        (intent-aprrl- use ?driver ?driver ?car ?fromLocation)
         (intent-aprrl- move ?driver ?driver ?car ?toLocation)
         (not (intent-apr-l- leave ?driver ?driver ?fromLocation))
         (not (intent-apr-l- arrive ?driver ?driver ?toLocation))
@@ -518,13 +536,6 @@
         (intent-apr-l- arrive ?passenger ?passenger ?toLocation)
     )
     :effect (and 
-        (when (not(currentLocation ?driver ?fromLocation))
-            (forall (?dl - location)
-                (when (currentLocation ?driver ?dl)
-                    (intent-apr-l- travel ?driver ?driver ?fromLocation)
-                )
-            )
-        )
         (intent-aprrl- use ?driver ?driver ?car ?fromLocation)
         (intent-aprrl- mount ?driver ?passenger ?car ?fromLocation)
         (intent-aprrl- move ?driver ?driver ?car ?toLocation)
@@ -556,13 +567,6 @@
         (intent-a-rrl- transfer-custody ?consignee ?consignment ?toLocation )
     )
     :effect (and 
-        (when (not(currentLocation ?transporter ?fromLocation))
-            (forall (?dl - location)
-                (when (currentLocation ?transporter ?dl)
-                    (intent-apr-l- travel ?transporter ?transporter ?fromLocation)
-                )
-            )
-        )
         (intent-aprrl- transfer-custody ?consignor ?transporter ?consignment ?fromLocation)
         (intent-aprrl- use ?transporter ?transporter ?truck ?fromLocation)
         (intent-aprrl- move ?transporter ?transporter ?truck ?toLocation)
@@ -587,26 +591,12 @@
         )
         (or
             (exists (?useLocation - location )
-                (intent-aprrl- use ?borrower ?borrower ?resource ?useLocation) ;todo: match via resource class, not resource
+                (intent-aprrl- use ?borrower ?borrower ?resource ?useLocation) 
             )
             (intent-aprr-- use ?borrower ?borrower ?resource)
         )
     )
     :effect (and
-        (when (not(currentLocation ?borrower ?location))
-            (forall (?dl - location)
-                (when (currentLocation ?borrower ?dl)
-                    (intent-apr-l- travel ?borrower ?borrower ?location)
-                )
-            )
-        )
-        (when (not(currentLocation ?borrower ?location))
-            (forall (?dl - location)
-                (when (currentLocation ?borrower ?dl)
-                    (intent-apr--- travel ?borrower ?borrower )
-                )
-            )
-        )
         (intent-aprrl- transfer-custody ?lender ?borrower ?resource ?location)
         (intent-aprrl- use ?borrower ?borrower ?resource ?location )
         (intent-aprrl- transfer-custody ?borrower ?lender ?resource ?location)
@@ -639,6 +629,7 @@
     )
     :effect (and
         (intent-a-r-lc transfer-custody ?a ?l ?c)
+        (increase (total-cost) 1)
     )
 )
 
@@ -657,6 +648,7 @@
     :effect (and
             (intent-a-r-lc transfer-custody ?a ?l ?c)
             (intent-a-r--c transfer-all-rights ?a ?c)
+            (increase (total-cost) 1)
     )
 )
 
@@ -700,6 +692,7 @@
                 (intent-apr-lc ?action ?a ?a ?l ?input)
             )
         )
+        (increase (total-cost) 1)
     )
 )
 
@@ -742,6 +735,7 @@
                 )
             )
         )
+        (increase (total-cost) 1)
     )
 )
 
@@ -757,6 +751,7 @@
     :effect (and
         (not (intent-aprr-- consume ?a ?a ?r))
         (intent-aprrl- consume ?a ?a ?r ?l)
+        (increase (total-cost) 1)
     )
 )
 
@@ -766,7 +761,7 @@
 ;
 ;------------------------------------------------------------------------------
 
-(:action produce 
+(:action event-produce 
     :parameters (?p ?r - actor ?s - resource ?l - location ?c - resourceClassType)
     :precondition (and 
         (commitment produce ?p ?r ?s ?l ?c)
@@ -781,10 +776,11 @@
         (primaryAccountable ?s ?r)   
         (not (commitment produce ?p ?r ?s ?l ?c))
         (fulfillment produce ?p ?r ?s ?l ?c)
+        (increase (total-cost) 1)
     )
 )
 
-(:action consume
+(:action event-consume
     :parameters (?p ?r - actor ?s - resource ?l - location)
     :precondition (and 
         (commitment-r- consume ?p ?r ?s ?l)
@@ -803,10 +799,11 @@
         (not (currentLocation ?s ?l))
         (not (commitment-r- consume ?p ?r ?s ?l))
         (fulfillment-r- consume ?p ?r ?s ?l)
+        (increase (total-cost) 1)
     )
 )
 
-(:action move 
+(:action event-move 
     :parameters (?a - actor ?r - resource ?fromLocation ?toLocation - location)
     :precondition ( and
         (not (isPassive ?a))
@@ -838,10 +835,11 @@
                 )
             )
         )
+        (increase (total-cost) 1)
     )
 )
 
-(:action put-into
+(:action event-put-into
     :parameters (?a - actor ?r ?rContainer - resource)
     :precondition (and 
         (not (isPassive ?a))
@@ -858,11 +856,12 @@
     )
     :effect (and 
         (containedIn ?r ?rContainer)
+        (increase (total-cost) 1)
     )
 )
 
 
-(:action take-out-of
+(:action event-take-out-of
     :parameters (?a - actor ?r ?rContainer - resource)
     :precondition (and
         (not (isPassive ?a))
@@ -872,11 +871,12 @@
     :effect 
         (and
             (not (containedIn ?r ?rContainer))
+            (increase (total-cost) 1)
         )
 )
 
 
-(:action mount
+(:action event-mount
     :parameters (?driver ?passenger - actor ?vehicle - resource ?l - location)
     :precondition (and 
         (isVehicle ?vehicle)
@@ -903,10 +903,11 @@
         (isPassive ?passenger)
         (fulfillment-r- mount ?driver ?passenger ?vehicle ?l)           
         (not (commitment-r- mount ?driver ?passenger ?vehicle ?l)) 
+        (increase (total-cost) 1)
     )
 )
 
-(:action dismount
+(:action event-dismount
     :parameters (?driver ?passenger - actor ?vehicle - resource ?l - location)
     :precondition (and 
         (isVehicle ?vehicle)
@@ -924,50 +925,80 @@
             (not (isPassive ?passenger))
             (fulfillment-r- dismount ?driver ?passenger ?vehicle ?l)
             (not (commitment-r- dismount ?driver ?passenger ?vehicle ?l))
+            (increase (total-cost) 1)
         )
 )
 
-(:action begin-use
-    :parameters (?a - actor ?r - resource)
+(:action event-begin-use
+    :parameters (?a - actor ?r - resource ?l - location)
     :precondition ( and
-        (exists (?l - location) 
-            (and
-                (currentLocation ?r ?l)
-                (currentLocation ?a ?l)
-                (commitment-r- use ?a ?a ?r ?l)
-            )
+        (and
+            (currentLocation ?r ?l)
+            (currentLocation ?a ?l)
+            (commitment-r- use ?a ?a ?r ?l)
         )
         (not (isPassive ?a))
         (custodian ?r ?a)
-        (not (exists(?a2 - actor) (using ?a2 ?r)))
+        (not 
+            (exists (?a2 - actor)
+                (and 
+                    (not (= ?a2 ?a))
+                    (using ?a2 ?r)
+                )
+            )      
+        )
     )
     :effect (and
         (using ?a ?r)
+        (not (commitment-r- use ?a ?a ?r ?l))
         (fulfillment-r- use ?a ?a ?r ?l)
+        (increase (total-cost) 1)
+    )
+)
+
+(:action event-continue-use
+    :parameters (?a - actor ?r - resource ?l - location)
+    :precondition ( and
+        (currentLocation ?r ?l)
+        (currentLocation ?a ?l)
+        (using ?a ?r)
+        (not (isPassive ?a))
+        (commitment-r- use ?a ?a ?r ?l)
+    )
+    :effect (and
+        (not(commitment-r- use ?a ?a ?r ?l))
+        (fulfillment-r- use ?a ?a ?r ?l)
+        (increase (total-cost) 1)
     )
 )
 
 
-(:action end-use
-    :parameters (?a - actor ?r - resource)
+(:action event-end-use
+    :parameters (?a - actor ?r - resource ?l - location)
     :precondition 
         (and 
+            (and
+                (currentLocation ?r ?l)
+                (currentLocation ?a ?l)
+            )
             (using ?a ?r)
             (not (isPassive ?a))
         )
     :effect 
         (and
             (not(using ?a ?r))
-            (forall (?l - location)
-                (when 
-                    (commitment-r- use ?a ?a ?r ?l)
+            (when 
+                (commitment-r- use ?a ?a ?r ?l)
+                (and
                     (not(commitment-r- use ?a ?a ?r ?l))
+                    (fulfillment-r- use ?a ?a ?r ?l)
                 )
             )
+            (increase (total-cost) 1)
         )
 )
 
-(:action transfer-custody
+(:action event-transfer-custody
     :parameters (?provider ?receiver - actor ?r - resource ?l - location)
     :precondition (and
         (not (isPassive ?provider))
@@ -985,10 +1016,11 @@
         (custodian ?r ?receiver)
         (fulfillment-r- transfer-custody ?provider ?receiver ?r ?l) 
         (not (commitment-r- transfer-custody ?provider ?receiver ?r ?l) )
+        (increase (total-cost) 1)
     )
 )
 
-(:action transfer-all-rights
+(:action event-transfer-all-rights
     :parameters (?provider ?receiver - actor ?r - resource ?l - location)
     :precondition 
         ( and 
@@ -1004,10 +1036,11 @@
             (primaryAccountable ?r ?receiver)
             (fulfillment-r- transfer-all-rights ?provider ?receiver ?r ?l) 
             (not (commitment-r- transfer-all-rights ?provider ?receiver ?r ?l) )
+            (increase (total-cost) 1)
         )
 )
 
-(:action transfer
+(:action event-transfer
     :parameters (?provider - actor ?receiver - actor ?r - resource ?l - location)
     :precondition 
         ( and 
@@ -1029,7 +1062,68 @@
             (custodian ?r ?receiver)            
             (fulfillment-r- transfer ?provider ?receiver ?r ?l) 
             (not (commitment-r- transfer ?provider ?receiver ?r ?l) )
+            (increase (total-cost) 1)
         )
 )
+
+
+(:action accept-solution
+    :parameters ()
+    :precondition
+    (not 
+        (exists (?a - action ?p ?r - actor ?s - resource ?l - location ?c - resourceClassType)
+            (or
+                (commitment-r- ?a ?p ?r ?s ?l)
+                ;(commitment--c ?a ?p ?r ?l ?c)
+                (commitment ?a ?p ?r ?s ?l ?c)
+                (intent ?a ?p ?r ?s ?l ?c)
+                (intent-apr--c ?a ?p ?r ?c)
+                (intent-ap-r-c ?a ?p ?s ?c)
+                (intent-apr-lc ?a ?p ?r ?l ?c)
+                (intent-ap--lc ?a ?p ?l ?c)
+                (intent-a-r-lc ?a ?r ?l ?c)
+                (intent-apr--c ?a ?p ?r ?c)
+                (intent-a-r--c ?a ?r ?c)
+                (intent-ap---c ?a ?p ?c)
+                (intent-ap---c ?a ?p ?c)
+                (intent-aprrl- ?a ?p ?r ?s ?l)
+                (intent-aprr-- ?a ?p ?r ?s) 
+                (intent-apr-l- ?a ?p ?r ?l)
+                (intent-ap-rl- ?a ?p ?s ?l)
+                (intent-a-rrl- ?a ?r ?s ?l)
+                (intent-apr--- ?a ?p ?r)
+                (intent-ap-r-- ?a ?p ?s)
+                (intent-ap---- ?a ?p)
+            )
+        )
+    )
+    :effect     
+        (and 
+            (problemSolved)
+            (increase (total-cost) 0)
+        )
+    
+)
+
+
+; ---------- DEBUGGING ACTIONS
+; help to spot predicates that have to be removed in order to reach the standard goal
+; (:action remove_unused_intent
+;     :parameters (?a - action ?p ?r - actor ?s - resource ?l - location)
+;     :precondition 
+;         (intent-aprrl- ?a ?p ?r ?s ?l)
+;     :effect 
+;         (not (intent-aprrl- ?a ?p ?r ?s ?l))
+    
+; )
+
+; (:action remove_unused_commitment
+;     :parameters (?a - action ?p ?r - actor ?s - resource ?l - location)
+;     :precondition 
+;         (commitment-r- ?a ?p ?r ?s ?l)
+;     :effect 
+;         (not (commitment-r- ?a ?p ?r ?s ?l))
+    
+; )
 
 )
