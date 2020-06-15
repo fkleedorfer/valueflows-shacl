@@ -13,14 +13,13 @@
     (custodian Car1 Maria)
     (isVehicle Car1)
     (mayContainActors Car1)
-    (persistent-intent-ap-r-c deliver-service Maria Car1 TaxiServiceClass)
-    ;(persistent-intent-apr--- travel Maria Maria)
+    (persistent-intent-ap-r--c deliver-service Maria Car1 TaxiServiceClass)
 
     (currentlocation Claudia Horn)
-    (intent-apr-l- travel Claudia Claudia Wien)
+    (intent-apr-l-- travel Claudia Claudia Wien)
 
     (currentlocation Rolf Krems)
-    (intent-apr-l- travel Rolf Rolf Linz)
+    (intent-apr-l-- travel Rolf Rolf Linz)
     
 )
     

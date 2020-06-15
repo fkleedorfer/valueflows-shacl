@@ -12,10 +12,10 @@
     (currentLocation Alice Rossatz)
     (custodian Car Alice)
     (primaryAccountable Car Alice)
-    (persistent-intent-ap-r-- lend Alice Car)
+    (persistent-intent-ap-r--- lend Alice Car)
 
     (currentLocation Bob Rossatz)
-    (intent-aprr-- use Bob Bob Car)
+    (intent-aprr--- use Bob Bob Car)
 )
 
 (:goal 

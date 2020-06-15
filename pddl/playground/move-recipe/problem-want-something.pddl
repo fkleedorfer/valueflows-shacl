@@ -12,23 +12,12 @@
 )
 
 (:init
-    
-    
     (currentLocation Bob Wien)
     (intent-a-r-lc transfer-custody Bob Wien Anything)
-
-    
+)
+(:goal
+   (problemSolved)
 )
 
-(:goal 
-    (exists (?pro - actor ?res - resource ?loc - location ?cla - resourceClassType)
-        (or
-            (commitment-r- transfer-custody Bob ?pro ?res ?loc)
-            (commitment--c transfer-custody Bob ?pro ?res ?cla)
-        )
-    )
-)
-
-;un-comment the following line if metric is needed
-;(:metric minimize (???))
+(:metric minimize (total-cost))
 )

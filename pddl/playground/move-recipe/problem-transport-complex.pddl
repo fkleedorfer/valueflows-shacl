@@ -17,10 +17,10 @@
     (resourceClassification Apples GrannySmith)
     (custodian Apples Alice)
     (primaryAccountable Apples Alice)    
-    (intent-ap--lc transfer-custody Alice Rossatz GrannySmith)
+    (intent-ap--l-c transfer-custody Alice Rossatz GrannySmith)
 
     (currentLocation Bob Wien)
-    (intent-a-r-lc transfer-custody Bob Wien GrannySmith)
+    (intent-a-r-l-c transfer-custody Bob Wien GrannySmith)
 
     (currentLocation Rolf Gedersdorf)
     (currentLocation Truck1 Gedersdorf)
@@ -28,24 +28,23 @@
     (primaryAccountable Truck1 Rolf)
     (isVehicle Truck1)
     (mayContainResources Truck1)
-    (persistent-intent-ap-rl- lend Rolf Truck1 Gedersdorf)
+    (persistent-intent-ap-rl-- lend Rolf Truck1 Gedersdorf)
 
     (currentLocation Maria Krems)
     (currentLocation Car1 Krems)
     (custodian Car1 Maria)
     (isVehicle Car1)
     (mayContainActors Car1)
-    (persistent-intent-ap-r-c deliver-service Maria Car1 TaxiServiceClass)
+    (persistent-intent-ap-r--c deliver-service Maria Car1 TaxiServiceClass)
 
     (currentlocation Claudia Krems)    
-    (persistent-intent-ap---c deliver-service Claudia TransportServiceClass)
+    (persistent-intent-ap----c deliver-service Claudia TransportServiceClass)
     
 )
 
-(:goal 
-    (problemSolved)
+(:goal
+   (problemSolved)
 )
 
-;un-comment the following line if metric is needed
-;(:metric minimize (???))
+(:metric minimize (total-cost))
 )

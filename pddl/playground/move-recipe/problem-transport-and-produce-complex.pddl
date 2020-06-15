@@ -17,7 +17,7 @@
     (recipeInputOf applestrudelProcess consumeApples)
     (recipeFlowDef consumeApples consume GrannySmith)
     (recipeInputOf applestrudelProcess consumeRaisins)
-    (recipeFlowDef consumeRaisins Raisins)
+    (recipeFlowDef consumeRaisins consume Raisins)
     (recipeInputOf applestrudelProcess useOven)
     (recipeFlowDef useOven use Oven)
     (recipeOutputOf applestrudelProcess produceApplestrudel)
@@ -29,15 +29,15 @@
     (custodian Apples Alice)
     (primaryAccountable Apples Alice)  
 
-    (persistent-intent-ap--lc transfer-custody Alice Rossatz GrannySmith) 
-    (persistent-intent-ap--lc transfer-all-rights Alice Rossatz GrannySmith) 
+    (persistent-intent-ap--l-c transfer-custody Alice Rossatz GrannySmith) 
+    (persistent-intent-ap--l-c transfer-all-rights Alice Rossatz GrannySmith) 
 
     (currentLocation Claudia Krems)
     (currentLocation Truck1 Krems)
     (isVehicle Truck1)
     (mayContainResources Truck1)
     (custodian Truck1 Claudia)
-    (persistent-intent-ap---c deliver-service Claudia TransportServiceClass)
+    (persistent-intent-ap----c deliver-service Claudia TransportServiceClass)
 
     (currentLocation Bob Wien)
     (resourceClassification raisins1 Raisins)
@@ -51,7 +51,7 @@
 
 
 
-    (intent-apr--c consume Bob Bob Applestrudel)
+    (intent-apr---c consume Bob Bob Applestrudel)
 )
     
 (:goal

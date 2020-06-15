@@ -14,10 +14,10 @@
     (custodian Car1 Maria)
     (isVehicle Car1)
     (mayContainActors Car1)
-    (persistent-intent-ap---c deliver-service Maria TaxiServiceClass)
+    (persistent-intent-ap----c deliver-service Maria TaxiServiceClass)
 
     (currentlocation Claudia Krems)
-    (intent-apr-l- travel Claudia Claudia Wien)
+    (intent-apr-l-- travel Claudia Claudia Wien)
 )
     
 (:goal 
