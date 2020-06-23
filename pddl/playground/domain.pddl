@@ -22,7 +22,7 @@
 )
 
 (:constants 
-    produce consume transfer  transfer-all-rights transfer-custody move mount dismount put-into take-out-of begin-use end-use use deliver-service lend leave arrive drive travel - action
+    produce consume transfer  transfer-all-rights transfer-custody move mount dismount put-into take-out-of begin-use end-use use deliver-service lend drive travel - action
     TransportServiceClass - serviceClassType
     TaxiServiceClass - serviceClassType
     TruckClass - vehicleClassType
@@ -43,6 +43,8 @@
     (recipeOutputOf ?process - recipeProcess ?flow - recipeFlow)
     (recipeFlowDef ?flow - recipeFlow ?action - action ?resourceClassType - resourceClassType)
     (problemSolved) ; set if problem is solved
+    (debugRemoveUnusedIntents) ; trigger for debugging actions
+    (debugRemoveUnusedCommitments)
 
     (intent-aprrltc ?action - action ?provider ?receiver - actor ?r - resource ?l ?t - location ?c - resourceClassType)
     (intent-aprrl-c ?action - action ?provider ?receiver - actor ?r - resource ?l - location ?c - resourceClassType)
@@ -513,42 +515,23 @@
 ;------------------------------------------------------------------------------
 
 (:action recipe-travel-to-intent-location
-    :parameters (?actor - actor ?action - action ?fromLocation ?location - location)
+    :parameters (?actor - actor ?fromLocation ?toLocation - location)
     :precondition (and 
-        (exists (?otherActor - actor ?resource - resource ) 
+        (exists (?action - action ?otherActor - actor ?resource - resource ) 
             (or
-                (intent-aprrl-- ?action ?actor ?otherActor ?resource ?location)
-                (intent-aprrl-- ?action ?otherActor ?actor ?resource ?location)
+                (intent-aprrl-- ?action ?actor ?otherActor ?resource ?toLocation)
+                (intent-aprrl-- ?action ?otherActor ?actor ?resource ?toLocation)
             )
         )
         (or
             (exists (?otherLocation - location) 
                 (intent-apr-lt- travel ?actor ?actor ?otherLocation ?fromLocation)
             )
-            (intent-apr-l-- arrive ?actor ?actor ?fromLocation)
             (currentLocation ?actor ?fromLocation)
         )
     )
     :effect (and 
-        (intent-apr-lt- travel ?actor ?actor ?fromLocation ?location)
-        (increase (total-cost) 1)
-    )
-)
-
-(:action recipe-travel-to-location
-    :parameters (?traveller - actor ?fromLocation ?toLocation - location)
-    :precondition (and 
-        (not (= ?fromLocation ?toLocation))
-        (intent-apr-lt- travel ?traveller ?traveller ?fromLocation ?toLocation)
-        (or 
-            (currentLocation ?traveller ?fromLocation)
-            (intent-apr-l-- arrive ?traveller ?traveller ?fromLocation)
-        )
-    )
-    :effect (and 
-        (intent-apr-l-- leave ?traveller ?traveller ?fromLocation)
-        (intent-apr-l-- arrive ?traveller ?traveller ?toLocation)
-        (not(intent-apr-lt- travel ?traveller ?traveller ?fromLocation ?toLocation))
+        (intent-apr-lt- travel ?actor ?actor ?fromLocation ?toLocation)
         (increase (total-cost) 1)
     )
 )
@@ -558,16 +541,14 @@
     :precondition (and 
         (not (= ?fromLocation ?toLocation))
         (isVehicle ?car)
-        (custodian ?car ?driver)
-        (currentLocation ?car ?fromLocation)
-        (currentLocation ?driver ?fromLocation)
-        (intent-apr-l-- leave ?driver ?driver ?fromLocation)
-        (intent-apr-l-- arrive ?driver ?driver ?toLocation)
+        ; (custodian ?car ?driver) ; this is detrimental! don't use it!
+        ;(currentLocation ?car ?fromLocation)
+        ;(currentLocation ?driver ?fromLocation)
+        (intent-apr-lt- travel ?driver ?driver ?fromLocation ?toLocation)
     )
     :effect (and 
         (intent-aprrlt- move ?driver ?driver ?car ?fromLocation ?toLocation)
-        (not (intent-apr-l-- leave ?driver ?driver ?fromLocation))
-        (not (intent-apr-l-- arrive ?driver ?driver ?toLocation))
+        (not (intent-apr-lt- travel ?driver ?driver ?fromLocation ?toLocation))
         (increase (total-cost) 1)
     )
 )
@@ -577,12 +558,13 @@
     :precondition (and 
         (not (= ?fromLocation ?toLocation))
         (not (= ?driver ?passenger))
+        (isVehicle ?car)
+        (mayContainActors ?car)
         (or 
             (intent-ap----c deliver-service ?driver TaxiServiceClass)   
             (intent-ap-r--c deliver-service ?driver ?car TaxiServiceClass) 
         )
-        (intent-apr-l-- leave ?passenger ?passenger ?fromLocation)
-        (intent-apr-l-- arrive ?passenger ?passenger ?toLocation)
+        (intent-apr-lt- travel ?passenger ?passenger ?fromLocation ?toLocation)
     )
     :effect (and 
         (intent-aprrl-- mount ?driver ?passenger ?car ?fromLocation)
@@ -590,8 +572,7 @@
         (intent-aprrl-- dismount ?driver ?passenger ?car ?toLocation)
         (not (intent-ap-r--c deliver-service ?driver ?car TaxiServiceClass) )
         (not (intent-ap----c deliver-service ?driver TaxiServiceClass) )
-        (not (intent-apr-l-- leave ?passenger ?passenger ?fromLocation))
-        (not (intent-apr-l-- arrive ?passenger ?passenger ?toLocation))
+        (not (intent-apr-lt- travel ?passenger ?passenger ?fromLocation ?toLocation))
         (increase (total-cost) 1)
     )
 )
@@ -636,11 +617,15 @@
             (intent-ap-rl-- lend ?lender ?resource ?location)
             (intent-aprrl-- lend ?lender ?borrower ?resource ?location)
         )
-        (or
-            (exists (?useLocation - location )
-                (intent-aprrl-- use ?borrower ?borrower ?resource ?useLocation) 
+        (exists (?action - action ?actor - actor ?l ?t - location) 
+            (and
+                (not (= ?action consume))
+                (or
+                    (intent-aprrlt- ?action ?borrower ?actor ?resource ?l ?t)
+                    (intent-aprrl-- ?action ?borrower ?actor ?resource ?l)
+                    (intent-aprr--- ?action ?borrower ?actor ?resource)
+                )
             )
-            (intent-aprr--- use ?borrower ?borrower ?resource)
         )
     )
     :effect (and
@@ -650,6 +635,26 @@
         (not(intent-ap-rl-- lend ?lender ?resource ?location))
         (not(intent-aprrl-- lend ?lender ?borrower ?resource ?location))
         (increase (total-cost) 1)
+    )
+)
+
+(:action recipe-intend-to-use 
+    :parameters (?a - actor ?r - resource ?l - location)
+    :precondition (and
+        
+        (exists (?action - action ?actor - actor ?t - location) 
+            (and
+                (not (= ?action consume))
+                (or
+                    (intent-aprrlt- ?action ?a ?actor ?r ?l ?t)
+                    (intent-aprrl-- ?action ?a ?actor ?r ?l)
+                    (intent-aprr--- ?action ?a ?actor ?r)
+                )
+            )
+        )
+    )
+    :effect ( and
+        (intent-aprrl-- use ?a ?a ?r ?l)
     )
 )
 
@@ -777,7 +782,10 @@
                 )
                 (and
                     (intent-aprrl-c ?action ?a ?a ?r ?l ?output)
-                    (reservedForProduce ?r)
+                    (when 
+                        (= ?action produce)
+                        (reservedForProduce ?r)
+                    )
                 )
             )
         )
@@ -802,25 +810,6 @@
 )
 
 
-(:action recipe-intend-to-use 
-    :parameters (?a - actor ?r - resource ?l - location)
-    :precondition (and
-        (or 
-            (custodian ?r ?a)
-            (intent-a-rrl-- transfer-custody ?a ?r ?l)
-        )
-        (exists (?action - action ?actor - actor ?t - location) 
-            (or
-                (intent-aprrlt- ?action ?a ?actor ?r ?l ?t)
-                (intent-aprrl-- ?action ?a ?actor ?r ?l)
-                (intent-aprr--- ?action ?a ?actor ?r)
-            )
-        )
-    )
-    :effect ( and
-        (intent-aprrl-- use ?a ?a ?r ?l)
-    )
-)
 ;------------------------------------------------------------------------------
 ;
 ;                    Events
@@ -1142,26 +1131,25 @@
                 (commitment-aprrltc ?a ?p ?r ?s ?l ?t ?c)
                 (commitment-aprrlt- ?a ?p ?r ?s ?l ?t)
                 (commitment-aprrl-- ?a ?p ?r ?s ?l)
-                ;(commitment--c- ?a ?p ?r ?l ?c)
                 (commitment-aprrl-c ?a ?p ?r ?s ?l ?c)
+                (intent-aprrlt- ?a ?p ?r ?s ?l ?t)
                 (intent-aprrl-c ?a ?p ?r ?s ?l ?c)
-                (intent-apr---c ?a ?p ?r ?c)
-                (intent-ap-r--c ?a ?p ?s ?c)
-                (intent-apr-l-c ?a ?p ?r ?l ?c)
-                (intent-ap--l-c ?a ?p ?l ?c)
-                (intent-a-r-l-c ?a ?r ?l ?c)
-                (intent-apr---c ?a ?p ?r ?c)
-                (intent-a-r---c ?a ?r ?c)
-                (intent-ap----c ?a ?p ?c)
-                (intent-ap----c ?a ?p ?c)
                 (intent-aprrl-- ?a ?p ?r ?s ?l)
                 (intent-aprr--- ?a ?p ?r ?s) 
+                (intent-apr-lt- ?a ?p ?r ?l ?t)
+                (intent-apr-l-c ?a ?p ?r ?l ?c)
                 (intent-apr-l-- ?a ?p ?r ?l)
-                (intent-ap-rl-- ?a ?p ?s ?l)
-                (intent-a-rrl-- ?a ?r ?s ?l)
+                (intent-apr---c ?a ?p ?r ?c)
                 (intent-apr---- ?a ?p ?r)
+                (intent-ap-rl-- ?a ?p ?s ?l)
+                (intent-ap-r--c ?a ?p ?s ?c)
                 (intent-ap-r--- ?a ?p ?s)
+                (intent-ap--l-c ?a ?p ?l ?c)
+                (intent-ap----c ?a ?p ?c)
                 (intent-ap----- ?a ?p)
+                (intent-a-rrl-- ?a ?r ?s ?l)
+                (intent-a-r-l-c ?a ?r ?l ?c)
+                (intent-a-r---c ?a ?r ?c)
             )
         )
     )
@@ -1173,25 +1161,171 @@
     
 )
 
+; --------- TRIGGER ACTION(s) ENABLING DEBUGGING ACTIONS
+(:action debugtrigger
+    :parameters (?a - actor ?r1 ?r2 ?r3 - resource ?l - location ?c - resourceClassType)
+    :precondition (and 
+        (debugRemoveUnusedCommitments)
+        (fulfillment-aprrl-- consume ?a ?a ?r1 ?l)
+        (fulfillment-aprrl-- use ?a ?a ?r2 ?l)
+        (fulfillment-aprrl-c produce ?a ?a ?r3 ?l ?c)
+    )
+    :effect (and 
+        (debugRemoveUnusedCommitments)
+        (debugRemoveUnusedIntents)
+    )
+)
 
-; ; ----------- DEBUGGING ACTIONS
-; ; ; help to spot predicates that have to be removed in order to reach the standard goal
-; (:action remove_unused_intent
-;     :parameters (?a - action ?p ?r - actor ?s - resource ?l - location)
-;     :precondition 
-;         (intent-aprrl-- ?a ?p ?r ?s ?l)
-;     :effect 
-;         (not (intent-aprrl-- ?a ?p ?r ?s ?l))
-    
-; )
 
-; (:action remove_unused_commitment
-;     :parameters (?a - action ?p ?r - actor ?s - resource ?l - location)
-;     :precondition 
-;         (commitment-aprrl-- ?a ?p ?r ?s ?l)
-;     :effect 
-;         (not (commitment-aprrl-- ?a ?p ?r ?s ?l))
-    
-; )
+; ----------- DEBUGGING ACTIONS
+; help to spot predicates that have to be removed in order to reach the standard goal
+(:action remove_unused_intent
+    :parameters (?a - action ?p ?r - actor ?s - resource ?l ?t - location)
+    :precondition 
+        (and
+            (debugRemoveUnusedIntents)
+            (or
+                (intent-aprrlt- ?a ?p ?r ?s ?l ?t)
+                (intent-apr-lt- ?a ?p ?r ?l ?t)
+            )
+        )
+    :effect 
+        (and
+            (not (intent-aprrlt- ?a ?p ?r ?s ?l ?t))
+            (not (intent-apr-lt- ?a ?p ?r ?l ?t))
+        )
+
+)
+
+(:action remove_unused_intent
+    :parameters (?a - action ?p ?r - actor ?s - resource ?l - location ?c - resourceClassType)
+    :precondition 
+        (and
+            (debugRemoveUnusedIntents)
+            (or
+                (intent-aprrl-c ?a ?p ?r ?s ?l ?c)
+                (intent-ap-r--c ?a ?p ?s ?c)
+            )
+        )
+    :effect 
+        (and
+            (not (intent-aprrl-c ?a ?p ?r ?s ?l ?c))
+            (not (intent-ap-r--c ?a ?p ?s ?c))
+        )
+
+)
+
+
+
+(:action remove_unused_intent
+    :parameters (?a - action ?p ?r - actor ?s - resource ?c - resourceClassType)
+    :precondition 
+        (and
+            (debugRemoveUnusedIntents)
+            (or
+                (intent-aprrl-c ?a ?p ?r ?s ?l ?c)
+                (intent-ap-r--c ?a ?p ?s ?c)
+            )
+        )
+    :effect 
+        (and
+            (not (intent-aprrl-c ?a ?p ?r ?s ?l ?c))
+            (not (intent-ap-r--c ?a ?p ?s ?c))
+        )
+
+)
+
+(:action remove_unused_intent
+    :parameters (?a - action ?p ?r - actor ?c - resourceClassType)
+    :precondition 
+        (and
+            (debugRemoveUnusedIntents)
+            (or
+                (intent-apr---c ?a ?p ?r ?c)
+                (intent-a-r---c ?a ?r ?c)
+                (intent-ap----c ?a ?p ?c)
+            )
+        )
+    :effect 
+        (and
+            (not (intent-apr---c ?a ?p ?r ?c))
+            (not (intent-a-r---c ?a ?r ?c))
+            (not (intent-ap----c ?a ?p ?c))
+        )
+
+)
+
+
+(:action remove_unused_intent
+    :parameters (?a - action ?p ?r - actor ?l - location ?c - resourceClassType)
+    :precondition 
+        (and
+            (debugRemoveUnusedIntents)
+            (or
+                (intent-apr-l-c ?a ?p ?r ?l ?c)
+                (intent-ap--l-c ?a ?p ?l ?c)
+                (intent-a-r-l-c ?a ?r ?l ?c)
+            )
+        )
+    :effect 
+        (and
+            (not (intent-apr-l-c ?a ?p ?r ?l ?c))
+            (not (intent-ap--l-c ?a ?p ?l ?c))
+            (not (intent-a-r-l-c ?a ?r ?l ?c))
+        )
+
+)
+
+(:action remove_unused_intent
+    :parameters (?a - action ?p ?r - actor ?s - resource ?l - location )
+    :precondition 
+        (and
+            (debugRemoveUnusedIntents)
+            (or
+                (intent-aprrl-- ?a ?p ?r ?s ?l)
+                (intent-aprr--- ?a ?p ?r ?s) 
+                (intent-apr-l-- ?a ?p ?r ?l)
+                (intent-ap-rl-- ?a ?p ?s ?l)
+                (intent-a-rrl-- ?a ?r ?s ?l)
+                (intent-apr---- ?a ?p ?r)
+                (intent-ap-r--- ?a ?p ?s)
+                (intent-ap----- ?a ?p)
+            )
+        )
+    :effect 
+        (and
+            (not (intent-aprrl-- ?a ?p ?r ?s ?l))
+            (not (intent-aprr--- ?a ?p ?r ?s) )
+            (not (intent-apr-l-- ?a ?p ?r ?l))
+            (not (intent-ap-rl-- ?a ?p ?s ?l))
+            (not (intent-a-rrl-- ?a ?r ?s ?l))
+            (not (intent-apr---- ?a ?p ?r))
+            (not (intent-ap-r--- ?a ?p ?s))
+            (not (intent-ap----- ?a ?p))
+        )
+
+)
+
+(:action remove_unused_commitment
+    :parameters (?a - action ?p ?r - actor ?s - resource ?l ?t - location ?c - resourceClassType)
+    :precondition 
+        (and
+            (debugRemoveUnusedCommitments)
+            (or
+                (commitment-aprrltc ?a ?p ?r ?s ?l ?t ?c)
+                (commitment-aprrlt- ?a ?p ?r ?s ?l ?t)
+                (commitment-aprrl-- ?a ?p ?r ?s ?l)
+                (commitment-aprrl-c ?a ?p ?r ?s ?l ?c)
+            )
+        )
+    :effect 
+        (and
+            (not (commitment-aprrltc ?a ?p ?r ?s ?l ?t ?c))
+            (not (commitment-aprrlt- ?a ?p ?r ?s ?l ?t))
+            (not (commitment-aprrl-- ?a ?p ?r ?s ?l))
+            (not (commitment-aprrl-c ?a ?p ?r ?s ?l ?c))
+        )
+
+)
 
 )

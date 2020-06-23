@@ -2,11 +2,12 @@
     (problem simple-move) 
     (:domain valueflows)
 (:objects 
-    Wien Rossatz Krems - location
-    Claudia Alice Bob - actor
-    Truck1 - truck
-    GrannySmith  Applestrudel  Raisins Oven - resourceClassType
-    Apples raisins1 oven1 thing1 strudel1 - resource
+    Wien Rossatz Krems Gedersdorf - location
+    Claudia Alice Bob Rolf Maria - actor
+    truck1 - truck
+    car1 - car
+    GrannySmith Applestrudel Raisins Oven - resourceClassType
+    apples1 raisins1 oven1 thing1 strudel1 - resource
     applestrudelProcess - recipeProcess
     consumeApples consumeRaisins useOven produceApplestrudel - recipeFlow
 )
@@ -24,19 +25,31 @@
     (recipeFlowDef produceApplestrudel produce Applestrudel)
 
     (currentLocation Alice Rossatz)
-    (currentLocation Apples Rossatz)
-    (resourceClassification Apples GrannySmith)
-    (custodian Apples Alice)
-    (primaryAccountable Apples Alice)  
+    (currentLocation apples1 Rossatz)
+    (resourceClassification apples1 GrannySmith)
+    (custodian apples1 Alice)
+    (primaryAccountable apples1 Alice)  
 
     (persistent-intent-ap--l-c transfer-custody Alice Rossatz GrannySmith) 
     (persistent-intent-ap--l-c transfer-all-rights Alice Rossatz GrannySmith) 
 
+    (currentLocation Rolf Gedersdorf)
+    (currentLocation truck1 Gedersdorf)
+    (custodian truck1 Rolf)
+    (primaryAccountable truck1 Rolf)
+    (isVehicle truck1)
+    (mayContainResources truck1)
+    (persistent-intent-ap-r--- lend Rolf truck1)
+
+    (currentLocation Maria Krems)
+    (currentLocation car1 Krems)
+    (custodian car1 Maria)
+    (isVehicle car1)
+    (mayContainActors car1)
+    (persistent-intent-ap-r--c deliver-service Maria car1 TaxiServiceClass)
+
+
     (currentLocation Claudia Krems)
-    (currentLocation Truck1 Krems)
-    (isVehicle Truck1)
-    (mayContainResources Truck1)
-    (custodian Truck1 Claudia)
     (persistent-intent-ap----c deliver-service Claudia TransportServiceClass)
 
     (currentLocation Bob Wien)
@@ -48,8 +61,6 @@
     (currentLocation oven1 Wien)
     (custodian oven1 Bob)
     (primaryAccountable oven1 Bob)
-
-
 
     (intent-apr---c consume Bob Bob Applestrudel)
 )

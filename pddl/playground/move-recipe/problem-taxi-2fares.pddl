@@ -16,10 +16,10 @@
     (persistent-intent-ap-r--c deliver-service Maria Car1 TaxiServiceClass)
 
     (currentlocation Claudia Horn)
-    (intent-apr-l-- travel Claudia Claudia Wien)
+    (intent-apr-lt- travel Claudia Claudia Horn Wien)
 
     (currentlocation Rolf Krems)
-    (intent-apr-l-- travel Rolf Rolf Linz)
+    (intent-apr-lt- travel Rolf Rolf Krems Linz)
     
 )
     
