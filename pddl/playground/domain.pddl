@@ -3,18 +3,21 @@
 (define (domain valueflows)
 
 
-(:requirements :adl :action-costs :typing)
+(:requirements :adl :action-costs :typing :derived-predicates)
 
 (:types 
     thing
-    resource - thing 
     actor - thing
-    vehicle - resource
+    resource - thing 
+    intangibleResource - resource
+    tangibleResource - resource
+    money - intangibleResource
+    vehicle - tangibleResource
     truck - vehicle
     car - vehicle
-    resourceClassType
     location
     action
+    resourceClassType
     vehicleClassType - resourceClassType
     serviceClassType - resourceClassType
     recipeProcess
@@ -27,6 +30,7 @@
     TaxiServiceClass - serviceClassType
     TruckClass - vehicleClassType
     CarClass - vehicleClassType
+    MoneyClass - resourceClassType
 )
 
 (:functions (total-cost - numeric))
@@ -43,64 +47,65 @@
     (recipeOutputOf ?process - recipeProcess ?flow - recipeFlow)
     (recipeFlowDef ?flow - recipeFlow ?action - action ?resourceClassType - resourceClassType)
     (problemSolved) ; set if problem is solved
-    (debugRemoveUnusedIntents) ; trigger for debugging actions
-    (debugRemoveUnusedCommitments)
+    (debug) ;trigger for removing intents and commitments
+    (debugRemoveUnusedIntents) ; trigger for removing intents
+    (debugRemoveUnusedCommitments); trigger for removing commitments
+    (providesService ?actor - actor ?serviceClass - serviceClassType)
 
     (intent-aprrltc ?action - action ?provider ?receiver - actor ?r - resource ?l ?t - location ?c - resourceClassType)
-    (intent-aprrl-c ?action - action ?provider ?receiver - actor ?r - resource ?l - location ?c - resourceClassType)
-    (intent-apr---c ?action - action ?provider ?receiver - actor ?c - resourceClassType)
-    (intent-ap-r--c ?action - action ?provider - actor ?r - resource ?c - resourceClassType)
-    (intent-apr-l-c ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClassType)    
-    (intent-ap--l-c ?action - action ?provider - actor ?l - location ?c - resourceClassType)
-    (intent-a-r-l-c ?action - action ?receiver - actor ?l - location ?c - resourceClassType)
-    (intent-a-r---c ?action - action ?receiver - actor ?c - resourceClassType)
-    (intent-ap----c ?action - action ?provider - actor ?c - resourceClassType)
-    (intent-ap----c ?action - action ?provider - actor ?c - resourceClassType)
-    (intent-aprrl-- ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
     (intent-aprrlt- ?action - action ?provider ?receiver - actor ?r - resource ?l ?t - location)
+    (intent-aprrl-c ?action - action ?provider ?receiver - actor ?r - resource ?l - location ?c - resourceClassType)
+    (intent-aprrl-- ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
+    (intent-apr-lt- ?action - action ?provider ?receiver - actor ?l ?t - location)    
+    (intent-apr-l-c ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClassType)    
     (intent-aprr--- ?action - action ?provider ?receiver - actor ?r - resource)
     (intent-apr-l-- ?action - action ?provider ?receiver - actor ?l - location)    
-    (intent-apr-lt- ?action - action ?provider ?receiver - actor ?l ?t - location)    
+    (intent-apr---c ?action - action ?provider ?receiver - actor ?c - resourceClassType)
     (intent-ap-rl-- ?action - action ?provider - actor ?r - resource ?l - location)
+    (intent-ap-r--c ?action - action ?provider - actor ?r - resource ?c - resourceClassType)
+    (intent-ap--l-c ?action - action ?provider - actor ?l - location ?c - resourceClassType)
     (intent-a-rrl-- ?action - action ?receiver - actor ?r - resource ?l - location)
-    (intent-a-rr--- ?action - action ?receiver - actor ?r - resource)
+    (intent-a-r-l-c ?action - action ?receiver - actor ?l - location ?c - resourceClassType)
     (intent-apr---- ?action - action ?provider ?receiver - actor )
     (intent-ap-r--- ?action - action ?provider - actor ?r - resource)
+    (intent-ap----c ?action - action ?provider - actor ?c - resourceClassType)
+    (intent-a-rr--- ?action - action ?receiver - actor ?r - resource)
+    (intent-a-r---c ?action - action ?receiver - actor ?c - resourceClassType)
     (intent-ap----- ?action - action ?provider - actor)
 
 
 
     (persistent-intent-aprrltc ?action - action ?provider ?receiver - actor ?r - resource ?l ?t - location ?c - resourceClassType)
-    (persistent-intent-aprrl-c ?action - action ?provider ?receiver - actor ?r - resource ?l - location ?c - resourceClassType)
-    (persistent-intent-apr---c ?action - action ?provider ?receiver - actor ?c - resourceClassType)
-    (persistent-intent-ap-r--c ?action - action ?provider - actor ?r - resource ?c - resourceClassType)
-    (persistent-intent-apr-l-c ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClassType)    
-    (persistent-intent-ap--l-c ?action - action ?provider - actor ?l - location ?c - resourceClassType)
-    (persistent-intent-a-r-l-c ?action - action ?receiver - actor ?l - location ?c - resourceClassType)
-    (persistent-intent-a-r---c ?action - action ?receiver - actor ?c - resourceClassType)
-    (persistent-intent-ap----c ?action - action ?provider - actor ?c - resourceClassType)
-    (persistent-intent-aprrl-- ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
     (persistent-intent-aprrlt- ?action - action ?provider ?receiver - actor ?r - resource ?l ?t - location)
-    (persistent-intent-aprr--- ?action - action ?provider ?receiver - actor ?r - resource )
-    (persistent-intent-a-rr--- ?action - action ?receiver - actor ?r - resource)
-    (persistent-intent-apr-l-- ?action - action ?provider ?receiver - actor ?l - location )    
+    (persistent-intent-aprrl-c ?action - action ?provider ?receiver - actor ?r - resource ?l - location ?c - resourceClassType)
+    (persistent-intent-aprrl-- ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
     (persistent-intent-apr-lt- ?action - action ?provider ?receiver - actor ?l ?t - location)        
+    (persistent-intent-apr-l-c ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClassType)    
+    (persistent-intent-aprr--- ?action - action ?provider ?receiver - actor ?r - resource )
+    (persistent-intent-apr---c ?action - action ?provider ?receiver - actor ?c - resourceClassType)
+    (persistent-intent-apr-l-- ?action - action ?provider ?receiver - actor ?l - location )    
     (persistent-intent-ap-rl-- ?action - action ?provider - actor ?r - resource ?l - location )
+    (persistent-intent-ap-r--c ?action - action ?provider - actor ?r - resource ?c - resourceClassType)
+    (persistent-intent-ap--l-c ?action - action ?provider - actor ?l - location ?c - resourceClassType)
     (persistent-intent-a-rrl-- ?action - action ?receiver - actor ?r - resource ?l - location )
+    (persistent-intent-a-r-l-c ?action - action ?receiver - actor ?l - location ?c - resourceClassType)
     (persistent-intent-apr---- ?action - action ?provider ?receiver - actor )
     (persistent-intent-ap-r--- ?action - action ?provider - actor ?r - resource )
+    (persistent-intent-ap----c ?action - action ?provider - actor ?c - resourceClassType)
     (persistent-intent-ap----- ?action - action ?provider - actor )
+    (persistent-intent-a-rr--- ?action - action ?receiver - actor ?r - resource)
+    (persistent-intent-a-r---c ?action - action ?receiver - actor ?c - resourceClassType)
 
     (commitment-aprrltc ?action - action ?provider ?receiver - actor ?s - resource ?l ?t - location ?c - resourceClassType)
-    (commitment-aprrl-c ?action - action ?provider ?receiver - actor ?s - resource ?l - location ?c - resourceClassType)
     (commitment-aprrlt- ?action - action ?provider ?receiver - actor ?r - resource ?l ?t - location)
+    (commitment-aprrl-c ?action - action ?provider ?receiver - actor ?s - resource ?l - location ?c - resourceClassType)
     (commitment-aprrl-- ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
-    ;(commitment--c- ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClassType)
+    (commitment-aprr--- ?action - action ?provider ?receiver - actor ?r - intangibleResource)
     (fulfillment-aprrltc ?action - action ?provider ?receiver - actor ?r - resource ?l ?t - location ?c - resourceClassType)
-    (fulfillment-aprrl-c ?action - action ?provider ?receiver - actor ?r - resource ?l - location ?c - resourceClassType)
     (fulfillment-aprrlt- ?action - action ?provider ?receiver - actor ?r - resource ?l ?t - location)    
+    (fulfillment-aprrl-c ?action - action ?provider ?receiver - actor ?r - resource ?l - location ?c - resourceClassType)
     (fulfillment-aprrl-- ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
-    ;(fulfillment--c- ?action - action ?provider ?receiver - actor ?l - location ?c - resourceClassType)
+    (fulfillment-aprr--- ?action - action ?provider ?receiver - actor ?r - resource)
     (using ?a - actor ?r - resource) ; a is using r
     (isCarryable ?r - resource) ; an actor can move the resource
     (isVehicle ?r - resource) ; r is a vehicle
@@ -109,25 +114,6 @@
     (mayContainActors ?a - actor) ; a means of person transport
     (containedIn ?rinside - thing ?rcontainer - resource) ; rinside is inside rcontainer
 )
-
-; commit: turn an intent into a commitment
-
-; ; Turns out this is not needed (yet), as intents for deliver-service are not
-; ; directly committed to.
-; ; 
-; ; special case: commit without matching a resource to the class. Allowed so we can 
-; ; deliver-service .. TransportServiceClass. If we did not allow this, we would have
-; ; to 'produce' an resource of type TransportService each time. (which is another way of doing it)
-; (:action commit--c 
-;     :parameters (?action - action ?provider ?receiver - actor ?location - location ?c - resourceClassType)
-;     :precondition 
-;         (intent-apr-l-c ?action ?provider ?receiver ?location ?c)
-;     :effect (and
-;         (commitment--c- ?action ?provider ?receiver ?location ?c)
-;         (not (intent-apr-l-c ?action ?provider ?receiver ?location ?c))
-;     )
-; )
-
 
 (:action commit-aprrlt- 
     :parameters (?action - action ?provider ?receiver - actor ?resource - resource ?location ?toLocation - location)
@@ -193,6 +179,21 @@
     )
 )
 
+(:action commit-aprr---
+    :parameters (?action - action ?provider ?receiver - actor ?resource - intangibleResource)
+    :precondition (or
+        (intent-aprr--- ?action ?provider ?receiver ?resource)
+        (and 
+            (intent-ap-r--- ?action ?provider ?resource)
+            (intent-a-rr--- ?action ?receiver ?resource)
+        )
+    )
+    :effect (and
+        (commitment-aprr--- ?action ?provider ?receiver ?resource)
+        (not (intent-aprr--- ?action ?provider ?receiver ?resource))
+        (increase (total-cost) 1)
+    )
+)
 
 ; create an intent from an persistent-intent
 
@@ -445,6 +446,7 @@
     :effect (and
         (intent-a-rrl-- ?action ?receiver ?resource ?l)
         (not (intent-a-r-l-c ?action ?receiver ?l ?c))
+        (increase (total-cost) 1)
     )
 )
 
@@ -457,6 +459,7 @@
     :effect (and
         (intent-a-rr--- ?action ?receiver ?resource)
         (not (intent-a-r---c ?action ?receiver ?c))
+        (increase (total-cost) 1)
     )
 )
 
@@ -469,6 +472,7 @@
     :effect (and
         (intent-ap-rl-- ?action ?provider ?resource ?l)
         (not (intent-ap--l-c ?action ?provider ?l ?c ))
+        (increase (total-cost) 1)
     )
 )
 
@@ -481,6 +485,7 @@
     :effect (and
         (intent-aprrl-- ?action ?provider ?receiver ?resource ?l)    
         (not (intent-apr-l-c ?action ?provider ?receiver ?l ?c))
+        (increase (total-cost) 1)
     )
 )
 
@@ -493,6 +498,7 @@
     :effect (and
         (intent-aprr--- ?action ?provider ?receiver ?resource)    
         (not (intent-apr---c ?action ?provider ?receiver ?c))
+        (increase (total-cost) 1)
     )
 )
 
@@ -505,6 +511,93 @@
     :effect (and
         (intent-ap-r--- ?action ?provider ?resource)
         (not (intent-ap----c ?action ?provider ?c))
+        (increase (total-cost) 1)
+    )
+)
+
+(:action match-resource-a-r---c
+    :parameters (?action - action ?receiver - actor ?resource - resource ?c - resourceClassType)
+    :precondition (and 
+        (resourceClassification ?resource ?c)
+        (intent-a-r---c ?action ?receiver ?c)
+    )
+    :effect (and
+        (intent-a-rr--- ?action ?receiver ?resource)
+        (not (intent-a-r---c ?action ?receiver ?c))
+        (increase (total-cost) 1)
+    )
+)
+
+;------------------------------------------------------------------------------
+;
+;                    MATCH LOCATIONS
+;
+;------------------------------------------------------------------------------
+; turn an intent without a location into an intent with a location based on the other bound variables
+
+(:action match-location-a-rr---
+    :parameters (?action - action ?receiver - actor ?resource - resource ?location - location)
+    :precondition (and 
+        (currentLocation ?receiver ?location)
+        (intent-a-rr--- ?action ?receiver ?resource)
+    )
+    :effect (and
+        (intent-a-rrl-- ?action ?receiver ?resource ?location)
+        (not (intent-a-rr--- ?action ?receiver ?resource))
+        (increase (total-cost) 1)
+    )
+)
+
+
+(:action match-location-ap-r---
+    :parameters (?action - action ?provider - actor ?resource - resource ?location - location)
+    :precondition (and 
+        (currentLocation ?provider ?location)
+        (intent-ap-r--- ?action ?provider ?resource)
+    )
+    :effect (and
+        (intent-ap-rl-- ?action ?provider ?resource ?location)
+        (not (intent-ap-r--- ?action ?provider ?resource))
+        (increase (total-cost) 1)
+    )
+)
+
+(:action match-location-prov-aprr---
+    :parameters (?action - action ?provider ?receiver - actor ?resource - resource ?location - location)
+    :precondition (and 
+        (currentLocation ?provider ?location)
+        (intent-aprr--- ?action ?provider ?receiver ?resource)
+    )
+    :effect (and
+        (intent-aprrl-- ?action ?provider ?receiver ?resource ?location)
+        (not (intent-aprr--- ?action ?provider ?receiver ?resource))
+        (increase (total-cost) 1)
+    )
+)
+
+(:action match-location-recv-aprr---
+    :parameters (?action - action ?provider ?receiver - actor ?resource - resource ?location - location)
+    :precondition (and 
+        (currentLocation ?receiver ?location)
+        (intent-aprr--- ?action ?provider ?receiver ?resource)
+    )
+    :effect (and
+        (intent-aprrl-- ?action ?provider ?receiver ?resource ?location)
+        (not (intent-aprr--- ?action ?provider ?receiver ?resource))
+        (increase (total-cost) 1)
+    )
+)
+
+(:action match-location-res-aprr---
+    :parameters (?action - action ?provider ?receiver - actor ?resource - resource ?location - location)
+    :precondition (and 
+        (currentLocation ?resource ?location)
+        (intent-aprr--- ?action ?provider ?receiver ?resource)
+    )
+    :effect (and
+        (intent-aprrl-- ?action ?provider ?receiver ?resource ?location)
+        (not (intent-aprr--- ?action ?provider ?receiver ?resource))
+        (increase (total-cost) 1)
     )
 )
 
@@ -514,7 +607,7 @@
 ;
 ;------------------------------------------------------------------------------
 
-(:action recipe-travel-to-intent-location
+(:action pattern-travel-to-intent-location
     :parameters (?actor - actor ?fromLocation ?toLocation - location)
     :precondition (and 
         (exists (?action - action ?otherActor - actor ?resource - resource ) 
@@ -536,7 +629,7 @@
     )
 )
 
-(:action recipe-drive
+(:action pattern-drive
     :parameters (?driver - actor ?car - vehicle ?fromLocation ?toLocation - location)
     :precondition (and 
         (not (= ?fromLocation ?toLocation))
@@ -553,7 +646,7 @@
     )
 )
 
-(:action recipe-taxi
+(:action pattern-taxi
     :parameters (?driver ?passenger - actor  ?car - resource ?fromLocation ?toLocation - location)
     :precondition (and 
         (not (= ?fromLocation ?toLocation))
@@ -577,8 +670,8 @@
     )
 )
 
-(:action recipe-transport
-    :parameters (?transporter ?consignor ?consignee - actor  ?truck ?consignment - resource ?fromLocation ?toLocation - location)
+(:action pattern-transport
+    :parameters (?transporter ?consignor ?consignee ?contractee - actor  ?truck ?consignment - resource ?fromLocation ?toLocation - location)
     :precondition (and 
         (not (= ?fromLocation ?toLocation))
         (not (= ?consignor ?consignee))
@@ -591,23 +684,22 @@
         (or 
             (intent-ap-r--c deliver-service ?transporter ?truck TransportServiceClass)
             (intent-ap----c deliver-service ?transporter TransportServiceClass)
+            (intent-apr---c deliver-service ?transporter ?contractee TransportServiceClass)
         )
-        (intent-ap-rl-- transfer-custody ?consignor ?consignment ?fromLocation )
-        (intent-a-rrl-- transfer-custody ?consignee ?consignment ?toLocation )
+        (and 
+            (intent-aprrl-- transfer-custody ?consignor ?transporter ?consignment ?fromLocation )
+            (intent-aprrl-- transfer-custody ?transporter ?consignee ?consignment ?toLocation )
+        )
     )
     :effect (and 
-        (intent-aprrl-- transfer-custody ?consignor ?transporter ?consignment ?fromLocation)
         (intent-aprrlt- move ?transporter ?transporter ?truck ?fromLocation ?toLocation)
-        (intent-aprrl-- transfer-custody ?transporter ?consignee ?consignment ?toLocation)
         (not (intent-ap-r--c deliver-service ?transporter ?truck TransportServiceClass))
         (not (intent-ap----c deliver-service ?transporter TransportServiceClass))
-        (not (intent-ap-rl-- transfer-custody ?consignor ?consignment ?fromLocation ))
-        (not (intent-a-rrl-- transfer-custody ?consignee ?consignment ?toLocation ))
         (increase (total-cost) 1)
     )
 )
 
-(:action recipe-borrow
+(:action pattern-borrow
     :parameters (?lender ?borrower - actor ?resource - resource ?location - location)
     :precondition (and 
         (primaryAccountable ?resource ?lender)
@@ -638,7 +730,7 @@
     )
 )
 
-(:action recipe-intend-to-use 
+(:action pattern-intend-to-use 
     :parameters (?a - actor ?r - resource ?l - location)
     :precondition (and
         
@@ -655,11 +747,12 @@
     )
     :effect ( and
         (intent-aprrl-- use ?a ?a ?r ?l)
+        (increase (total-cost) 1)
     )
 )
 
 
-(:action recipe-request-resource-for-use
+(:action pattern-request-resource-for-use
     :parameters (?a - actor ?l - location ?c - resourceClassType)
     :precondition (and
         (or 
@@ -685,7 +778,7 @@
 )
 
 
-(:action recipe-request-resource
+(:action pattern-request-resource-by-class
     :parameters (?a - actor ?l - location ?c - resourceClassType)
     :precondition (and
         (or 
@@ -697,15 +790,61 @@
         )
     )
     :effect (and
-            (intent-a-r-l-c transfer-custody ?a ?l ?c)
-            (intent-a-r---c transfer-all-rights ?a ?c)
+            (intent-a-r-l-c transfer ?a ?l ?c)
             (increase (total-cost) 1)
+    )
+)
+
+(:action pattern-request-resource
+    :parameters (?a - actor ?r - resource)
+    :precondition (or
+        (intent-aprr--- consume ?a ?a ?r)
+        (exists (?l - location)
+            (intent-aprrl-- consume ?a ?a ?r ?l)
+        )
+    )
+    :effect (and
+            (intent-a-rr--- transfer ?a ?r)
+            (increase (total-cost) 1)
+    )
+)
+
+(:action pattern-sell-resource
+    :parameters(?seller ?buyer - actor ?resource - resource ?price - money)
+    :precondition (and 
+        (primaryAccountable ?price ?buyer)
+        (custodian ?price ?buyer)
+        (primaryAccountable ?resource ?seller)
+        (intent-a-rr--- transfer ?seller ?price)
+        (intent-a-rr--- transfer ?buyer ?resource)
+    )
+    :effect (and
+        (not (intent-a-rr--- transfer ?seller ?price))
+        (intent-aprr--- transfer ?buyer ?seller ?price)
+        (intent-aprr--- transfer ?seller ?buyer ?resource)
+        (increase (total-cost) 1)
+    )
+)
+
+(:action pattern-sell-service
+    :parameters(?seller ?buyer - actor ?price - money ?serviceClass - serviceClassType)
+    :precondition (and 
+        (primaryAccountable ?price ?buyer)
+        (custodian ?price ?buyer)
+        (intent-a-rr--- transfer ?seller ?price)
+        (providesService ?seller ?serviceClass)
+    )
+    :effect (and
+        (not (intent-a-rr--- transfer ?seller ?price)) 
+        (intent-aprr--- transfer ?buyer ?seller ?price)
+        (intent-apr---c deliver-service ?seller ?buyer ?serviceClass)
+        (increase (total-cost) 1)
     )
 )
 
 
 ; simple version: one process that combines all ingredients/constituents
-(:action recipe-process-inputs 
+(:action pattern-process-inputs 
     :parameters (?process - recipeProcess ?a - actor ?r - resource ?l - location ?c - resourceClassType)
     :precondition (and 
         (potentialResource ?r)
@@ -747,7 +886,7 @@
     )
 )
 
-(:action recipe-process-outputs
+(:action pattern-process-outputs
     :parameters (?process - recipeProcess ?a - actor ?r - resource ?l - location)
     :precondition (and 
         (potentialResource ?r)
@@ -793,21 +932,154 @@
     )
 )
 
-(:action recipe-consume-at-location
-    :parameters (?a - actor ?r - resource ?l - location )
-    :precondition (and
-        (intent-aprr--- consume ?a ?a ?r)
-        (custodian ?r ?a )
-        (primaryAccountable ?r ?a)
-        (currentLocation ?a ?l)
-        (currentLocation ?r ?l)
-    )
+
+(:action pattern-split-transfer-a-r-l-c
+    :parameters (?receiver - actor ?location - location ?class - resourceClassType)
+    :precondition (intent-a-r-l-c transfer ?receiver ?location ?class)
     :effect (and
-        (not (intent-aprr--- consume ?a ?a ?r))
-        (intent-aprrl-- consume ?a ?a ?r ?l)
+        (not (intent-a-r-l-c transfer ?receiver ?location ?class))
+        (intent-a-r-l-c transfer-custody ?receiver ?location ?class)
+        (intent-a-r-l-c transfer-all-rights ?receiver ?location ?class)
         (increase (total-cost) 1)
     )
 )
+
+(:action pattern-split-transfer-aprr---
+    :parameters (?provider ?receiver - actor ?resource - resource)
+    :precondition (intent-aprr--- transfer ?provider ?receiver ?resource )
+    :effect (and
+        (not (intent-aprr--- transfer ?provider ?receiver ?resource ))
+        (intent-aprr--- transfer-custody ?provider ?receiver ?resource )
+        (intent-aprr--- transfer-all-rights ?provider ?receiver ?resource)
+        (increase (total-cost) 1)
+    )
+)
+
+
+(:action pattern-split-transfer--rrl--
+    :parameters (?receiver - actor ?resource - resource ?location - location)
+    :precondition  
+        (intent-a-rrl-- transfer ?receiver ?resource ?location)
+    :effect (and
+        (not (intent-a-rrl-- transfer ?receiver ?resource ?location))
+        (intent-a-rrl-- transfer-custody ?receiver ?resource ?location)
+        (intent-a-rrl-- transfer-all-rights ?receiver ?resource ?location)
+        (increase (total-cost) 1)
+    )
+)
+
+(:action pattern-split-transfer-p-rl--
+    :parameters (?provider - actor ?resource - resource ?location - location)
+    :precondition  
+        (intent-ap-rl-- transfer ?provider ?resource ?location)
+    :effect (and
+        (not (intent-ap-rl-- transfer ?provider ?resource ?location))
+        (intent-ap-rl-- transfer-custody ?provider ?resource ?location)
+        (intent-ap-rl-- transfer-all-rights ?provider ?resource ?location)
+        (increase (total-cost) 1)
+    )
+)
+
+(:action pattern-split-transfer-TAR-loc-unrestricted-a-r-l-c
+    :parameters (?receiver - actor ?location - location ?class - resourceClassType)
+    :precondition (intent-a-r-l-c transfer ?receiver ?location ?class)
+    :effect (and
+        (not (intent-a-r-l-c transfer ?receiver ?location ?class))
+        (intent-a-r-l-c transfer-custody ?receiver ?location ?class)
+        (intent-a-r---c transfer-all-rights ?receiver ?class)
+        (increase (total-cost) 1)
+    )
+)
+
+(:action pattern-split-transfer-TAR-loc-unrestricted--rrl--
+    :parameters (?receiver - actor ?resource - resource ?location - location)
+    :precondition  
+        (intent-a-rrl-- transfer ?receiver ?resource ?location)
+    :effect (and
+        (not (intent-a-rrl-- transfer ?receiver ?resource ?location))
+        (intent-a-rrl-- transfer-custody ?receiver ?resource ?location)
+        (intent-a-rr--- transfer-all-rights ?receiver ?resource)
+        (increase (total-cost) 1)
+    )
+)
+
+(:action pattern-split-transfer-TAR-loc-unrestricted-p-rl--
+    :parameters (?provider - actor ?resource - resource ?location - location)
+    :precondition  
+        (intent-ap-rl-- transfer ?provider ?resource ?location)
+    :effect (and
+        (not (intent-ap-rl-- transfer ?provider ?resource ?location))
+        (intent-ap-rl-- transfer-custody ?provider ?resource ?location)
+        (intent-ap-r--- transfer-all-rights ?provider ?resource)
+        (increase (total-cost) 1)
+    )
+)
+
+
+
+
+
+
+(:action pattern-split-transfer-a-r---c
+    :parameters (?receiver - actor ?class - resourceClassType)
+    :precondition (intent-a-r---c transfer ?receiver ?class)
+    :effect (and
+        (not (intent-a-r---c transfer ?receiver ?class))
+        (intent-a-r---c transfer-custody ?receiver ?class)
+        (intent-a-r---c transfer-all-rights ?receiver ?class)
+        (increase (total-cost) 1)
+    )
+)
+
+(:action pattern-split-transfer-aprr---
+    :parameters (?provider ?receiver - actor ?resource - resource)
+    :precondition (intent-aprr--- transfer ?provider ?receiver ?resource )
+    :effect (and
+        (not (intent-aprr--- transfer ?provider ?receiver ?resource ))
+        (intent-aprr--- transfer-custody ?provider ?receiver ?resource )
+        (intent-aprr--- transfer-all-rights ?provider ?receiver ?resource)
+        (increase (total-cost) 1)
+    )
+)
+
+(:action pattern-split-transfer--rr---
+    :parameters (?receiver - actor ?resource - resource)
+    :precondition  
+        (intent-a-rr--- transfer ?receiver ?resource)
+    :effect (and
+        (not (intent-a-rr--- transfer ?receiver ?resource))
+        (intent-a-rr--- transfer-custody ?receiver ?resource)
+        (intent-a-rr--- transfer-all-rights ?receiver ?resource)
+        (increase (total-cost) 1)
+    )
+)
+
+(:action pattern-split-transfer-p-r---
+    :parameters (?provider - actor ?resource - resource)
+    :precondition  
+        (intent-ap-r--- transfer ?provider ?resource)
+    :effect (and
+        (not (intent-ap-r--- transfer ?provider ?resource))
+        (intent-ap-r--- transfer-custody ?provider ?resource)
+        (intent-ap-r--- transfer-all-rights ?provider ?resource)
+        (increase (total-cost) 1)
+    )
+)
+
+(:action pattern-split-transfer-custody-aprr---
+    :parameters (?provider ?intermediate ?receiver - actor ?resource - resource)
+    :precondition (and
+        (intent-aprr--- transfer-custody ?provider ?receiver ?resource )
+        )
+    :effect (and
+        (not (intent-aprr--- transfer-custody ?provider ?receiver ?resource ))
+        (intent-aprr--- transfer-custody ?provider ?intermediate ?resource )
+        (intent-aprr--- transfer-custody ?intermediate ?receiver ?resource)
+        (increase (total-cost) 1)
+    )
+)
+
+
 
 
 ;------------------------------------------------------------------------------
@@ -1082,7 +1354,10 @@
             (primaryAccountable ?r ?provider)
             (not (isPassive ?provider))
             (not (isPassive ?receiver)) ;questionable
-            (currentLocation ?provider ?l)
+            (or 
+                (currentLocation ?provider ?l)
+                (currentLocation ?receiver ?l)
+            )
             (commitment-aprrl-- transfer-all-rights ?provider ?receiver ?r ?l) 
         )
     :effect 
@@ -1122,6 +1397,36 @@
 )
 
 
+(:action event-transfer-intangible
+    :parameters (?provider - actor ?receiver - actor ?r - intangibleResource)
+    :precondition 
+        ( and 
+            (not (isPassive ?provider))
+            (not (isPassive ?receiver))
+            (custodian ?r ?provider)
+            (primaryAccountable ?r ?provider)
+            (commitment-aprr--- transfer ?provider ?receiver ?r) 
+        )
+    :effect 
+        ( and
+            (not(primaryAccountable ?r ?provider))
+            (not (custodian ?r ?provider))
+            (primaryAccountable ?r ?receiver)
+            (custodian ?r ?receiver)            
+            (fulfillment-aprr--- transfer ?provider ?receiver ?r) 
+            (not (commitment-aprr--- transfer ?provider ?receiver ?r ) )
+            (increase (total-cost) 1)
+        )
+)
+
+;------------------------------------------------------------------------------
+;
+;                    GOAL STATE
+;
+;------------------------------------------------------------------------------
+; we define our goal in general terms: no intents or commitments must be left over
+; this trick allows us to use the same goal in all situations
+
 (:action accept-solution
     :parameters ()
     :precondition
@@ -1130,26 +1435,28 @@
             (or
                 (commitment-aprrltc ?a ?p ?r ?s ?l ?t ?c)
                 (commitment-aprrlt- ?a ?p ?r ?s ?l ?t)
-                (commitment-aprrl-- ?a ?p ?r ?s ?l)
                 (commitment-aprrl-c ?a ?p ?r ?s ?l ?c)
+                (commitment-aprrl-- ?a ?p ?r ?s ?l)
+                (commitment-aprr--- ?a ?p ?r ?s)
+                (intent-aprrltc ?a ?p ?r ?s ?l ?t ?c)
                 (intent-aprrlt- ?a ?p ?r ?s ?l ?t)
                 (intent-aprrl-c ?a ?p ?r ?s ?l ?c)
                 (intent-aprrl-- ?a ?p ?r ?s ?l)
-                (intent-aprr--- ?a ?p ?r ?s) 
                 (intent-apr-lt- ?a ?p ?r ?l ?t)
                 (intent-apr-l-c ?a ?p ?r ?l ?c)
+                (intent-aprr--- ?a ?p ?r ?s) 
                 (intent-apr-l-- ?a ?p ?r ?l)
                 (intent-apr---c ?a ?p ?r ?c)
-                (intent-apr---- ?a ?p ?r)
                 (intent-ap-rl-- ?a ?p ?s ?l)
                 (intent-ap-r--c ?a ?p ?s ?c)
-                (intent-ap-r--- ?a ?p ?s)
                 (intent-ap--l-c ?a ?p ?l ?c)
-                (intent-ap----c ?a ?p ?c)
-                (intent-ap----- ?a ?p)
                 (intent-a-rrl-- ?a ?r ?s ?l)
                 (intent-a-r-l-c ?a ?r ?l ?c)
+                (intent-apr---- ?a ?p ?r)
+                (intent-ap-r--- ?a ?p ?s)
+                (intent-ap----c ?a ?p ?c)
                 (intent-a-r---c ?a ?r ?c)
+                (intent-ap----- ?a ?p)
             )
         )
     )
@@ -1161,14 +1468,24 @@
     
 )
 
+
+
+;------------------------------------------------------------------------------
+;
+;                    DEBUGGING
+;
+;------------------------------------------------------------------------------
+; 
+; if (debug) is set, these actions will remove intents, hopefully reaching a 
+; (problemSolved) state. In that case, the removal actions show up in the solution,
+; indicating that there are intents left over that hinder us from getting to 
+; the (problemSovled) state
+
 ; --------- TRIGGER ACTION(s) ENABLING DEBUGGING ACTIONS
 (:action debugtrigger
-    :parameters (?a - actor ?r1 ?r2 ?r3 - resource ?l - location ?c - resourceClassType)
+    :parameters ()
     :precondition (and 
-        (debugRemoveUnusedCommitments)
-        (fulfillment-aprrl-- consume ?a ?a ?r1 ?l)
-        (fulfillment-aprrl-- use ?a ?a ?r2 ?l)
-        (fulfillment-aprrl-c produce ?a ?a ?r3 ?l ?c)
+        (debug)
     )
     :effect (and 
         (debugRemoveUnusedCommitments)
@@ -1179,153 +1496,312 @@
 
 ; ----------- DEBUGGING ACTIONS
 ; help to spot predicates that have to be removed in order to reach the standard goal
-(:action remove_unused_intent
-    :parameters (?a - action ?p ?r - actor ?s - resource ?l ?t - location)
-    :precondition 
-        (and
-            (debugRemoveUnusedIntents)
-            (or
-                (intent-aprrlt- ?a ?p ?r ?s ?l ?t)
-                (intent-apr-lt- ?a ?p ?r ?l ?t)
-            )
-        )
-    :effect 
-        (and
-            (not (intent-aprrlt- ?a ?p ?r ?s ?l ?t))
-            (not (intent-apr-lt- ?a ?p ?r ?l ?t))
-        )
 
+(:action remove-intent-aprrltc 
+    :parameters (?action - action ?provider ?receiver - actor ?r - resource ?l ?t - location ?c - resourceClassType) 
+    :precondition
+        (and 
+            (debugRemoveUnusedIntents)
+            (intent-aprrltc ?action ?provider ?receiver ?r ?l ?t ?c) 
+        )
+    :effect (not
+        (intent-aprrltc ?action ?provider ?receiver ?r ?l ?t ?c) 
+    )
 )
 
-(:action remove_unused_intent
-    :parameters (?a - action ?p ?r - actor ?s - resource ?l - location ?c - resourceClassType)
-    :precondition 
-        (and
+(:action remove-intent-aprrlt- 
+    :parameters ( ?action - action ?provider ?receiver - actor ?r - resource ?l ?t - location)
+    :precondition
+        (and 
             (debugRemoveUnusedIntents)
-            (or
-                (intent-aprrl-c ?a ?p ?r ?s ?l ?c)
-                (intent-ap-r--c ?a ?p ?s ?c)
-            )
+            (intent-aprrlt- ?action ?provider ?receiver ?r ?l ?t)
         )
-    :effect 
-        (and
-            (not (intent-aprrl-c ?a ?p ?r ?s ?l ?c))
-            (not (intent-ap-r--c ?a ?p ?s ?c))
-        )
+    :effect (not
+        (intent-aprrlt- ?action ?provider ?receiver ?r ?l ?t)
+    )
+)
 
+(:action remove-intent-aprrl-c  
+    :parameters (?action - action ?provider ?receiver - actor ?r - resource ?l - location ?c - resourceClassType)
+    :precondition
+        (and 
+            (debugRemoveUnusedIntents)
+            (intent-aprrl-c ?action ?provider ?receiver ?r ?l ?c)
+        )
+    :effect (not
+        (intent-aprrl-c ?action ?provider ?receiver ?r ?l ?c)
+    )
+)
+
+(:action remove-intent-aprrl-- 
+    :parameters (?action - action ?provider ?receiver - actor ?r - resource ?l - location)
+    :precondition
+        (and 
+            (debugRemoveUnusedIntents)
+             (intent-aprrl-- ?action ?provider ?receiver ?r ?l)
+        )
+    :effect (not
+         (intent-aprrl-- ?action ?provider ?receiver ?r ?l)
+    )
+)
+
+(:action remove-intent-apr-lt-
+    :parameters ( ?action - action ?provider ?receiver - actor ?l ?t - location)    
+    :precondition
+        (and 
+            (debugRemoveUnusedIntents)
+             (intent-apr-lt- ?action ?provider ?receiver ?l ?t)    
+        )
+    :effect (not
+        (intent-apr-lt- ?action ?provider ?receiver ?l ?t)    
+    )
+)
+
+(:action remove-intent-apr-l-c 
+    :parameters (?action - action ?provider ?receiver - actor ?l - location ?c - resourceClassType) 
+    :precondition
+        (and 
+            (debugRemoveUnusedIntents)
+            (intent-apr-l-c ?action ?provider ?receiver ?l ?c) 
+        )
+    :effect (not
+        (intent-apr-l-c ?action ?provider ?receiver ?l ?c) 
+    )
+)
+
+(:action remove-intent-aprr--- 
+    :parameters (?action - action ?provider ?receiver - actor ?r - resource)
+    :precondition
+        (and 
+            (debugRemoveUnusedIntents)
+            (intent-aprr--- ?action ?provider ?receiver ?r)
+        )
+    :effect (not
+        (intent-aprr--- ?action ?provider ?receiver ?r)
+    )
+)
+
+(:action remove-intent-apr-l-- 
+    :parameters (?action - action ?provider ?receiver - actor ?l - location)
+    :precondition
+        (and 
+            (debugRemoveUnusedIntents)
+            (intent-apr-l-- ?action ?provider ?receiver ?l)
+        )
+    :effect (not
+        (intent-apr-l-- ?action ?provider ?receiver ?l)
+    )
+)
+
+(:action remove-intent-apr---c 
+    :parameters (?action - action ?provider ?receiver - actor ?c - resourceClassType)
+    :precondition
+        (and 
+            (debugRemoveUnusedIntents)
+            (intent-apr---c ?action ?provider ?receiver ?c)
+        )
+    :effect (not
+        (intent-apr---c ?action ?provider ?receiver ?c)
+    )
+)
+
+(:action remove-intent-ap-rl-- 
+    :parameters (?action - action ?provider - actor ?r - resource ?l - location)
+    :precondition
+        (and 
+            (debugRemoveUnusedIntents)
+            (intent-ap-rl-- ?action ?provider ?r ?l)
+        )
+    :effect (not
+        (intent-ap-rl-- ?action ?provider ?r ?l)
+    )
+)
+
+(:action remove-intent-ap-r--c 
+    :parameters (?action - action ?provider - actor ?r - resource ?c - resourceClassType)
+    :precondition
+        (and 
+            (debugRemoveUnusedIntents)
+            (intent-ap-r--c ?action ?provider ?r ?c)
+        )
+    :effect (not
+        (intent-ap-r--c ?action ?provider ?r ?c)
+    )
+)
+
+(:action remove-intent-ap--l-c 
+    :parameters (?action - action ?provider - actor ?l - location ?c - resourceClassType)
+    :precondition
+        (and 
+            (debugRemoveUnusedIntents)
+            (intent-ap--l-c ?action ?provider ?l ?c)
+        )
+    :effect (not
+        (intent-ap--l-c ?action ?provider ?l ?c)
+    )
+)
+
+(:action remove-intent-a-rrl-- 
+    :parameters (?action - action ?receiver - actor ?r - resource ?l - location)
+    :precondition
+        (and 
+            (debugRemoveUnusedIntents)
+             (intent-a-rrl-- ?action ?receiver ?r ?l)
+        )
+    :effect (not
+         (intent-a-rrl-- ?action ?receiver ?r ?l)
+    )
+)
+
+(:action remove-intent-a-r-l-c 
+    :parameters (?action - action ?receiver - actor ?l - location ?c - resourceClassType)
+    :precondition
+        (and 
+            (debugRemoveUnusedIntents)
+            (intent-a-r-l-c ?action ?receiver ?l ?c)
+        )
+    :effect (not
+        (intent-a-r-l-c ?action ?receiver ?l ?c)
+    )
+)
+
+
+(:action remove-intent-apr---- 
+    :parameters (?action - action ?provider ?receiver - actor )
+    :precondition
+        (and 
+            (debugRemoveUnusedIntents)
+            (intent-apr---- ?action ?provider ?receiver )
+        )
+    :effect (not
+        (intent-apr---- ?action ?provider ?receiver )
+    )
+)
+
+
+(:action remove-intent-ap-r---
+    :parameters ( ?action - action ?provider - actor ?r - resource)
+    :precondition
+        (and 
+            (debugRemoveUnusedIntents)
+             (intent-ap-r--- ?action ?provider ?r)
+        )
+    :effect (not
+         (intent-ap-r--- ?action ?provider ?r)
+    )
+)
+
+
+(:action remove-intent-ap----c
+    :parameters (?action - action ?provider - actor ?c - resourceClassType)
+    :precondition
+        (and 
+            (debugRemoveUnusedIntents)
+            (intent-ap----c ?action ?provider ?c)
+        )
+    :effect (not
+        (intent-ap----c ?action ?provider ?c)
+    )
+)
+
+
+(:action remove-intent-a-rr--- 
+    :parameters (?action - action ?receiver - actor ?r - resource)
+    :precondition
+        (and 
+            (debugRemoveUnusedIntents)
+            (intent-a-rr--- ?action ?receiver ?r)
+        )
+    :effect (not
+        (intent-a-rr--- ?action ?receiver ?r)
+    )
+)
+
+
+(:action remove-intent-a-r---c 
+    :parameters (?action - action ?receiver - actor ?c - resourceClassType)
+    :precondition
+        (and 
+            (debugRemoveUnusedIntents)
+            (intent-a-r---c ?action ?receiver ?c)
+        )
+    :effect (not
+        (intent-a-r---c ?action ?receiver ?c)
+    )
+)
+
+(:action remove-intent-ap----- 
+    :parameters (?action - action ?provider - actor)
+    :precondition
+        (and 
+            (debugRemoveUnusedIntents)
+            (intent-ap----- ?action ?provider)
+        )
+    :effect (not
+        (intent-ap----- ?action ?provider)
+    )
 )
 
 
 
-(:action remove_unused_intent
-    :parameters (?a - action ?p ?r - actor ?s - resource ?c - resourceClassType)
-    :precondition 
-        (and
-            (debugRemoveUnusedIntents)
-            (or
-                (intent-aprrl-c ?a ?p ?r ?s ?l ?c)
-                (intent-ap-r--c ?a ?p ?s ?c)
-            )
-        )
-    :effect 
-        (and
-            (not (intent-aprrl-c ?a ?p ?r ?s ?l ?c))
-            (not (intent-ap-r--c ?a ?p ?s ?c))
-        )
-
-)
-
-(:action remove_unused_intent
-    :parameters (?a - action ?p ?r - actor ?c - resourceClassType)
-    :precondition 
-        (and
-            (debugRemoveUnusedIntents)
-            (or
-                (intent-apr---c ?a ?p ?r ?c)
-                (intent-a-r---c ?a ?r ?c)
-                (intent-ap----c ?a ?p ?c)
-            )
-        )
-    :effect 
-        (and
-            (not (intent-apr---c ?a ?p ?r ?c))
-            (not (intent-a-r---c ?a ?r ?c))
-            (not (intent-ap----c ?a ?p ?c))
-        )
-
-)
-
-
-(:action remove_unused_intent
-    :parameters (?a - action ?p ?r - actor ?l - location ?c - resourceClassType)
-    :precondition 
-        (and
-            (debugRemoveUnusedIntents)
-            (or
-                (intent-apr-l-c ?a ?p ?r ?l ?c)
-                (intent-ap--l-c ?a ?p ?l ?c)
-                (intent-a-r-l-c ?a ?r ?l ?c)
-            )
-        )
-    :effect 
-        (and
-            (not (intent-apr-l-c ?a ?p ?r ?l ?c))
-            (not (intent-ap--l-c ?a ?p ?l ?c))
-            (not (intent-a-r-l-c ?a ?r ?l ?c))
-        )
-
-)
-
-(:action remove_unused_intent
-    :parameters (?a - action ?p ?r - actor ?s - resource ?l - location )
-    :precondition 
-        (and
-            (debugRemoveUnusedIntents)
-            (or
-                (intent-aprrl-- ?a ?p ?r ?s ?l)
-                (intent-aprr--- ?a ?p ?r ?s) 
-                (intent-apr-l-- ?a ?p ?r ?l)
-                (intent-ap-rl-- ?a ?p ?s ?l)
-                (intent-a-rrl-- ?a ?r ?s ?l)
-                (intent-apr---- ?a ?p ?r)
-                (intent-ap-r--- ?a ?p ?s)
-                (intent-ap----- ?a ?p)
-            )
-        )
-    :effect 
-        (and
-            (not (intent-aprrl-- ?a ?p ?r ?s ?l))
-            (not (intent-aprr--- ?a ?p ?r ?s) )
-            (not (intent-apr-l-- ?a ?p ?r ?l))
-            (not (intent-ap-rl-- ?a ?p ?s ?l))
-            (not (intent-a-rrl-- ?a ?r ?s ?l))
-            (not (intent-apr---- ?a ?p ?r))
-            (not (intent-ap-r--- ?a ?p ?s))
-            (not (intent-ap----- ?a ?p))
-        )
-
-)
-
-(:action remove_unused_commitment
-    :parameters (?a - action ?p ?r - actor ?s - resource ?l ?t - location ?c - resourceClassType)
-    :precondition 
-        (and
+(:action remove-commitment-aprrltc 
+    :parameters (?action - action ?provider ?receiver - actor ?s - resource ?l ?t - location ?c - resourceClassType)
+    :precondition
+        (and 
             (debugRemoveUnusedCommitments)
-            (or
-                (commitment-aprrltc ?a ?p ?r ?s ?l ?t ?c)
-                (commitment-aprrlt- ?a ?p ?r ?s ?l ?t)
-                (commitment-aprrl-- ?a ?p ?r ?s ?l)
-                (commitment-aprrl-c ?a ?p ?r ?s ?l ?c)
-            )
+            (commitment-aprrltc ?action ?provider ?receiver ?s ?l ?t ?c)
         )
-    :effect 
-        (and
-            (not (commitment-aprrltc ?a ?p ?r ?s ?l ?t ?c))
-            (not (commitment-aprrlt- ?a ?p ?r ?s ?l ?t))
-            (not (commitment-aprrl-- ?a ?p ?r ?s ?l))
-            (not (commitment-aprrl-c ?a ?p ?r ?s ?l ?c))
-        )
+    :effect (not
+        (commitment-aprrltc ?action ?provider ?receiver ?s ?l ?t ?c) 
+    )
+)
 
+(:action remove-commitment-aprrlt- 
+    :parameters (?action - action ?provider ?receiver - actor ?r - resource ?l ?t - location)
+    :precondition
+        (and 
+            (debugRemoveUnusedCommitments)
+            (commitment-aprrlt- ?action ?provider ?receiver ?r ?l ?t)
+        )
+    :effect (not
+        (commitment-aprrlt- ?action ?provider ?receiver ?r ?l ?t)    
+    )
+)
+
+(:action remove-commitment-aprrl-c
+    :parameters ( ?action - action ?provider ?receiver - actor ?s - resource ?l - location ?c - resourceClassType)
+    :precondition
+        (and 
+            (debugRemoveUnusedCommitments)
+            (commitment-aprrl-c ?action ?provider ?receiver ?s ?l ?c)
+        )
+    :effect (not
+        (commitment-aprrl-c ?action ?provider ?receiver ?s ?l ?c)
+    )
+)
+
+(:action remove-commitment-aprrl--
+    :parameters ( ?action - action ?provider ?receiver - actor ?r - resource ?l - location)
+    :precondition
+        (and 
+            (debugRemoveUnusedCommitments)
+            (commitment-aprrl-- ?action ?provider ?receiver ?r ?l)   
+        )
+    :effect (not
+        (commitment-aprrl-- ?action ?provider ?receiver ?r ?l)
+    )
+)
+
+(:action remove-commitment-aprr--- 
+    :parameters (?action - action ?provider ?receiver - actor ?r - intangibleResource)
+    :precondition
+        (and 
+            (debugRemoveUnusedCommitments)
+            (commitment-aprr--- ?action ?provider ?receiver ?r)
+        )
+    :effect (not
+        (commitment-aprr--- ?action ?provider ?receiver ?r)
+    )
 )
 
 )

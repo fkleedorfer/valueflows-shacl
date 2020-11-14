@@ -32,8 +32,8 @@
     (persistent-intent-ap--l-c transfer-custody Alice Rossatz GrannySmith) 
     (persistent-intent-ap--l-c transfer-all-rights Alice Rossatz GrannySmith) 
 
-    (currentLocation Claudia Rossatz)
-    (currentLocation Truck1 Rossatz)
+    (currentLocation Claudia Wien)
+    (currentLocation Truck1 Wien)
     (isVehicle Truck1)
     (mayContainResources Truck1)
     (custodian Truck1 Claudia)

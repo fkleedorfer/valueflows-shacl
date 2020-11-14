@@ -9,7 +9,7 @@
 @prefix wd: <http://www.wikidata.org/entity/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 
-# move with only one resource
+
 ex:Alice
     a foaf:Agent .
 
@@ -19,7 +19,7 @@ ex:Bob
 ex:bobsApples1
     a vf:EconomicResource ;
     vf:primaryAccountable ex:Bob ;
-    vf:classifiedAs wd:Q3127261 ;    
+    vf:classifiedAs wd:Q506040 ;    
     vf:currentLocation wd:Q676832 ;
     vf:onhandQuantity [
         om2:hasUnit om2:kilogram ;
@@ -36,7 +36,7 @@ ex:intent1
     vf:action vf:produce ;
     vf:receiver ex:Bob ;
     vf:resourceInventoriedAs ex:bobsApples1 ;
-    vf:resourceClassifiedAs wd:Q3127261 ;
+    vf:resourceClassifiedAs wd:Q506040 ;
     vf:resourceQuantity [
         om2:hasUnit om2:kilogram ;
         om2:hasNumericalValue "100"^^xsd:int ;
@@ -47,7 +47,7 @@ ex:intent2
     a vf:Intent ;
     vf:action vf:produce ;
     vf:provider ex:Alice ;
-    vf:resourceClassifiedAs wd:Q3127261 ;
+    vf:resourceClassifiedAs wd:Q506040 ;
     vf:atLocation wd:Q676832 ;
     vf:resourceQuantity [
         om2:hasUnit om2:kilogram ;
