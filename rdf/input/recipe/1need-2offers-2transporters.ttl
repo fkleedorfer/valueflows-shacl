@@ -31,7 +31,7 @@ ex:wantApples
     a vf:Intent ;
     vf:action vf:transfer-custody ;
     vf:receiver ex:Bob ;
-    vf:resourceClassifiedAs wd:Q3127261 ;
+    vf:resourceClassifiedAs wd:Q506040 ;
     vf:atLocation wd:Q1741 ;
     vf:resourceQuantity [
         om2:hasUnit om2:kilogram ;
@@ -44,7 +44,7 @@ ex:offerApples
     a vf:Intent ;
     vf:action vf:transfer-custody ;
     vf:provider ex:Alice ;
-    vf:resourceClassifiedAs wd:Q3127261 ;
+    vf:resourceClassifiedAs wd:Q506040 ;
     vf:atLocation wd:Q676832 ;
     vf:resourceQuantity [
         om2:hasUnit om2:kilogram ;
@@ -56,7 +56,7 @@ ex:offerApples2
     a vf:Intent ;
     vf:action vf:transfer-custody ;
     vf:provider ex:Maria ;
-    vf:resourceClassifiedAs wd:Q3127261 ;
+    vf:resourceClassifiedAs wd:Q506040 ;
     vf:atLocation wd:Q676832 ;
     vf:resourceQuantity [
         om2:hasUnit om2:kilogram ;

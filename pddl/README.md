@@ -13,5 +13,5 @@ docker run --rm -v "c:\DATA\DEV\workspace\valueflows-shacl\pddl\playground":/ben
 
 Good results for problem-transport-complex.pddl
 ```
-docker run --rm -v "c:\DATA\DEV\workspace\valueflows-shacl\pddl\playground":/benchmarks aibasel/downward --sas-file /benchmarks/sas --plan-file /benchmarks/plan /benchmarks/domain.pddl /benchmarks/move-recipe/problem-transport-complex.pddl --search "eager_greedy([ff(),hmax(),add()])"
+docker run --rm -v "c:\DATA\DEV\workspace\valueflows-shacl\pddl\playground":/benchmarks aibasel/downward --search-time-limit 30 --sas-file /benchmarks/sas --plan-file /benchmarks/plan /benchmarks/domain.pddl /benchmarks/move-recipe/problem-transport-complex.pddl --search "eager(open=pareto([ff(),hmax(),add(),goalcount()]))"
 ```

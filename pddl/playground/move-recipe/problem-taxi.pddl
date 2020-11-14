@@ -3,88 +3,57 @@
     (:domain valueflows)
 (:objects 
     Wien Krems - location
-    Claudia Maria - actor
+    Claudia Maria Bob - actor
     Car1 - car 
+    lasercutter1 thing1 woodenboard1 - resource
+    LaserCutter WoodenBoard LaserCutterProduct - resourceClassType
+    cutout - recipeProcess
+    consumeWoodenboard useLaserCutter produceLaserCutterProduct - recipeFlow
+    
 )
 
 (:init
+    (potentialResource thing1)
+    
+    (recipeInputOf cutout consumeWoodenboard)
+    (recipeFlowDef consumeWoodenboard consume WoodenBoard)
+    (recipeInputOf cutout useLaserCutter)
+    (recipeFlowDef useLaserCutter use LaserCutter)
+    (recipeOutputOf cutout produceLaserCutterProduct)
+    (recipeFlowDef produceLaserCutterProduct produce LaserCutterProduct)
+
     (currentLocation Maria Krems)
     (currentLocation Car1 Krems)
     (custodian Car1 Maria)
     (isVehicle Car1)
     (mayContainActors Car1)
-    (persistent-intent-ap-r- deliver-taxi-service Maria Car1)
+    (persistent-intent-ap----c deliver-service Maria TaxiServiceClass)
 
     (currentlocation Claudia Krems)
-    (intent-apr-l travel Claudia Claudia Wien)
+    (custodian woodenboard1 Claudia)
+    (resourceClassification woodenboard1 WoodenBoard)
+    (primaryAccountable woodenboard1 Claudia)
+    (isCarryable woodenboard1)
+    (currentLocation woodenboard1 Wien)
+    (intent-apr---c use Claudia Claudia LaserCutterProduct )
+
+    (currentLocation Bob Wien)
+    (currentLocation lasercutter1 Wien)
+    (resourceClassification lasercutter1 LaserCutter)
+    (custodian lasercutter1 Bob)
+    (primaryAccountable lasercutter1 Bob)
+    (intent-ap-r--- lend Bob lasercutter1)
+    
 )
     
 (:goal 
-    (and
-        (not 
-            (exists (?a - action ?p ?r - actor ?s - resource ?l - location)
-                (and
-                    (or
-                        (commitment ?a ?p ?r ?s ?l)
-                        ;(commitment transfer ?p ?r ?s ?l)
-                        ; (commitment move ?p ?r ?s ?l)
-                        ; (commitment goto ?p ?r ?s ?l)
-                        ; (commitment transfer-all-rights ?p ?r ?s ?l)
-                        ; (commitment transfer-custody ?p ?r ?s ?l)
-                        ; (commitment mount ?p ?r ?s ?l)
-                        ; (commitment dismount ?p ?r ?s ?l)
-                        ; (commitment put-into ?p ?r ?s ?l)
-                        ; (commitment take-out-of ?p ?r ?s ?l)
-                        ; (commitment begin-use ?p ?r ?s ?l)
-                        ; (commitment end-use ?p ?r ?s ?l)
-                        ; (commitment use ?p ?r ?s ?l)
-                        ; (commitment send-and-transfer ?p ?r ?s ?l)
-                        ; (commitment deliver-taxi-service ?p ?r ?s ?l)
-                        ; (commitment deliver-transport-service ?p ?r ?s ?l)
-                        ; (commitment lend ?p ?r ?s ?l)
-                        ; (commitment leave ?p ?r ?s ?l)
-                        ; (commitment arrive ?p ?r ?s ?l)
-                        ; (commitment drive ?p ?r ?s ?l)
-                        ; (commitment travel ?p ?r ?s ?l)
-            
-                        (intent ?a ?p ?r ?s ?l)
-                        (intent-aprr- ?a ?p ?r ?s) 
-                        (intent-apr-l ?a ?p ?r ?l)
-                        (intent-ap-rl ?a ?p ?s ?l)
-                        (intent-a-rrl ?a ?r ?s ?l)
-                        ;(intent--prrl ?p ?r ?s ?l)
-                        (intent-apr-- ?a ?p ?r)
-                        (intent-ap-r- ?a ?p ?s)
-                        ; (intent-a-rr- ?a ?r ?s)
-                        ; (intent--prr- ?p ?r ?s)
-                        ; (intent-ap--l ?a ?p ?l)
-                        ; (intent-a-r-l ?a ?r ?l)
-                        ; (intent--pr-l ?p ?r ?l)
-                        ; (intent-a--rl ?a ?s ?l)
-                        ; (intent--p-rl ?p ?s ?l)
-                        ; (intent---rrl ?r ?s ?l)
-                        (intent-ap--- ?a ?p)
-                        ; (intent-a-r-- ?a ?r)
-                        ; (intent-a--r- ?a ?s)
-                        ; (intent--pr-- ?p ?r)
-                        ; (intent--p-r- ?p ?s)
-                        ; (intent---rr- ?r ?s)
-                        ; (intent-a---l ?a ?l)
-                        ; (intent--p--l ?p ?l)
-                        ; (intent---r-l ?r ?l)
-                        ; (intent----rl ?s ?l)
-                        ; (intent-a---- ?a)
-                        ; (intent--p--- ?p)
-                        ; (intent---r-- ?r)
-                        ; (intent----r- ?s)
-                        ; (intent-----l ?l)
-                    )
-                )
-            )
-        )
+    (and 
+        (fulfillment-aprrl-- consume Claudia Claudia woodenboard1 Wien)
+        (fulfillment-aprrl-- use Claudia Claudia lasercutter1 Wien)
+        (fulfillment-aprrl-c produce Claudia Claudia thing1 Wien LaserCutterProduct)
+        (custodian thing1 Claudia)
+        (problemSolved)
     )
 )
 
-;un-comment the following line if metric is needed
-;(:metric minimize (???))
 )
